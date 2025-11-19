@@ -1,52 +1,87 @@
-import { Image } from 'expo-image';
-import { StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import CreerPoint from '../creerPoint';
 import HautPage from '../hautPage';
+import PointSignale from '../pointSignale';
 
 export default function HomeScreen() {
+  const [page, setPage] = useState("signale"); 
+  const [choix, setChoix] = useState("signale"); 
+
   return (
 
     <>
     <View>
       <HautPage title="Point d’eau signalé" />
     </View>
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Point d'eau!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      
-    </ParallaxScrollView>
+
+
+  {/* choix type demande */}
+  <View style={styles.typeD}>
+
+      <TouchableOpacity style={[styles.bouttonG, styles.boutton, choix === "signale" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("signale"); setChoix("signale");}}>
+      <Text style={choix === "signale" ? styles.txtActif : styles.txtInactif}>Point d’eau signalé</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.bouttonD, styles.boutton, choix === "creer" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("creer"); setChoix("creer");}}>
+      <Text style={choix === "creer" ? styles.txtActif : styles.txtInactif}>Créer un point d’eau</Text>
+      </TouchableOpacity>
+
+  </View>
+    <View>
+        {page === "signale" && <PointSignale />}
+        {page === "creer" && <CreerPoint />}
+    </View>
+
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+
+  typeD:{
     flexDirection: 'row',
+    marginTop: 40,
     alignItems: 'center',
-    gap: 8,
+       
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  boutton:{
+    paddingVertical: 15,
+    paddingHorizontal:25,
+    alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: '#1D3557',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+
+  bouttonG:{
+    borderTopLeftRadius: 30,
+    borderBottomLeftRadius: 30,
   },
+
+  bouttonD:{
+
+    borderTopRightRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+
+
+
+  /* couleurs bouton état */
+  bouttonActif:{
+    backgroundColor: '#1D3557',
+  },
+
+  bouttonInactif:{
+    backgroundColor: '#E7E7E7',
+  },
+
+  /* texte */
+  txtActif:{
+    color: '#ffffff',
+  },
+  txtInactif:{
+    color: '#1D3557',
+  }
+
 });

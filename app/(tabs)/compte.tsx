@@ -1,5 +1,6 @@
 import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import HautPage from '../hautPage';
 
@@ -11,6 +12,7 @@ const OeilCache = require('@/assets/images/oeil_cacher.png');
 
 export default function Compte() {
     const [showPassword, setShowPassword] = useState(false);
+    const router = useRouter();
 
   return (
     <>
@@ -87,7 +89,7 @@ export default function Compte() {
 
 
         {/* Deconnexion */}
-          <TouchableOpacity style={styles.boutton} onPress={() => console.log('LE BOUTTOOOOON !!!!!')}>
+          <TouchableOpacity style={styles.boutton} onPress={() => router.navigate('/')}>
             <Text style={{color:'#ffffff'}}>SE DECONNECTER</Text>
           </TouchableOpacity>
 

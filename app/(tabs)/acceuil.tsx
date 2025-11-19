@@ -1,58 +1,100 @@
-import { Image } from 'expo-image';
-import { StyleSheet, View } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { FontAwesome } from '@expo/vector-icons';
+import * as Location from 'expo-location';
+import React, { useEffect, useRef, useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import MapView from 'react-native-maps';
 import HautPage from '../hautPage';
 
 export default function HomeScreen() {
+  const [localisation, setLocalisation] = useState<Location.LocationObject | null>(null);
+  const referenceCarte = useRef<MapView>(null);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        return;
+      }
+
+      const abonnement = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 5000,
+          distanceInterval: 10,
+        },
+        (nouvelleLocalisation) => {
+          setLocalisation(nouvelleLocalisation);
+        }
+      );
+
+      return () => {
+        if (abonnement) abonnement.remove();
+      };
+    })();
+  }, []);
+
+  const allerPosition = () => {
+    if (referenceCarte.current && localisation) {
+      referenceCarte.current.animateToRegion(
+        {
+          latitude: localisation.coords.latitude,
+          longitude: localisation.coords.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        1000
+      );
+    }
+  };
+
   return (
-    <>
-    <View>
+    <View style={styles.container}>
       <HautPage title="Carte des points d’eau" />
-    </View>
 
-    
-    <ParallaxScrollView
-      
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+      {localisation && (
+        <MapView
+          ref={referenceCarte}
+          style={styles.map}
+          initialRegion={{
+            latitude: localisation.coords.latitude,
+            longitude: localisation.coords.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+          showsUserLocation={true}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Accueil</ThemedText>
-        <HelloWave />
-        
+      )}
 
-      </ThemedView>
-      
-    </ParallaxScrollView>
-
-    </>
+      {localisation && (
+        <TouchableOpacity style={styles.boutonLocalisation} onPress={allerPosition}>
+          <FontAwesome name="location-arrow" size={24} color="#FFF" />
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  map: {
+    flex: 1,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  boutonLocalisation: {
     position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#007AFF',
+    borderRadius: 30,
+    width: 60,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
-
 });
