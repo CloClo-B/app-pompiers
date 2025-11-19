@@ -40,7 +40,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
 
-  typeD:{
+  typeD:{ 
     flexDirection: 'row',
     marginTop: 40,
     alignItems: 'center',
