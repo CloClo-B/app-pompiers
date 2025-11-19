@@ -27,7 +27,7 @@ export default function HomeScreen() {
       <TouchableOpacity style={[styles.bouttonD, styles.boutton, choix === "creer" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("creer"); setChoix("creer");}}>
       <Text style={choix === "creer" ? styles.txtActif : styles.txtInactif}>Créer un point d’eau</Text>
       </TouchableOpacity>
-
+   
   </View>
     <View>
         {page === "signale" && <PointSignale />}
