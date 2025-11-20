@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import CreerPoint from '../creerPoint';
 import HautPage from '../hautPage';
@@ -29,22 +29,29 @@ export default function HomeScreen() {
       </TouchableOpacity>
    
   </View>
+    <ScrollView contentContainerStyle={styles.contenue}>
     <View>
         {page === "signale" && <PointSignale />}
         {page === "creer" && <CreerPoint />}
     </View>
+      
+    </ScrollView>
 
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  contenue: {
+    marginTop: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   typeD:{ 
     flexDirection: 'row',
-    marginTop: 40,
-    alignItems: 'center',
-       
+    marginTop: 20,
+    alignSelf: 'center',  
   },
   boutton:{
     paddingVertical: 15,
