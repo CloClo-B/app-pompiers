@@ -24,7 +24,7 @@ export default function Compte() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-      <ScrollView contentContainerStyle={styles.contenue}>
+      <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
         <Image source={imgMonCompte} style={styles.imageH}/>
 
 

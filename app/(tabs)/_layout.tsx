@@ -23,7 +23,7 @@ export default function TabLayout() {
         //Couleur de fond
         tabBarStyle: {
           backgroundColor: '#1D3557',
-          height: 52,  //  hauteur de la barre pas obligé à voir par la suite
+          //  height:75,  //  hauteur de la barre pas obligé à voir par la suite
         },
 
         //taille du texte

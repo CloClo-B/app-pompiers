@@ -1,13 +1,23 @@
-import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import CreerPoint from '../creerPoint';
 import HautPage from '../hautPage';
 import PointSignale from '../pointSignale';
 
 export default function HomeScreen() {
+  const { page: pageR } = useLocalSearchParams<{ page?: string }>();
+
   const [page, setPage] = useState("signale"); 
   const [choix, setChoix] = useState("signale"); 
+
+  useEffect(() => {
+    if (pageR) {
+      setPage(pageR);
+      setChoix(pageR);
+    }
+  }, [pageR]);
 
   return (
 
@@ -29,13 +39,21 @@ export default function HomeScreen() {
       </TouchableOpacity>
    
   </View>
-    <ScrollView contentContainerStyle={styles.contenue}>
-    <View>
-        {page === "signale" && <PointSignale />}
-        {page === "creer" && <CreerPoint />}
-    </View>
-      
-    </ScrollView>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+    >
+
+
+      <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
+      <View>
+          {page === "signale" && <PointSignale />}
+          {page === "creer" && <CreerPoint />}
+      </View>
+        
+      </ScrollView>
+    </KeyboardAvoidingView>
 
     </>
   );

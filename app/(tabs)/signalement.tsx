@@ -81,7 +81,7 @@ const prendrePhoto = async () => {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
 
-      <ScrollView contentContainerStyle={styles.contenue}>
+      <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
     
         <View style={styles.info}>
 
