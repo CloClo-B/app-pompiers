@@ -1,56 +1,123 @@
-import { Image } from 'expo-image';
-import { StyleSheet, View } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import HautPage from '../hautPage';
 
-export default function HomeScreen() {
-  return (
-    <>
-    
-    <View>
-      <HautPage title="Misssion" />
-    </View>
-    
-    <ParallaxScrollView
-      
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Mission</ThemedText>
-        <HelloWave />
-      </ThemedView>
+import CreerMission from '../creerMission';
+import HistoriqueMission from '../historiqueMission';
+import MissionEnCours from '../missionEnCours';
 
-    </ParallaxScrollView>
-    
-    
+
+
+export default function HomeScreen() {
+  const { page: pageR } = useLocalSearchParams<{ page?: string }>();
+
+  const [page, setPage] = useState("enCours"); 
+  const [choix, setChoix] = useState("enCours"); 
+
+  useEffect(() => {
+    if (pageR) {
+      setPage(pageR);
+      setChoix(pageR);
+    }
+  }, [pageR]);
+
+  return (
+
+    <>
+    <View>
+      <HautPage title="Mission" />
+    </View>
+
+
+  {/* choix type demande */}
+  <View style={styles.typeD}>
+
+      <TouchableOpacity style={[styles.bouttonG, styles.boutton, choix === "creer" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("creer"); setChoix("creer");}}>
+      <Text style={choix === "creer" ? styles.txtActif : styles.txtInactif}>Créer une mission</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.boutton, choix === "enCours" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("enCours"); setChoix("enCours");}}>
+      <Text style={choix === "enCours" ? styles.txtActif : styles.txtInactif}>En cours</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.bouttonD, styles.boutton, choix === "historique" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("historique"); setChoix("historique");}}>
+      <Text style={choix === "historique" ? styles.txtActif : styles.txtInactif}>Historique</Text>
+      </TouchableOpacity>
+   
+
+   {/* affichage */}
+  </View>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+    >
+
+
+      <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
+      <View>
+          {page === "creer" && <CreerMission />}
+          {page === "enCours" && <MissionEnCours />}
+          {page === "historique" && <HistoriqueMission />}
+      </View>
+        
+      </ScrollView>
+    </KeyboardAvoidingView>
+
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  contenue: {
+    marginTop: 20,
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+
+  typeD:{ 
+    flexDirection: 'row',
+    marginTop: 20,
+    alignSelf: 'center',  
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  
+  boutton:{
+    paddingVertical: 15,
+    paddingHorizontal:20,
+    alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: '#1D3557',
   },
+
+  bouttonG:{
+    borderTopLeftRadius: 30,
+    borderBottomLeftRadius: 30,
+  },
+
+  bouttonD:{
+
+    borderTopRightRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+
+
+
+  /* couleurs bouton état */
+  bouttonActif:{
+    backgroundColor: '#1D3557',
+  },
+
+  bouttonInactif:{
+    backgroundColor: '#E7E7E7',
+  },
+
+  /* texte */
+  txtActif:{
+    color: '#ffffff',
+  },
+  txtInactif:{
+    color: '#1D3557',
+  }
+
 });

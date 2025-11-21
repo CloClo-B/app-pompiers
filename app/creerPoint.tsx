@@ -84,7 +84,7 @@ export default function CreerPoint() {
 
     {/* creer */}
       <View style={[styles.tout, {marginTop:20}]}>
-        <TouchableOpacity style={[styles.boutton, {marginTop: 15, backgroundColor: '#457B9D', width: 200, height: 45}]} onPress={() => router.navigate('/creation_point_succes')}>
+        <TouchableOpacity style={[styles.boutton, {marginTop: 15, backgroundColor: '#457B9D', width: 200, height: 45}]} onPress={() => router.navigate({ pathname: '/creationSucces', params: {title: 'Point d’eau créé avec succès', nomPage: 'creer', chemainPage: '/point_eau'}})}>
           <Text style={{color:'#ffffff'}}>CREER</Text>
         </TouchableOpacity>
     </View>

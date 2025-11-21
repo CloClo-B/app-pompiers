@@ -38,6 +38,11 @@ export default function HomeScreen() {
       <Text style={choix === "creer" ? styles.txtActif : styles.txtInactif}>Créer un point d’eau</Text>
       </TouchableOpacity>
    
+
+
+
+
+  {/* affichage */}
   </View>
     <KeyboardAvoidingView
       style={{ flex: 1 }}

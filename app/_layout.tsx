@@ -24,8 +24,7 @@ export default function RootLayout() {
         <Stack.Screen name="connexion" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="inscription" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="creation_point_succes" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="creerPoint" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen name="creationSucces" options={{ headerShown: false, gestureEnabled: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

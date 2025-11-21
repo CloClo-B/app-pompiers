@@ -1,21 +1,26 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 const reussi = require('@/assets/images/succes.png');
 
-export default function CreerPoint() {
-   const router = useRouter();
+export default function CreationSucces() {
+  const router = useRouter();
+  const params = useLocalSearchParams();
+
+  const title = params.title;
+  const nomPage = params.nomPage;
+  const chemainPage = params.chemainPage;
   return (
     <>    
 
     {/* reussi */}
       <View style={[styles.tout, {marginTop:20}]}>
 
-        <Text style={styles.text}>Point d’eau créé avec succès</Text>
+        <Text style={styles.text}>{title}</Text>
         <Image source={reussi} style={styles.imageR}></Image>
 
     {/* retour */}
-        <TouchableOpacity style={[styles.boutton, {}]} onPress={() => router.push({ pathname: '/(tabs)/point_eau', params: { page: 'creer' } })}>
+        <TouchableOpacity style={styles.boutton} onPress={() => router.push({ pathname: chemainPage as any, params: { page: nomPage }})}>
           <Text style={{color:'#ffffff', fontSize:20}}>CONTINUER</Text>
         </TouchableOpacity>
     </View>

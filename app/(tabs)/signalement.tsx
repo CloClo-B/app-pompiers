@@ -91,12 +91,10 @@ const prendrePhoto = async () => {
 
             {/* message signalement */}
             <View style={styles.total}>
-            <Text style={styles.text}>Descripton du problème</Text>
-            <View style={styles.entreeCryon}>
-                <TextInput style={styles.entree} maxLength={250} multiline={true} placeholder="Ecrivez ici"></TextInput>
-                <TouchableOpacity  onPress={() => console.log('Bouton pressé')}>
-                </TouchableOpacity>
-            </View>
+              <Text style={styles.text}>Descripton du problème</Text>
+              <View style={styles.entreeCryon}>
+                  <TextInput style={styles.entree} maxLength={250} multiline={true} placeholder="Ecrivez ici"></TextInput>
+              </View>
             </View>
 
             {/* ajout de l'image */}
