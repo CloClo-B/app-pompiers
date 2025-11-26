@@ -18,7 +18,12 @@ Ce projet est une application développée avec **React Native** et **Expo**.
    ```
 
 
-## Pour lancer l'api:
+## Pour lancer l'api et afficher les points:
 
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-⚠️⚠️⚠️ bien modifier modifier les fichier le **acceuil** dans (tabs) et le **database** dans le backend avec l'ip de son réseau sinon sa ne fonctionnera pas
+- lancer environement venv en se placant dans : **appli/backend**
+- faire : **source api/venv/bin/activate**
+
+ensuite pour lancer l'api faire : 
+**uvicorn main:app --reload --host 0.0.0.0 --port 8000**
+
+⚠️⚠️⚠️ bien modifier modifier le fichier le **acceuil** dans (tabs) et bien maitre son ip sinon sa ne marche pas
