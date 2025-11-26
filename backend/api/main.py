@@ -35,6 +35,3 @@ app.add_middleware(
 app.include_router(points_eau.router, prefix="/points_eau", tags=["Points d'eau"])
 app.include_router(auth.router) 
 
-# Tu pourras ajouter d'autres routeurs comme :
-# app.include_router(utilisateurs.router, prefix="/utilisateurs", tags=["Utilisateurs"])
-# app.include_router(missions.router, prefix="/missions", tags=["Missions"])
