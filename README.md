@@ -24,6 +24,6 @@ Ce projet est une application développée avec **React Native** et **Expo**.
 - faire : **source api/venv/bin/activate**
 
 ensuite pour lancer l'api faire : 
-**uvicorn main:app --reload --host 0.0.0.0 --port 8000**
+**uvicorn api.main:app --reload --host 0.0.0.0 --port 8000**
 
 ⚠️⚠️⚠️ bien modifier modifier le fichier le **acceuil** dans (tabs) et bien maitre son ip sinon sa ne marche pas
