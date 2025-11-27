@@ -18,7 +18,7 @@ Ce projet est une application développée avec **React Native** et **Expo**.
    ```
 
 
-## Pour lancer l'api et afficher les points:
+## Pour lancer l'api et afficher les différents points:
 
 - lancer environement venv en se placant dans : **appli/backend**
 - faire : **source api/venv/bin/activate**
