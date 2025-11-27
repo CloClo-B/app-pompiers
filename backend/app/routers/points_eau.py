@@ -2,8 +2,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from api.database import get_db
-from api import crud
-from api.schemas import PointEauCreate
+import crud
+from schemas import PointEauCreate
 
 router = APIRouter()
 
