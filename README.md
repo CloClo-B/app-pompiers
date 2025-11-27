@@ -3,7 +3,7 @@
 Bienvenue sur le dépôt GitLab du projet **FEN-Alim** !  
 Ce projet est une application développée avec **React Native** et **Expo**.
 
-## Pour démarer :
+## Pour démarer le projet :
 
 1. Installer les dépendances
 
