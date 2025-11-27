@@ -7,7 +7,7 @@ import MapView, { Marker } from 'react-native-maps';
 import HautPage from '../hautPage';
 import proj4 from "proj4";
 
-const API_URL = "http://172.20.10.2:8000/points_eau/";
+const API_URL = "http://172.20.10.5:8000/points-eau/";
 
 // valentin : 172.20.10.2
 
@@ -40,7 +40,7 @@ export default function HomeScreen() {
           "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
         const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
-        const pointsEauWGS84 = response.data.points_eau.map((p: any) => {
+        const pointsEauWGS84 = response.data.map((p: any) => {
           const [lon, lat] = proj4(lambert93, wgs84, [p.longitude, p.latitude]);
           return { ...p, latitude: lat, longitude: lon };
         });
