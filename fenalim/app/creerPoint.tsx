@@ -2,6 +2,9 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
+import axios from 'axios';
+
+
 
 export default function CreerPoint() {
  
@@ -26,6 +29,46 @@ export default function CreerPoint() {
     { label : 'Non fonctionnel' , value : 'nonFonctionnel' }, 
 
   ]);
+
+  const [debit, setDebit] = useState('');
+  const [pression, setPression] = useState('');
+  const [capacite, setCapacite] = useState('');
+  const [longitude, setLongitude] = useState('');
+  const [latitude, setLatitude] = useState('');
+
+const creerPointAPI = async () => {
+  try {
+    // 172.20.10.2:8000 valentin
+    const response = await axios.post('http:/172.20.10.2:8000/points_eau/', {
+      numero_pei: 'ftgyhujioijhujfdhgyu',
+      nom: 'Pompe A',
+      statut: 'PUBLIC',
+      type_nature: valueType,
+      insee5: '29001', 
+      accessibilite: '',
+      disponibilite: '',
+      carto_ref: null,
+      press_deb: parseFloat(pression),
+      debit_1_bar: parseFloat(debit),
+      vol_eau_mi: parseFloat(capacite),
+      longitude: parseFloat(longitude),
+      latitude: parseFloat(latitude),
+      utilisateur: '', //ne pas oublié par la suite c'est pour savoir qui a ajouter le point 
+      date_crea: new Date().toISOString(),
+      date_maj: new Date().toISOString()
+    });
+    console.log(response.data);
+    router.push({
+      pathname: '/creationSucces',
+      params: { title: 'Point d’eau créé avec succès', nomPage: 'creer', chemainPage: '/point_eau' }
+    });
+  } catch (error) {
+    console.error(error);
+    alert('Erreur lors de la création du point d’eau');
+  }
+};
+
+
   return (
     <>    
 
@@ -45,7 +88,7 @@ export default function CreerPoint() {
       />
     </View> 
 
-    {/* etat poin eau */}
+    {/* etat point eau */}
     <View style={[styles.tout, {marginTop:20}]}>
       <Text style={styles.text}>État du point d’eau</Text> 
       <DropDownPicker 
@@ -64,7 +107,13 @@ export default function CreerPoint() {
     {/* debit */}
     <View style={[styles.tout, {marginTop:20}]}>
       <Text style={styles.text}>Débit en L/min</Text> 
-      <TextInput keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
+      <TextInput value={debit} onChangeText={setDebit} keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
+    </View> 
+
+    {/* préssion */}
+    <View style={[styles.tout, {marginTop:20}]}>
+      <Text style={styles.text}>préssion</Text> 
+      <TextInput value={pression} onChangeText={setPression} keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
     </View> 
 
     {/* capacite */}
@@ -73,22 +122,25 @@ export default function CreerPoint() {
       <TextInput keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
     </View> 
 
+    {/* longitude */}
+    <View style={[styles.tout, {marginTop:20}]}>
+      <Text style={styles.text}>Longitude</Text> 
+      <TextInput value={longitude} onChangeText={setLongitude} keyboardType='numbers-and-punctuation' style={styles.entree} placeholder=""></TextInput>
+    </View> 
 
-    {/* afficher la carte */}
-      <View style={[styles.tout, {marginTop:20}]}>
-        <Text style={styles.text}>Localisation du point d’eau</Text> 
-        <TouchableOpacity style={[styles.boutton, {backgroundColor: '#457B9D', width: 250, height: 45}]} onPress={() => console.log("afficher carte")}>
-          <Text style={{color:'#ffffff'}}>AFFICHER SUR LA CARTE</Text>
-        </TouchableOpacity>
-    </View>
+    {/* lattitude */}
+    <View style={[styles.tout, {marginTop:20}]}>
+      <Text style={styles.text}>Lattitude</Text> 
+      <TextInput value={latitude} onChangeText={setLatitude} keyboardType='numbers-and-punctuation' style={styles.entree} placeholder=""></TextInput>
+    </View> 
 
     {/* creer */}
       <View style={[styles.tout, {marginTop:20}]}>
-        <TouchableOpacity style={[styles.boutton, {marginTop: 15, backgroundColor: '#457B9D', width: 200, height: 45}]} onPress={() => router.navigate({ pathname: '/creationSucces', params: {title: 'Point d’eau créé avec succès', nomPage: 'creer', chemainPage: '/point_eau'}})}>
+        <TouchableOpacity style={[styles.boutton, {marginTop: 15, backgroundColor: '#457B9D', width: 200, height: 45}]} onPress={creerPointAPI}>
           <Text style={{color:'#ffffff'}}>CREER</Text>
         </TouchableOpacity>
     </View>
-
+{/* router.navigate({ pathname: '/creationSucces', params: {title: 'Point d’eau créé avec succès', nomPage: 'creer', chemainPage: '/point_eau'}}) */}
     </>
   );
 }

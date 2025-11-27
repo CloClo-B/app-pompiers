@@ -7,7 +7,7 @@ import MapView, { Marker } from 'react-native-maps';
 import HautPage from '../hautPage';
 import proj4 from "proj4";
 
-const API_URL = "http://192.168.1.15:8000/points_eau/";
+const API_URL = "http://172.20.10.2:8000/points_eau/";
 
 // valentin : 172.20.10.2
 
