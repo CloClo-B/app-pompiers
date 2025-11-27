@@ -1,33 +1,51 @@
-# api/routes/points_eau.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from api.database import get_db
-import crud
-from schemas import PointEauCreate
+from sqlalchemy import func
+from geoalchemy2.elements import WKTElement
 
-router = APIRouter()
+from ..database import SessionLocal
+from ..models import PointEau
+from ..schemas import PointEauBase, PointEauCreate
 
-# -----------------------------
-# Route pour récupérer tous les points d'eau
-# -----------------------------
-@router.get("/", summary="Récupère tous les points d'eau")
-def read_points_eau(db: Session = Depends(get_db)):
-    points = crud.get_all_points_eau(db)
-    return {"count": len(points), "points_eau": points}
+router = APIRouter(prefix="/points-eau", tags=["Points d'eau"])
 
-# Route pour récupérer un point d'eau par ID
-@router.get("/{point_id}", summary="Récupère un point d'eau par son ID")
-def read_point_eau(point_id: int, db: Session = Depends(get_db)):
-    point = crud.get_point_eau_by_id(db, point_id)
-    if not point:
-        raise HTTPException(status_code=404, detail="Point d'eau non trouvé")
-    return point
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
+@router.get("/", response_model=list[PointEauBase])
+def list_points(db: Session = Depends(get_db)):
+    points = db.query(
+        PointEau.id,
+        PointEau.numero_pei,
+        PointEau.nom,
+        PointEau.statut,
+        func.ST_Y(PointEau.geom).label("latitude"),
+        func.ST_X(PointEau.geom).label("longitude"),
+    ).all()
+    return points
 
+@router.post("/", response_model=PointEauBase)
+def create_point(payload: PointEauCreate, db: Session = Depends(get_db)):
+    wkt = WKTElement(f"POINT({payload.longitude} {payload.latitude})", srid=4326)
+    new_point = PointEau(
+        numero_pei=payload.numero_pei,
+        nom=payload.nom,
+        statut=payload.statut,
+        geom=wkt
+    )
+    db.add(new_point)
+    db.commit()
+    db.refresh(new_point)
 
-# créer un point d'eau
-@router.post("/", summary="Création d'un point d'eau")
-def creer_point(point: PointEauCreate, db: Session = Depends(get_db)):
-    data = point.dict()
-    point_id = crud.creer_point_eau(db, data)
-    return {"id": point_id, "message": "Point d'eau créé avec succès"}
+    return db.query(
+        PointEau.id,
+        PointEau.numero_pei,
+        PointEau.nom,
+        PointEau.statut,
+        func.ST_Y(PointEau.geom).label("latitude"),
+        func.ST_X(PointEau.geom).label("longitude"),
+    ).filter(PointEau.id == new_point.id).first()

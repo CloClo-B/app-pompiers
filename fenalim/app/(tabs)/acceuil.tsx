@@ -35,15 +35,13 @@ export default function HomeScreen() {
     const fetchPointsEau = async () => {
       try {
         const response = await axios.get(API_URL);
+        console.log("Données reçues:", response.data);
 
         const lambert93 =
           "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
         const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
-        // Vérification si la réponse est un tableau ou un objet avec points_eau
-        const pointsRaw = Array.isArray(response.data)
-          ? response.data
-          : response.data.points_eau;
+        const pointsRaw = Array.isArray(response.data) ? response.data : response.data.points_eau;
 
         if (!pointsRaw) {
           console.error("Impossible de récupérer les points d'eau :", response.data);
@@ -51,7 +49,6 @@ export default function HomeScreen() {
           return;
         }
 
-        // Conversion Lambert93 → WGS84
         const pointsEauWGS84 = pointsRaw.map((p: any) => {
           const [lon, lat] = proj4(lambert93, wgs84, [p.longitude, p.latitude]);
           return { ...p, latitude: lat, longitude: lon };
@@ -147,6 +144,7 @@ export default function HomeScreen() {
             description={`Pression: ${point.press_deb ?? "-"} bars | Débit: ${point.debit_1_bar ?? "-"} L/min`}
             pinColor="red"
           />
+
         ))}
       </MapView>
 
