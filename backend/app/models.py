@@ -5,12 +5,15 @@ import enum
 from .database import Base
 
 class RoleEnum(str, enum.Enum):
+    #Rôles possibles pour un utlisateur.
     public = "public"
     pompier = "pompier"
     commandement = "commandement"
     admin = "admin"
 
 class PointEau(Base):
+    """Représente un point d'eau."""
+
     __tablename__ = "points_eau"
     id = Column(Integer, primary_key=True, index=True)
     numero_pei = Column(String(20), nullable=False, unique=True)
@@ -27,10 +30,12 @@ class PointEau(Base):
     date_crea = Column(TIMESTAMP)
     date_maj = Column(TIMESTAMP)
     utilisateur = Column(String(50))
+    #Colonne géographique, point -> coordonnées (x, y)
     geom = Column(Geometry("POINT", srid=2154))
 
 
 class Utilisateur(Base):
+    """Représente un utilisateur."""
     __tablename__ = "utilisateurs"
     id_utilisateur = Column(Integer, primary_key=True, index=True)
     nom = Column(String(100), nullable=False)
@@ -38,21 +43,29 @@ class Utilisateur(Base):
     email = Column(String(150), unique=True, nullable=False)
     mot_de_passe = Column(String(255), nullable=False)
     role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.public)
+    #Date de suivi créée automatiquement
     date_creation = Column(TIMESTAMP, server_default=func.now())
+    #Mis à jour à chaque connexion
     derniere_connexion = Column(TIMESTAMP)
 
 
 class Mission(Base):
+    """Représente une mission assignée à un pompier sur un point d'eau"""
+
     __tablename__ = "missions"
     id_mission = Column(Integer, primary_key=True, index=True)
+    #Relation avec le point d'eau
     id_point = Column(Integer, ForeignKey("points_eau.id"), nullable=False)
+    #Relation avec l'utlisateur (pompier)
     id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
     date_creation = Column(TIMESTAMP, server_default=func.now())
     statut = Column(String(20), default="en_attente")
     commentaire = Column(String)
-    itineraire = Column(String)  # JSONB → String ou JSONType selon SQLAlchemy
+    # JSONB -> String ou JSONType selon SQLAlchemy
+    itineraire = Column(String)
 
 class Historique(Base):
+    """Historique des actions effectuées."""
     __tablename__ = "historiques"
     id_log = Column(Integer, primary_key=True, index=True)
     id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"))
