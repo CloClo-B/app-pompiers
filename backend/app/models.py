@@ -41,6 +41,7 @@ class Utilisateur(Base):
     nom = Column(String(100), nullable=False)
     prenom = Column(String(100), nullable=False)
     email = Column(String(150), unique=True, nullable=False)
+    telephone = Column(String(10), unique=True, nullable=False)
     mot_de_passe = Column(String(255), nullable=False)
     role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.public)
     #Date de suivi créée automatiquement
