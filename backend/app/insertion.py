@@ -3,25 +3,33 @@ import json
 import psycopg2
 from psycopg2.extras import execute_values
 
+#Répertoire actuel
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+#Chemin vers le fichier .JSON
 JSON_FILE = os.path.join(BASE_DIR, "HYDRANTS_56.json")
 
+#Lecture du fichier .JSON
 with open(JSON_FILE, "r", encoding="utf-8") as f:
     geojson = json.load(f)
 
-conn = psycopg2.connect(
+#Connexion directe via psycopg2
+connexion = psycopg2.connect(
     dbname="fenalim_db",
     user="fenalim",
     password="fenalim123",
-    host="db"
+    host="db" #Conteneur Docker
 )
-cur = conn.cursor()
+cursor = connexion.cursor()
 
 records = []
+
+#Parcours du fichier .JSON
 for feature in geojson['features']:
     props = feature['properties']
+    #Récupération des coordonnées
     x, y = feature['geometry']['coordinates']
     
+    #Ajout des données
     records.append((
         props.get("NUMERO_PEI"),
         props.get("NOM"),
@@ -50,14 +58,15 @@ INSERT INTO points_eau (
 VALUES %s
 """
 
+#Permet d'insérer beaucoup de lignes d'un coup
 execute_values(
-    cur,
+    cursor,
     sql,
-    [(r[:14] + (f"SRID=2154;POINT({r[14]} {r[15]})",)) for r in records]
+    [(r[:14] + (f"SRID=2154;POINT({r[14]} {r[15]})",)) for r in records] #Conversion des données
 )
 
-conn.commit()
-cur.close()
-conn.close()
+connexion.commit()
+cursor.close()
+connexion.close()
 
 print(f"{len(records)} points insérés avec succès !")
