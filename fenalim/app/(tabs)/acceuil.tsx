@@ -7,9 +7,9 @@ import MapView, { Marker } from 'react-native-maps';
 import HautPage from '../hautPage';
 import proj4 from "proj4";
 
-const API_URL = "http://172.20.10.5:8000/points-eau/";
+const API_URL = "http://192.168.1.184:8000/points-eau/";
 
-// valentin : 172.20.10.2
+// valentin : 172.20.10.2 | 192.168.1.184
 
 type PointEau = {
   id: number;
@@ -35,7 +35,8 @@ export default function HomeScreen() {
     const fetchPointsEau = async () => {
       try {
         const response = await axios.get(API_URL);
-        console.log("Données reçues:", response.data);
+        // affichage des données
+        // console.log("Données reçues:", response.data);
 
         const lambert93 =
           "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
@@ -134,7 +135,7 @@ export default function HomeScreen() {
           longitudeDelta: 0.2,
         }}
         showsUserLocation
-        showsMyLocationButton
+        showsMyLocationButton = {true}
       >
         {pointsEau.map((point) => (
           <Marker
@@ -184,3 +185,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
+
+
+
+// exemple format:
+// {"id": 11362, "latitude": 6788543, "longitude": 225566, "nom": "", "numero_pei": "562100009", "statut": "PUBLIC"}

@@ -6,6 +6,7 @@ from geoalchemy2.elements import WKTElement
 from ..database import SessionLocal
 from ..models import PointEau
 from ..schemas import PointEauBase, PointEauCreate
+from app import crud
 
 router = APIRouter(prefix="/points-eau", tags=["Points d'eau"])
 
@@ -18,34 +19,30 @@ def get_db():
 
 @router.get("/", response_model=list[PointEauBase])
 def list_points(db: Session = Depends(get_db)):
-    points = db.query(
-        PointEau.id,
-        PointEau.numero_pei,
-        PointEau.nom,
-        PointEau.statut,
-        func.ST_Y(PointEau.geom).label("latitude"),
-        func.ST_X(PointEau.geom).label("longitude"),
-    ).all()
+    points = crud.get_all_points_eau(db)
     return points
+
 
 @router.post("/", response_model=PointEauBase)
 def create_point(payload: PointEauCreate, db: Session = Depends(get_db)):
-    wkt = WKTElement(f"POINT({payload.longitude} {payload.latitude})", srid=4326)
-    new_point = PointEau(
-        numero_pei=payload.numero_pei,
-        nom=payload.nom,
-        statut=payload.statut,
-        geom=wkt
-    )
-    db.add(new_point)
-    db.commit()
-    db.refresh(new_point)
 
+    nouveau_point = crud.creer_point_eau(db, payload)
     return db.query(
         PointEau.id,
         PointEau.numero_pei,
-        PointEau.nom,
         PointEau.statut,
+        PointEau.type_nature,
+        PointEau.insee5,
+        PointEau.press_deb,
+        PointEau.debit_1_bar,
+        PointEau.vol_eau_mi,
+        PointEau.accessibilite,
+        PointEau.disponibilite,
+        PointEau.carto_ref,
+        PointEau.utilisateur,
+        PointEau.date_crea,
+        PointEau.date_maj,
         func.ST_Y(PointEau.geom).label("latitude"),
         func.ST_X(PointEau.geom).label("longitude"),
-    ).filter(PointEau.id == new_point.id).first()
+
+    ).filter(PointEau.id == nouveau_point.id).first()

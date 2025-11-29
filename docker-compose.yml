@@ -57,23 +57,23 @@ services:
     networks:
       - fenalim_net
 
-  #Conteneur pour traefik. Pas encore mis en place (28/11/25), à retirer
-  traefik:
-    image: traefik:v3.1
-    container_name: traefik
-    command:
-      - "--api.dashboard=true"
-      - "--providers.docker=true"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-    ports:
-      - "80:80" #HTTP
-      - "443:443" #HTTPS
-      - "8080:8080" #localhost
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - fenalim_net
+  # #Conteneur pour traefik. Pas encore mis en place (28/11/25), à retirer
+  # traefik:
+  #   image: traefik:v3.1
+  #   container_name: traefik
+  #   command:
+  #     - "--api.dashboard=true"
+  #     - "--providers.docker=true"
+  #     - "--entrypoints.web.address=:80"
+  #     - "--entrypoints.websecure.address=:443"
+  #   ports:
+  #     - "80:80" #HTTP
+  #     - "443:443" #HTTPS
+  #     - "8080:8080" #localhost
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   networks:
+  #     - fenalim_net
 
 #Réseau commun pour tous les conteneurs
 networks:

@@ -1,15 +1,36 @@
-from pydantic import BaseModel, EmailStr, constr
+from pydantic import BaseModel, EmailStr, constr, Field
 from enum import Enum
 from typing import Optional, List
 from datetime import datetime
 
 class PointEauBase(BaseModel):
     id: int
+
     numero_pei: Optional[str] = None
     nom: Optional[str] = None
     statut: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
+
+    type_nature: Optional[str] = None
+    insee5: Optional[str] = None
+
+    press_deb: Optional[float] = None
+    debit_1_bar: Optional[float] = None
+    vol_eau_mi: Optional[float] = None
+
+
+    accessibilite: Optional[str] = None
+    disponibilite: Optional[str] = None
+
+    carto_ref: Optional[int] = None
+
+    utilisateur: Optional[str] = None 
+    
+    latitude: float 
+    longitude: float
+
+    date_crea : Optional[datetime] = None
+    date_maj: Optional[datetime] = None
+
 
     class Config:
         orm_mode = True
@@ -18,8 +39,28 @@ class PointEauCreate(BaseModel):
     numero_pei: Optional[str] = None
     nom: Optional[str] = None
     statut: Optional[str] = None
+    
+    type_nature: Optional[str] = None
+    insee5: Optional[str] = None
+
+    press_deb: Optional[float] = None
+    debit_1_bar: Optional[float] = None
+    vol_eau_mi: Optional[float] = None
+
+
+    accessibilite: Optional[str] = None
+    disponibilite: Optional[str] = None
+
+    carto_ref: Optional[int] = None
+
+    utilisateur: Optional[str] = None # a remplir par la suite avec la session de la personne
+    
     latitude: float
     longitude: float
+
+    date_crea: Optional[datetime] = Field(default_factory=datetime.now)
+    date_maj: Optional[datetime] = None
+
 
 class RoleEnum(str, Enum):
     public = "public"
