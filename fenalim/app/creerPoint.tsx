@@ -10,8 +10,8 @@ export default function CreerPoint() {
   
   
   
-  // variable pour ensuite envoyer à l'api
   
+  // variable pour ensuite envoyer à l'api
 
   // liste déroulante
   const [valueType, setValueType] = useState(null);
@@ -29,11 +29,10 @@ export default function CreerPoint() {
   const [refCarto, setRefCarto] = useState('');
 
   
-
-
-
-
-
+  
+  
+  
+  
 
   // liste pour les type de point d'eau
   const [openType, setOpenType] = useState(false);
@@ -46,9 +45,9 @@ export default function CreerPoint() {
     { label : 'PI150' , value : 'PI150' }, 
     { label : 'PI65' , value : 'PI65' },
     { label : 'PI70' , value : 'PI70' }, 
-    { label : 'PI80' , value : ' PI80' }, 
+    { label : 'PI80' , value : 'PI80' }, 
     { label : 'RESERVE EAU INCENDIE' , value : 'RESERVE EAU INCENDIE' }, 
-
+    
   ]);
   
   // liste pour les différents niveau de disponibilité
@@ -57,7 +56,7 @@ export default function CreerPoint() {
     { label : 'DI' , value : 'DI' }, 
     { label : 'IN' , value : 'IN' }, 
   ]);
-
+  
   // liste pour les différents niveau d'accès
   const [openAcces, setOpenAcces] = useState(false);
   const [etatAcces, setItemsAcces] = useState ([ 
@@ -74,17 +73,24 @@ export default function CreerPoint() {
     { label : 'Public' , value : 'PUBLIC' }, 
     { label : 'Privé' , value : 'PRIVE' }, 
   ]);
-
-
+  // une seul ouverture a la fois sinon erreur 
+  const onOpenType = () => { setOpenDispo(false); setOpenAcces(false); setOpenStatut(false); };
+  const onOpenDispo = () => { setOpenType(false); setOpenAcces(false); setOpenStatut(false); };
+  const onOpenAcces = () => { setOpenType(false); setOpenDispo(false); setOpenStatut(false); };
+  const onOpenStatut = () => { setOpenType(false); setOpenDispo(false); setOpenAcces(false); };
   
-  // communication avec l'api
+  
+ 
+
+
+  // communication avec l'api  /points-eau/
   // valentin : 172.20.10.2 | 192.168.1.184
   const creerPointAPI = async () => {
 
-  // Avant l'appel API, pour vérifier les valeurs
-  console.log("=== Vérification des valeurs à envoyer ===");
+    // Avant l'appel API, pour vérifier les valeurs
+  console.log("Vérification des valeurs à envoyer\n");
   console.log("numeroPEI:", numeroPEI);
-  console.log("nom:", ""); // tu envoies toujours vide
+  console.log("nom:", ""); // a changer par la suite
   console.log("statut:", valueStatut);
   console.log("type_nature:", valueType);
   console.log("insee5:", insee5);
@@ -116,8 +122,6 @@ export default function CreerPoint() {
         utilisateur: '', //ne pas oublié par la suite c'est pour savoir qui a ajouter le point 
       });
       
-      console.log("=== Réponse API ===");
-      console.log(response.data);
       router.push({
           pathname: '/creationSucces',
           params: { title: 'Point d’eau créé avec succès', nomPage: 'creer', chemainPage: '/point_eau' }
@@ -146,6 +150,7 @@ export default function CreerPoint() {
         setOpen={setOpenType}
         setValue={setValueType}
         setItems={setItemsType}
+        onOpen={onOpenType}
         placeholder="Sélectionnez un type de point d'eau"
         listMode="SCROLLVIEW"
         style={styles.menuD}
@@ -161,7 +166,8 @@ export default function CreerPoint() {
         items={etatDispo} 
         setOpen={setOpenDispo} 
         setValue={setValueDispo} 
-        setItems={setItemsDispo} 
+        setItems={setItemsDispo}
+        onOpen={onOpenDispo}
         placeholder="Sélectionnez la disponibilité du point d'eau" 
         listMode= "SCROLLVIEW"
         style={styles.menuD}
@@ -177,7 +183,8 @@ export default function CreerPoint() {
         items={etatAcces} 
         setOpen={setOpenAcces} 
         setValue={setValueAcces} 
-        setItems={setItemsAcces} 
+        setItems={setItemsAcces}
+        onOpen={onOpenAcces}
         placeholder="Sélectionnez le niveau d'accèes du point d'eau" 
         listMode= "SCROLLVIEW"
         style={styles.menuD}
@@ -193,7 +200,8 @@ export default function CreerPoint() {
         items={etatStatut} 
         setOpen={setOpenStatut} 
         setValue={setValueStatut} 
-        setItems={setItemsStatut} 
+        setItems={setItemsStatut}
+        onOpen={onOpenStatut}
         placeholder="Sélectionnez le statut du point d'eau" 
         listMode= "SCROLLVIEW"
         style={styles.menuD}

@@ -107,7 +107,10 @@ class MissionBase(BaseModel):
     itineraire: Optional[Any] 
 
 class MissionCreate(MissionBase):
-    pass
+    id_point: int
+    id_utilisateur: int
+    commentaire: Optional[str] = None
+    itineraire: Optional[Any] = None
 
 class MissionUpdate(BaseModel):
     statut: Optional[str]
