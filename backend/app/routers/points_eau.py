@@ -6,8 +6,10 @@ from geoalchemy2.elements import WKTElement
 from ..database import SessionLocal
 from ..models import PointEau
 from ..schemas import PointEauBase, PointEauCreate
-from app import crud
-
+from app.DAO.DAOPointsEau import (
+    creer_point_eau,
+    get_all_points_eau
+)
 router = APIRouter(prefix="/points-eau", tags=["Points d'eau"])
 
 def get_db():
@@ -19,14 +21,14 @@ def get_db():
 
 @router.get("/", response_model=list[PointEauBase])
 def list_points(db: Session = Depends(get_db)):
-    points = crud.get_all_points_eau(db)
+    points = get_all_points_eau(db)
     return points
 
 
 @router.post("/", response_model=PointEauBase)
 def create_point(payload: PointEauCreate, db: Session = Depends(get_db)):
 
-    nouveau_point = crud.creer_point_eau(db, payload)
+    nouveau_point = creer_point_eau(db, payload)
     return db.query(
         PointEau.id,
         PointEau.numero_pei,

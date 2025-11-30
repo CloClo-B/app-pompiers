@@ -1,7 +1,11 @@
 from pydantic import BaseModel, EmailStr, constr, Field
 from enum import Enum
-from typing import Optional, List
+from typing import Optional, List, Any
 from datetime import datetime
+
+
+
+# =============== POINT D'EAU ================
 
 class PointEauBase(BaseModel):
     id: int
@@ -62,60 +66,86 @@ class PointEauCreate(BaseModel):
     date_maj: Optional[datetime] = None
 
 
-class RoleEnum(str, Enum):
-    public = "public"
-    pompier = "pompier"
-    commandement = "commandement"
-    admin = "admin"
 
-class UserCreate(BaseModel):
+
+# ============ UTILISATEUR ===============
+
+class UtilisateurBase(BaseModel):
     nom: str
     prenom: str
-    telephone: Optional[str] = None
-    email: EmailStr
-    mot_de_passe: constr(min_length=12)
-    confirm_password: str
-    role: Optional[RoleEnum] = RoleEnum.public
+    email : EmailStr
+    telephone : Optional[str] = None
+    role: Optional[str] = "public"
 
-class UserOut(BaseModel):
+
+class UtilisateurCreate(UtilisateurBase):
+    mot_de_passe: str = Field(min_length=12)
+
+
+class UtilisateurUpdate(BaseModel):
+    nom: Optional[str]
+    prenom: Optional[str]
+    email: Optional[EmailStr]
+    telephone: Optional[str]
+    role: Optional[str]
+    mot_de_passe: Optional[str]
+
+class UtilisateurOut(UtilisateurBase):
     id_utilisateur: int
-    nom: str
-    prenom: str
-    email: EmailStr
-    role: RoleEnum
 
     class Config:
-        orm_mode = True
+        from_attributes: True
+
+
+# ============= MISSION ===============
+
 
 class MissionBase(BaseModel):
+    id_point: int
+    id_utilisateur: int
+    commentaire: Optional[str]
+    itineraire: Optional[Any] 
+
+class MissionCreate(MissionBase):
+    pass
+
+class MissionUpdate(BaseModel):
+    statut: Optional[str]
+    commentaire: Optional[str]
+    itineraire: Optional[Any]
+
+class MissionOut(BaseModel):
     id_mission: int
     id_point: int
-    id_pompier: int
-    date_mission: datetime
-    type_mission: str
+    id_utilisateur: int
+    date_creation: datetime
     statut: str
+    commentaire: Optional[str]
+    itineraire: Optional[Any]
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
-class MissionCreate(BaseModel):
-    id_point: int
-    id_pompier: int
-    date_mission: datetime
-    type_mission: str
+
+# =============== HISTORIQUE ==================
+
 
 class HistoriqueBase(BaseModel):
-    id_historique: int
-    id_mission: int
-    date_action: datetime
+    id_utilisateur: Optional[int]
     action: str
-    utilisateur_id: int
+    cible: Optional[str]
+    ip: Optional[str]
+
+class HistoriqueCreate(HistoriqueBase):
+    pass
+
+class HistoriqueOut(BaseModel):
+    id_log: int
+    id_utilisateur: Optional[int]
+    action: str
+    cible: Optional[str]
+    date_action: datetime
+    ip: Optional[str]
 
     class Config:
-        orm_mode = True
-
-class HistoriqueCreate(BaseModel):
-    id_mission: int
-    date_action: datetime
-    action: str
-    utilisateur_id: int
+        from_attributes = True
