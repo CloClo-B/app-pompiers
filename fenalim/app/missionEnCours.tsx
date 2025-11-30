@@ -1,31 +1,34 @@
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 
 export default function MissionEnCours() {
   return (
     <>    
 
-    <Text>Mission en cours</Text>
+    <View style={styles.hautBleu}>
+      <Text style={styles.textTittre}>Nom mission</Text>
+      <Text style={styles.textTittre}>Distance</Text>
+      <Text style={styles.textTittre}>Date</Text>
+      <Text style={styles.textTittre}>Partir</Text>
+    </View>
     
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  hautBleu:{
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    width: 350,
+    height: 40,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-around',
+    backgroundColor: '#1D3557',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  textTittre:{
+    color: '#ffffff',
+    fontSize: 17,
+  }
 });

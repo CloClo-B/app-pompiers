@@ -43,7 +43,7 @@ export default function CreerMission() {
       
       router.push({
           pathname: '/creationSucces',
-          params: { title: 'Mission créé avec succès', nomPage: 'creer', chemainPage: '/point_eau' }
+          params: { title: 'Mission créé avec succès', creerMission: 'creerMission', chemainPage: '/point_eau' }
         });
       } catch (error) {
           console.error(error);
