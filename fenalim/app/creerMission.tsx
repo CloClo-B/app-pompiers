@@ -31,7 +31,7 @@ export default function CreerMission() {
   console.log("itinéraire:", itineraire);
 
     try {
-      const response = await axios.post('http://192.168.1.184:8000/missions/', {
+      const response = await axios.post('http://10.201.126.118:8000/missions/', {
         // nomMission: nomMission,     a ajouter dans la bdd
         
         id_point: parseInt(IDPoint),
