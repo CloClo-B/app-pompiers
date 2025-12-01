@@ -69,7 +69,7 @@ class PointEauCreate(BaseModel):
     date_maj: Optional[datetime] = None
 
     signale : Optional[bool] = 0
-    probleme : Optional[str]
+    probleme : Optional[str] = None
 
 
 

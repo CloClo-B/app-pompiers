@@ -32,7 +32,7 @@ export default function CreerMission() {
 
     try {
       const response = await axios.post('http://10.201.126.118:8000/missions/', {
-        nomMission: nomMission,        
+        nom_mission: nomMission,        
         id_point: parseInt(IDPoint),
         id_utilisateur : 1,  // a changer par la suite celui ci est un utilisateur créer sur ma bdd
         commentaire: commentaire, 
