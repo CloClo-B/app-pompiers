@@ -32,6 +32,7 @@ def create_mission(db:Session, mission_data:dict):
     if not db.query(models.Utilisateur).filter(models.Utilisateur.id_utilisateur == mission_data["id_utilisateur"]).first():
         raise ValueError("id_utilisateur est incorrect")
     db_mission = models.Mission(
+        nom_mission=mission_data["nom_mission"],
         id_point=mission_data["id_point"],
         id_utilisateur=mission_data["id_utilisateur"],
         statut=mission_data.get("statut", "en attente"),

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, TIMESTAMP, Enum, ForeignKey, func, DateTime
+from sqlalchemy import Boolean, Column, Integer, String, Float, TIMESTAMP, Enum, ForeignKey, func, DateTime
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry
 import enum
@@ -31,6 +31,10 @@ class PointEau(Base):
     date_maj = Column(TIMESTAMP)
     utilisateur = Column(String(50))
     geom = Column(Geometry("POINT", srid=2154))
+    signale = Column(Boolean, default=False) #ajoute pour signaler (j'ai rajouter Boolean dans les imports)
+    probleme = Column(String(100))
+
+
 
 
 
@@ -51,6 +55,7 @@ class Utilisateur(Base):
 class Mission(Base):
     __tablename__ = "missions"
     id_mission = Column(Integer, primary_key=True, index=True)
+    nom_mission = Column(String(20), nullable=False)
     id_point = Column(Integer, ForeignKey("points_eau.id"), nullable=False)
     id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
     date_creation = Column(DateTime, server_default=func.now())

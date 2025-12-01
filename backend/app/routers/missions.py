@@ -20,6 +20,7 @@ def get_db():
 @router.post("/", response_model=MissionBase)
 def create_mission(payload: MissionCreate, db: Session = Depends(get_db)):
     new_mission = Mission(
+        nom_mission=payload.nom_mission,
         id_point=payload.id_point,
         id_utilisateur=payload.id_utilisateur,
         statut="en_attente",

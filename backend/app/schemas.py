@@ -35,6 +35,9 @@ class PointEauBase(BaseModel):
     date_crea : Optional[datetime] = None
     date_maj: Optional[datetime] = None
 
+    signale : Optional[bool] = 0
+    probleme : Optional[str]
+
 
     class Config:
         orm_mode = True
@@ -65,6 +68,8 @@ class PointEauCreate(BaseModel):
     date_crea: Optional[datetime] = Field(default_factory=datetime.now)
     date_maj: Optional[datetime] = None
 
+    signale : Optional[bool] = 0
+    probleme : Optional[str]
 
 
 
@@ -101,12 +106,14 @@ class UtilisateurOut(UtilisateurBase):
 
 
 class MissionBase(BaseModel):
+    nom_mission : str
     id_point: int
     id_utilisateur: int
     commentaire: Optional[str]
     itineraire: Optional[Any] 
 
 class MissionCreate(MissionBase):
+    nom_mission : str
     id_point: int
     id_utilisateur: int
     commentaire: Optional[str] = None
@@ -119,6 +126,7 @@ class MissionUpdate(BaseModel):
 
 class MissionOut(BaseModel):
     id_mission: int
+    nom_mission : str
     id_point: int
     id_utilisateur: int
     date_creation: datetime

@@ -46,5 +46,7 @@ def create_point(payload: PointEauCreate, db: Session = Depends(get_db)):
         PointEau.date_maj,
         func.ST_Y(PointEau.geom).label("latitude"),
         func.ST_X(PointEau.geom).label("longitude"),
+        PointEau.signale,
+        PointEau.probleme,
 
     ).filter(PointEau.id == nouveau_point.id).first()

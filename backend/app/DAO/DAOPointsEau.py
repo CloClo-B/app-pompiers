@@ -28,6 +28,8 @@ def get_all_points_eau(db: Session):
         PointEau.utilisateur,
         func.ST_Y(PointEau.geom).label("latitude"),
         func.ST_X(PointEau.geom).label("longitude"),
+        PointEau.signale,
+        PointEau.probleme,
     ).all()
     # Transformer les tuples pour que le response_model fonctionne bien
     return [
@@ -49,6 +51,9 @@ def get_all_points_eau(db: Session):
             "utilisateur": p.utilisateur,
             "latitude": p.latitude,
             "longitude": p.longitude,
+            "signale" : p.signale,
+            "probleme" : p.probleme,
+
         }
         for p in points
     ]
@@ -73,7 +78,9 @@ def creer_point_eau(db: Session, payload):
         disponibilite=payload.disponibilite,
         carto_ref=payload.carto_ref,
         date_crea= datetime.now(),
-        geom=wkt
+        geom=wkt,
+        signale=payload.signale,
+        probleme=payload.probleme,
 
     )
     db.add(new_point)

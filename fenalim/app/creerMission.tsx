@@ -32,8 +32,7 @@ export default function CreerMission() {
 
     try {
       const response = await axios.post('http://10.201.126.118:8000/missions/', {
-        // nomMission: nomMission,     a ajouter dans la bdd
-        
+        nomMission: nomMission,        
         id_point: parseInt(IDPoint),
         id_utilisateur : 1,  // a changer par la suite celui ci est un utilisateur créer sur ma bdd
         commentaire: commentaire, 
@@ -58,7 +57,7 @@ export default function CreerMission() {
     <>  
     {/* nom mission */}
     <View style={styles.tout}>
-      <Text style={styles.text}>Nom de la mission a rajouter dans la bdd</Text> 
+      <Text style={styles.text}>Nom de la mission</Text> 
       <TextInput value={nomMission} onChangeText={setnomMission} style={styles.entree} placeholder=""></TextInput>
     </View> 
 
