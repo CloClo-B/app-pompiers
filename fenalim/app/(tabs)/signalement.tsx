@@ -87,7 +87,7 @@ const handlePickImage = () => {
 
 
     try {
-      const response = await axios.post('http://10.2.132.49:8000/signaler/', {
+      const response = await axios.post('http://172.20.10.2:8000/signaler/', {
         id_point: "561210541",        
         probleme: probleme,
         photo :"vide acutuellement ",

@@ -36,8 +36,6 @@ class PointEauBase(BaseModel):
     date_maj: Optional[datetime] = None
 
     signale : Optional[bool] = 0
-    probleme : Optional[str]
-
 
     class Config:
         orm_mode = True
@@ -69,7 +67,6 @@ class PointEauCreate(BaseModel):
     date_maj: Optional[datetime] = None
 
     signale : Optional[bool] = 0
-    probleme : Optional[str] = None
 
 
 
@@ -160,3 +157,21 @@ class HistoriqueOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+
+
+# =============== Signaler ==================
+
+class SignalerBase(BaseModel):
+    id_point: str
+    probleme: str
+    photo: Optional[str]
+
+class SignalerCreate(SignalerBase):
+    id_point: str
+    probleme: str
+    photo: Optional[str]
+
+    class Config:
+        from_attributes = True 

@@ -32,10 +32,6 @@ class PointEau(Base):
     utilisateur = Column(String(50))
     geom = Column(Geometry("POINT", srid=2154))
     signale = Column(Boolean, default=False) #ajoute pour signaler (j'ai rajouter Boolean dans les imports)
-    probleme = Column(String(100))
-
-
-
 
 
 
@@ -71,4 +67,11 @@ class Historique(Base):
     cible = Column(String(100))
     date_action = Column(DateTime, server_default=func.now())
     ip = Column(String(50))
+
+class Signaler(Base):
+    __tablename__ = "signaler"
+    id = Column(Integer, primary_key=True, index=True)
+    id_point = Column(String(20), ForeignKey("points_eau.numero_pei"), nullable=False)
+    probleme = Column(String(100), nullable=False)
+    photo = Column(String(255), nullable=True) # représente le chemin vers l'image pour l'afficher
 
