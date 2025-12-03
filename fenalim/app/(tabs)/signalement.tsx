@@ -1,20 +1,25 @@
 import { Camera } from 'expo-camera';
 import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-
+import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import HautPage from './hautPage';
+import HautPage from '../hautPage';
 
 const ajouterPhoto = require('@/assets/images/ajouter_photo.png');
 
 
+  
+  // variable pour ensuite envoyer à l'api
+
+  const [IDPoint, setIDPoint] = useState(''); 
+  const [probleme, setProbleme] = useState('');
+  const [photo, setPhoto] = useState('');
 
 
-export default function Compte() {
+export default function Signalement() {
   const router = useRouter();
 
- 
 //  ouvrir la galerie
   const [image, setImage] = useState<string | null>(null);
   const pickImage = async () => {
@@ -51,7 +56,8 @@ const prendrePhoto = async () => {
 
 
 // choisir entre camera ou galerie
-    const handlePickImage = () => {
+
+const handlePickImage = () => {
         Alert.alert(
         "Ajouter une image",
         "",
@@ -68,6 +74,38 @@ const prendrePhoto = async () => {
         ]
         );
     };
+
+  // communication avec l'api  /missions/
+  // valentin : 172.20.10.2 | 192.168.1.184
+  const creerSignalement = async () => {
+
+    // Avant l'appel API, pour vérifier les valeurs
+  console.log("Vérification des valeurs à envoyer\n");
+  console.log("IDPoint:", IDPoint);
+  console.log("probleme:", probleme);
+  console.log("photo", photo);
+
+
+    try {
+      const response = await axios.post('http://10.2.132.49:8000/signaler/', {
+        id_point: "561210541",        
+        probleme: probleme,
+        photo :"vide acutuellement ",
+
+
+      });
+      
+      router.push({
+          pathname: '/creationSucces',
+          params: { title: 'Signalement créé avec succès', creerMission: 'creerMission', chemainPage: '/point_eau' }
+        });
+      } catch (error) {
+          console.error(error);
+          alert('Erreur lors de la création du signalement');
+    }
+  };
+
+
 
 
   return (
@@ -93,7 +131,7 @@ const prendrePhoto = async () => {
             <View style={styles.total}>
               <Text style={styles.text}>Descripton du problème</Text>
               <View style={styles.entreeCryon}>
-                  <TextInput style={styles.entree} maxLength={250} multiline={true} placeholder="Ecrivez ici"></TextInput>
+                  <TextInput value={probleme} onChangeText={setProbleme} style={styles.entree} maxLength={250} multiline={true} placeholder="Ecrivez ici"></TextInput>
               </View>
             </View>
 
@@ -107,11 +145,11 @@ const prendrePhoto = async () => {
             {/* choix validation annulation */}
             <View style={styles.validation}>
 
-                <TouchableOpacity style={styles.boutton} onPress={() => console.log("annuler")}>
+                <TouchableOpacity style={styles.boutton} onPress={() => router.navigate('/(tabs)/acceuil')}>
                 <Text style={{color:'#ffffff'}}>ANNULER</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.boutton} onPress={() => console.log("confirmer")}>
+                <TouchableOpacity style={styles.boutton} onPress={creerSignalement}>
                 <Text style={{color:'#ffffff'}}>CONFIRMER</Text>
                 </TouchableOpacity>
 
