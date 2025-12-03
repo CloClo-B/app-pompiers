@@ -4,21 +4,21 @@ import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import HautPage from '../hautPage';
+import HautPage from './hautPage';
 
 const ajouterPhoto = require('@/assets/images/ajouter_photo.png');
 
 
-  
-  // variable pour ensuite envoyer à l'api
-
-  const [IDPoint, setIDPoint] = useState(''); 
-  const [probleme, setProbleme] = useState('');
-  const [photo, setPhoto] = useState('');
 
 
 export default function Signalement() {
   const router = useRouter();
+  
+  // variable pour ensuite envoyer à l'api
+  
+  const [IDPoint, setIDPoint] = useState(''); 
+  const [probleme, setProbleme] = useState('');
+  const [photo, setPhoto] = useState('');
 
 //  ouvrir la galerie
   const [image, setImage] = useState<string | null>(null);
@@ -76,7 +76,7 @@ const handlePickImage = () => {
     };
 
   // communication avec l'api  /missions/
-  // valentin : 172.20.10.2 | 192.168.1.184
+  // valentin : 172.20.10.2 | 192.168.1.184 | 10.201.126.118
   const creerSignalement = async () => {
 
     // Avant l'appel API, pour vérifier les valeurs
@@ -87,7 +87,7 @@ const handlePickImage = () => {
 
 
     try {
-      const response = await axios.post('http://172.20.10.2:8000/signaler/', {
+      const response = await axios.post('http://10.201.126.118:8000/signaler/', {
         id_point: "561210541",        
         probleme: probleme,
         photo :"vide acutuellement ",
