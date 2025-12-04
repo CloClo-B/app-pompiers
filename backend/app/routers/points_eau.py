@@ -19,12 +19,13 @@ def get_db():
     finally:
         db.close()
 
+# ================= GET ALL =================
 @router.get("/", response_model=list[PointEauBase])
 def list_points(db: Session = Depends(get_db)):
     points = get_all_points_eau(db)
     return points
 
-
+# ================= CREATE =================
 @router.post("/", response_model=PointEauBase)
 def create_point(payload: PointEauCreate, db: Session = Depends(get_db)):
 
