@@ -11,6 +11,7 @@ export default function Connexion() {
 
   return (
     <ScrollView>
+        {/*Dégradé de couleur pour le font*/}
         <LinearGradient colors={['#E63946', '#1D3557']} style={styles.container}>
 
                 <View>
@@ -27,10 +28,12 @@ export default function Connexion() {
                     <Saisi/>
                 </View>
 
+                {/*Renvoie à la page de connexion*/}
                 <View style={{ marginTop: 50}}>
                     <Button label='Connexion' onPress={() => router.navigate('/acceuil')} backColor="#30D936"/>
                 </View>
 
+                {/* Complément de la page en fonction du besoin */}
                 <View>
                     <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Mot de passe oublié' onPress={() => {console.log('en cours')}}/>
                     <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Créer un compte' onPress={() => router.navigate('/inscription')}/>
