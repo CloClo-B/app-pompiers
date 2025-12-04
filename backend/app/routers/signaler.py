@@ -17,12 +17,13 @@ def get_db():
     finally:
         db.close()
 
+# ================= GET ALL =================
 @router.get("/", response_model=list[SignalerBase])
 def list_signaler(db: Session = Depends(get_db)):
     pointSignale= get_all_signale(db)
     return pointSignale
 
-
+# ================= CREATE =================
 @router.post("/", response_model=SignalerBase)
 def create_signal(payload: SignalerCreate, db: Session = Depends(get_db)):
 
