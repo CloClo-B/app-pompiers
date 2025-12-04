@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, Float, TIMESTAMP, Enum, ForeignKey, func, DateTime
+from sqlalchemy import Column, Integer, String, Float, TIMESTAMP, Enum, ForeignKey, func, DateTime
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry
 import enum
@@ -16,13 +16,24 @@ class PointEau(Base):
 
     __tablename__ = "points_eau"
     id = Column(Integer, primary_key=True, index=True)
-    numero_pei = Column(String(20), nullable=False, unique=True)
+    numero_pei = Column(Integer, nullable=False, unique=True)
     nom = Column(String(100))
-    statut = Column(String(20))
-    type_nature = Column(String(20))
+    statut = Column(        
+        Enum('PUBLIC', 'PRIVE', name="type_statut_autorise"),
+        nullable=False
+        )
+    type_nature = Column(
+        Enum('BI', 'BI100', 'PENA', 'PI100', 'PI110','PI150', 'PI65', 'PI70','PI80','RESERVE EAU INCENDIE', name="type_point_autorise"),
+        nullable=False
+    )
     insee5 = Column(String(10))
-    accessibilite = Column(String(5))
-    disponibilite = Column(String(5))
+    accessibilite = Column(
+        Enum('C', 'NC', 'NON', name="type_accessibilite_autorise"),
+
+    )
+    disponibilite = Column(
+        Enum('DI', 'IN', name="type_disponibilite_autorise"),
+    )
     carto_ref = Column(Integer)
     press_deb = Column(Float)
     debit_1_bar = Column(Float)
@@ -31,16 +42,14 @@ class PointEau(Base):
     date_maj = Column(TIMESTAMP)
     utilisateur = Column(String(50))
     geom = Column(Geometry("POINT", srid=2154))
-    signale = Column(Boolean, default=False) #ajoute pour signaler (j'ai rajouter Boolean dans les imports)
-
 
 
 class Utilisateur(Base):
     __tablename__ = "utilisateurs"
     id_utilisateur = Column(Integer, primary_key=True, index=True)
-    nom = Column(String(100), nullable=False)
-    prenom = Column(String(100), nullable=False)
-    email = Column(String(150), unique=True, nullable=False)
+    nom = Column(String(40), nullable=False)
+    prenom = Column(String(40), nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
     telephone = Column(String(10), unique=True, nullable=False)
     mot_de_passe = Column(String(255), nullable=False)
     role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.public)
@@ -71,7 +80,7 @@ class Historique(Base):
 class Signaler(Base):
     __tablename__ = "signaler"
     id = Column(Integer, primary_key=True, index=True)
-    id_point = Column(String(20), ForeignKey("points_eau.numero_pei"), nullable=False)
+    id_point = Column(Integer, ForeignKey("points_eau.numero_pei"), nullable=False)
     probleme = Column(String(100), nullable=False)
     photo = Column(String(255), nullable=True) # représente le chemin vers l'image pour l'afficher
 

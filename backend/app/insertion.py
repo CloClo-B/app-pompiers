@@ -29,6 +29,10 @@ for feature in geojson['features']:
     #Récupération des coordonnées
     x, y = feature['geometry']['coordinates']
     
+    # Nettoyage des valeurs vides pour la bdd
+    accessibilite = props.get("ACCESSIBIL") or None
+    disponibilite = props.get("DISPO") or None
+
     #Ajout des données
     records.append((
         props.get("NUMERO_PEI"),
@@ -36,8 +40,8 @@ for feature in geojson['features']:
         props.get("STATUT"),
         props.get("TYPE_NATUR"),
         props.get("INSEE5"),
-        props.get("ACCESSIBIL"),
-        props.get("DISPO"),
+        accessibilite,
+        disponibilite,
         props.get("CARTO_REF"),
         props.get("PRESS_DEB_"),
         props.get("DEBIT_1_BA"),

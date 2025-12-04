@@ -10,11 +10,11 @@ from datetime import datetime
 class PointEauBase(BaseModel):
     id: int
 
-    numero_pei: Optional[str] = None
+    numero_pei: int
     nom: Optional[str] = None
-    statut: Optional[str] = None
+    statut: str
 
-    type_nature: Optional[str] = None
+    type_nature: str
     insee5: Optional[str] = None
 
     press_deb: Optional[float] = None
@@ -35,17 +35,16 @@ class PointEauBase(BaseModel):
     date_crea : Optional[datetime] = None
     date_maj: Optional[datetime] = None
 
-    signale : Optional[bool] = 0
 
     class Config:
         orm_mode = True
 
 class PointEauCreate(BaseModel):
-    numero_pei: Optional[str] = None
+    numero_pei: int
     nom: Optional[str] = None
-    statut: Optional[str] = None
+    statut: str
     
-    type_nature: Optional[str] = None
+    type_nature: str
     insee5: Optional[str] = None
 
     press_deb: Optional[float] = None
@@ -66,7 +65,6 @@ class PointEauCreate(BaseModel):
     date_crea: Optional[datetime] = Field(default_factory=datetime.now)
     date_maj: Optional[datetime] = None
 
-    signale : Optional[bool] = 0
 
 
 
@@ -164,12 +162,12 @@ class HistoriqueOut(BaseModel):
 # =============== Signaler ==================
 
 class SignalerBase(BaseModel):
-    id_point: str
+    id_point: int
     probleme: str
     photo: Optional[str]
 
 class SignalerCreate(SignalerBase):
-    id_point: str
+    id_point: int
     probleme: str
     photo: Optional[str]
 
