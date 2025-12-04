@@ -19,21 +19,22 @@ def get_db():
     finally:
         db.close()
 
+# ================= GET ALL =================
 @router.get("/", response_model=List[HistoriqueBase])
 def list_history(db: Session = Depends(get_db)):
     return get_all_historique(db)
 
-
+# ================= GET BY USER =================
 @router.get("/utilisateur/{id_utilisateur}", response_model=List[HistoriqueBase])
 def history_by_user(id_utilisateur: int, db: Session = Depends(get_db)):
     return get_historique_by_utilisateur(db, id_utilisateur)
 
-
+# ================= GET ACTIONS BY USER =================
 @router.get("/derniere-actions", response_model=List[HistoriqueBase])
 def recent_actions(limit: int = 20, db: Session = Depends(get_db)):
     return get_derniere_action(db, limit)
 
-
+# ================= CREATE =================
 @router.post("/", response_model=HistoriqueBase)
 def create_entry(payload: HistoriqueCreate, db: Session = Depends(get_db)):
     return create_historique(db, payload.dict())
