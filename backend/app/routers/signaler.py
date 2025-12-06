@@ -5,7 +5,7 @@ from ..database import SessionLocal
 from ..models import Signaler
 from ..schemas import SignalerBase, SignalerCreate
 from app.DAO.DAOSignaler import (
-    creer_signale,
+    create_signale,
     get_all_signale
 )
 router = APIRouter(prefix="/signaler", tags=["Signaler"])
@@ -25,8 +25,8 @@ def list_signaler(db: Session = Depends(get_db)):
 
 # ================= CREATE =================
 @router.post("/", response_model=SignalerBase)
-def create_signal(payload: SignalerCreate, db: Session = Depends(get_db)):
+def create_signale(payload: SignalerCreate, db: Session = Depends(get_db)):
 
-    nouveau_signal = creer_signale(db, payload)
+    nouveau_signal = create_signale(db, payload)
     return nouveau_signal
 

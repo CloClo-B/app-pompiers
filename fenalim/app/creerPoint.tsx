@@ -105,7 +105,7 @@ export default function CreerPoint() {
   console.log("utilisateur:", "");
 
     try {
-      const response = await axios.post('http://10.201.126.118:8000/points-eau/', {
+      const response = await axios.post('http://192.168.1.178:8000/points-eau/', {
         numero_pei: parseInt(numeroPEI),
         nom: '',
         statut: valueStatut,

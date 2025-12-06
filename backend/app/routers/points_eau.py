@@ -7,7 +7,7 @@ from ..database import SessionLocal
 from ..models import PointEau
 from ..schemas import PointEauBase, PointEauCreate
 from app.DAO.DAOPointsEau import (
-    creer_point_eau,
+    create_point_eau,
     get_all_points_eau
 )
 router = APIRouter(prefix="/points-eau", tags=["Points d'eau"])
@@ -29,7 +29,7 @@ def list_points(db: Session = Depends(get_db)):
 @router.post("/", response_model=PointEauBase)
 def create_point(payload: PointEauCreate, db: Session = Depends(get_db)):
 
-    nouveau_point = creer_point_eau(db, payload)
+    nouveau_point = create_point_eau(db, payload)
     return db.query(
         PointEau.id,
         PointEau.numero_pei,
@@ -47,6 +47,5 @@ def create_point(payload: PointEauCreate, db: Session = Depends(get_db)):
         PointEau.date_maj,
         func.ST_Y(PointEau.geom).label("latitude"),
         func.ST_X(PointEau.geom).label("longitude"),
-        PointEau.signale,
 
     ).filter(PointEau.id == nouveau_point.id).first()
