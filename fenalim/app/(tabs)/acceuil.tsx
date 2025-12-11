@@ -7,7 +7,7 @@ import MapView, { Marker } from 'react-native-maps';
 import HautPage from '../hautPage';
 import proj4 from "proj4";
 
-const API_URL = "http://192.168.1.178:8000/points-eau/";
+const API_URL = "http://172.20.10.2:8000/points-eau/";
 
 // valentin : 172.20.10.2 | 192.168.1.184
 
@@ -141,9 +141,7 @@ export default function HomeScreen() {
           <Marker
             key={point.id}
             coordinate={{ latitude: point.latitude, longitude: point.longitude }}
-            title={point.numero_pei}
-            description={`Pression: ${point.press_deb ?? "-"} bars | Débit: ${point.debit_1_bar ?? "-"} L/min`}
-            pinColor="red"
+
           />
 
         ))}

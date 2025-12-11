@@ -1,10 +1,9 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import Button from '@/components/ButtonLog';
-import Saisi from '@/components/RectangleSaisi';
 
 export default function Connexion() {
   const router = useRouter();
@@ -19,12 +18,12 @@ export default function Connexion() {
 
                 <View style={styles.aligne}>
                   <Text style={styles.title_ID_MDP}>Identifiant</Text>
-                  <Saisi />
+                  <TextInput style={styles.saisiChamp}/>
                 </View>
 
                 <View style={styles.aligne}>
                     <Text style={styles.title_ID_MDP}>Mot de passe</Text>
-                    <Saisi/>
+                  <TextInput style={styles.saisiChamp}/>
                 </View>
 
                 <View style={{ marginTop: 50}}>
@@ -65,4 +64,12 @@ const styles = StyleSheet.create({
     alignSelf: 'center', 
     marginTop: 20,
   },
+  saisiChamp: {
+    width: '100%',
+    height: 40, 
+    color: '#000000ff',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+  }
 });

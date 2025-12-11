@@ -37,10 +37,9 @@ def create_user(payload: UtilisateurCreate, db: Session = Depends(get_db)):
     new_user = Utilisateur(
         nom=payload.nom,
         prenom=payload.prenom,
-        telephone=payload.telephone,
         email=payload.email,
+        telephone=payload.telephone,
         mot_de_passe=hash_password(payload.mot_de_passe),
-        role=payload.role,
         date_creation=datetime.now()
     )
     db.add(new_user)

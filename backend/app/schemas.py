@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, EmailStr, Field, ConfigDict,model_validator
 from typing import Optional, Any
 from datetime import datetime
 
@@ -52,19 +52,19 @@ class UtilisateurBase(BaseModel):
     nom: str
     prenom: str
     email: EmailStr
-    telephone: Optional[str] = None
+    telephone: str 
     role: Optional[str] = "public"
-
 
 class UtilisateurCreate(UtilisateurBase):
     mot_de_passe: str = Field(min_length=12)
     confirm_password: str = Field(min_length=12)
 
-    def validate_password(self):
-        if self.mot_de_passe != self.confirm_password:
+    @model_validator(mode="after")
+    def passwords_match(cls, model):
+        if model.mot_de_passe != model.confirm_password:
             raise ValueError("Le mot de passe et sa confirmation ne correspondent pas")
-
-
+        return model
+    
 class UtilisateurUpdate(BaseModel):
     nom: Optional[str]
     prenom: Optional[str]
