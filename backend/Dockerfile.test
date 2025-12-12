@@ -19,7 +19,7 @@ RUN pip install -e .
 ENV TESTING=true
 
 # Vérifier que app est accessible
-RUN python -c "import app.main; print('✅ app.main found!')"
+RUN python -c "import app.main; print('app.main found!')"
 
 # Lancer les tests par défaut
 CMD ["pytest", "tests/", "-v", "--tb=short"]
