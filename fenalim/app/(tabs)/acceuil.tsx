@@ -2,12 +2,12 @@ import axios from "axios";
 import { FontAwesome } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import { Alert, ActivityIndicator, StyleSheet, TouchableOpacity, View, Text, Linking, Platform } from 'react-native';
+import MapView, { Marker, Callout} from 'react-native-maps';
 import HautPage from '../hautPage';
 import proj4 from "proj4";
 
-const API_URL = "http://10.201.126.118:8000/points-eau/";
+const API_URL = "http://172.20.10.2:8000/points-eau/";
 
 // valentin : 172.20.10.2 | 192.168.1.184
 
@@ -137,14 +137,53 @@ export default function HomeScreen() {
         showsUserLocation
         showsMyLocationButton = {true}
       >
-        {pointsEau.map((point) => (
+        {pointsEau.slice(0, 10).map((point) => (
           <Marker
             key={point.id}
             coordinate={{ latitude: point.latitude, longitude: point.longitude }}
+          >
+            <Callout>
+              <View style={{ padding: 10, width: 200 }}>
+                <Text>{"Point d’eau : " + point.numero_pei}</Text>
+                <Text>{"Status : " + point.statut}</Text>
+                <Text>{"Presion : " + point.press_deb}</Text>
+                <Text>{"Débit : " + point.debit_1_bar}</Text>
 
-          />
-
+                <TouchableOpacity
+                  style={{
+                    marginTop: 10,
+                    backgroundColor: '#28a745',
+                    padding: 8,
+                    borderRadius: 5,
+                    alignItems: 'center',
+                  }}
+                  onPress={() => {
+                    const latitude = point.latitude;
+                    const longitude = point.longitude;
+                
+                    let url = "";
+                    if (Platform.OS === "ios") {
+                      // Apple Maps
+                      url = `http://maps.apple.com/?daddr=${latitude},${longitude}&dirflg=d`;
+                    } else {
+                      // Android / Google Maps
+                      url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+                    }
+                
+                    Linking.openURL(url).catch((err) =>
+                      console.error("Impossible d'ouvrir l'application de navigation", err)
+                    );
+                  }}
+                >
+                  <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Itinéraire</Text>
+                </TouchableOpacity>
+              </View>
+            </Callout>
+          </Marker>
         ))}
+
+        
+
       </MapView>
 
       <TouchableOpacity style={styles.boutonLocalisation} onPress={allerPosition}>
