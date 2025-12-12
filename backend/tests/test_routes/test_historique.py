@@ -11,7 +11,6 @@ class TestHistoriqueRouter:
     @pytest.fixture
     def client(self, db_session):
         """Client de test avec override de la dépendance DB"""
-        # Import LOCAL pour éviter l'import circulaire
         from app.main import app
         
         def override_get_db():
@@ -24,15 +23,6 @@ class TestHistoriqueRouter:
         with TestClient(app) as test_client:
             yield test_client
         app.dependency_overrides.clear()
-    
-    # ============= FIXTURE CLEANUP =============
-    @pytest.fixture(autouse=True)
-    def cleanup(self, db_session):
-        """Nettoie la table historique et utilisateur entre chaque test"""
-        yield
-        db_session.query(models.Historique).delete()
-        db_session.query(models.Utilisateur).delete()
-        db_session.commit()
     
     # ============= FIXTURES =============
     @pytest.fixture

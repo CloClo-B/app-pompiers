@@ -1,10 +1,8 @@
-from pydantic import BaseModel, EmailStr, Field, ConfigDict,model_validator
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional, Any
 from datetime import datetime
 
-
 # =============== POINT D'EAU ================
-
 class PointEauBase(BaseModel):
     id: int
     numero_pei: int
@@ -19,13 +17,12 @@ class PointEauBase(BaseModel):
     disponibilite: Optional[str] = None
     carto_ref: Optional[int] = None
     utilisateur: Optional[str] = None 
-    latitude: float 
-    longitude: float
+    latitude: Optional[float] = None  
+    longitude: Optional[float] = None  
     date_crea: Optional[datetime] = None
     date_maj: Optional[datetime] = None
-
+    
     model_config = ConfigDict(from_attributes=True)
-
 
 class PointEauCreate(BaseModel):
     numero_pei: int
@@ -45,33 +42,32 @@ class PointEauCreate(BaseModel):
     date_crea: datetime = Field(default_factory=datetime.now)
     date_maj: Optional[datetime] = None
 
-
 # ============ UTILISATEUR ===============
 
 class UtilisateurBase(BaseModel):
     nom: str
     prenom: str
     email: EmailStr
-    telephone: str 
+    telephone: Optional[str] = None
     role: Optional[str] = "public"
+
 
 class UtilisateurCreate(UtilisateurBase):
     mot_de_passe: str = Field(min_length=12)
     confirm_password: str = Field(min_length=12)
 
-    @model_validator(mode="after")
-    def passwords_match(cls, model):
-        if model.mot_de_passe != model.confirm_password:
+    def validate_password(self):
+        if self.mot_de_passe != self.confirm_password:
             raise ValueError("Le mot de passe et sa confirmation ne correspondent pas")
-        return model
-    
+
+
 class UtilisateurUpdate(BaseModel):
-    nom: Optional[str]
-    prenom: Optional[str]
-    email: Optional[EmailStr]
-    telephone: Optional[str]
-    role: Optional[str]
-    mot_de_passe: Optional[str]
+    nom: Optional[str] = None
+    prenom: Optional[str] = None
+    email: Optional[EmailStr] = None
+    telephone: Optional[str] = None
+    role: Optional[str] = None
+    mot_de_passe: Optional[str] = None
 
 
 class UtilisateurOut(UtilisateurBase):
@@ -96,9 +92,12 @@ class MissionCreate(MissionBase):
 
 
 class MissionUpdate(BaseModel):
-    statut: Optional[str]
-    commentaire: Optional[str]
-    itineraire: Optional[Any]
+    nom_mission: Optional[str] = None
+    id_point: Optional[int] = None
+    id_utilisateur: Optional[int] = None
+    statut: Optional[str] = None
+    commentaire: Optional[str] = None
+    itineraire: Optional[Any] = None
 
 
 class MissionOut(BaseModel):
@@ -111,7 +110,7 @@ class MissionOut(BaseModel):
     commentaire: Optional[str]
     itineraire: Optional[Any]
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 
 # =============== HISTORIQUE ==================

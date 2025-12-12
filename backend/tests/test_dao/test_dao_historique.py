@@ -6,24 +6,11 @@ import random
 
 class TestHistoriqueDAO:
     """Tests pour le DAO Historique"""
-
-    # ============= FIXTURE CLEANUP =============
-
-    @pytest.fixture(autouse=True)
-    def cleanup(self, db_session):
-        """Nettoie la table historique et utilisateur entre chaque test"""
-        yield
-        db_session.query(models.Historique).delete()
-        db_session.query(models.Utilisateur).delete()
-        db_session.commit()
-
     # ============= FIXTURES =============
 
     @pytest.fixture
     def utilisateur_test(self, db_session):
         """Crée un utilisateur valide pour les tests"""
-
-        # Génération email + téléphone uniques
         unique_number = random.randint(10000, 99999)
 
         user = models.Utilisateur(

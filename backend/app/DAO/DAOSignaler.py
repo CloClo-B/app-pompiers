@@ -41,9 +41,9 @@ def get_signale_by_id_point(db: Session, id_point: int) -> List[Dict[str, Any]]:
 
 
 def create_signale(db: Session, signale_data: Dict[str, Any]):
-    # Validation de la clé étrangère (optionnel, si tu veux être strict)
+    
     from app.models import PointEau
-    if not db.query(PointEau).filter(PointEau.id == signale_data["id_point"]).first():
+    if not db.query(PointEau).filter(PointEau.numero_pei == signale_data["id_point"]).first():
         raise ValueError("id_point est invalide")
     
     new_signale = Signaler(

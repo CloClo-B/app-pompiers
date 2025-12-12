@@ -27,14 +27,6 @@ class TestUtilisateurRouter:
             yield test_client
         app.dependency_overrides.clear()
     
-    # ============= FIXTURE CLEANUP =============
-    @pytest.fixture(autouse=True)
-    def cleanup(self, db_session):
-        """Nettoie la table utilisateur entre chaque test"""
-        yield
-        db_session.query(models.Utilisateur).delete()
-        db_session.commit()
-    
     # ============= FIXTURES =============
     @pytest.fixture
     def user_payload(self):
@@ -77,9 +69,7 @@ class TestUtilisateurRouter:
     
     def test_create_user_duplicate_email(self, client, user_payload):
         """POST / avec email déjà existant doit échouer"""
-        # Première création
         client.post("/utilisateurs/", json=user_payload)
-        # Tentative de doublon
         res = client.post("/utilisateurs/", json=user_payload)
         assert res.status_code == 400
         assert "déjà utilisé" in res.json()["detail"]
@@ -129,7 +119,7 @@ class TestUtilisateurRouter:
         data = res.json()
         assert data["nom"] == "Durand"
         assert data["telephone"] == "0611111111"
-        assert data["email"] == created_user["email"]  # Inchangé
+        assert data["email"] == created_user["email"] 
     
     def test_update_user_not_found(self, client):
         """PUT /{id} avec id inexistant doit retourner 404"""
@@ -142,12 +132,10 @@ class TestUtilisateurRouter:
         """DELETE /{id} doit supprimer l'utilisateur"""
         user_id = created_user["id_utilisateur"]
         
-        # Supprimer
         res = client.delete(f"/utilisateurs/{user_id}")
         assert res.status_code == 200
         assert "supprimé avec succès" in res.json()["detail"]
         
-        # Vérifier que l'utilisateur n'existe plus
         res = client.get(f"/utilisateurs/{user_id}")
         assert res.status_code == 404
     

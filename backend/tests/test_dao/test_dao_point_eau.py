@@ -1,4 +1,3 @@
-from app.schemas import PointEauCreate
 import pytest
 from app.DAO import point_eau_dao
 from app import models
@@ -6,20 +5,6 @@ from app import models
 
 class TestPointEauDAO:
     """Tests pour le DAO Point d'Eau"""
-
-    # ============= FIXTURES =============
-    
-    @pytest.fixture(autouse=True)
-    def cleanup(self, db_session):
-        """Nettoie la base entre chaque test"""
-        yield
-        # Après chaque test, rollback si nécessaire puis nettoyer
-        try:
-            db_session.rollback()  # Annuler toute transaction en erreur
-            db_session.query(models.PointEau).delete()
-            db_session.commit()
-        except Exception:
-            db_session.rollback()  # Si le nettoyage échoue aussi
     
     @pytest.fixture
     def sample_point_data(self):
@@ -44,10 +29,7 @@ class TestPointEauDAO:
     @pytest.fixture
     def sample_point(self, db_session, sample_point_data):
         """Crée un point d'eau de test"""
-        point_data = PointEauCreate(**sample_point_data)
-        point_data = PointEauCreate(**sample_point_data)
-        point = point_eau_dao.create_point_eau(db_session, point_data)
-
+        point = point_eau_dao.create_point_eau(db_session, sample_point_data)
         assert point is not None, "La création du point d'eau de test a échoué"
         return point
 
@@ -72,8 +54,7 @@ class TestPointEauDAO:
             "utilisateur": "pompier_test"
         }
         
-        point_data = PointEauCreate(**data) 
-        point = point_eau_dao.create_point_eau(db_session, point_data)
+        point = point_eau_dao.create_point_eau(db_session, data)
         
         assert point is not None
         assert point.id is not None
@@ -93,8 +74,7 @@ class TestPointEauDAO:
             "longitude": 1.4442
         }
         
-        point_data = PointEauCreate(**data)
-        point = point_eau_dao.create_point_eau(db_session, point_data)
+        point = point_eau_dao.create_point_eau(db_session, data)
         
         assert point is not None
         assert point.numero_pei == 11111
@@ -125,8 +105,7 @@ class TestPointEauDAO:
             "longitude": 2.3522
         }
         
-        point_data = PointEauCreate(**data)
-        point = point_eau_dao.create_point_eau(db_session, point_data)
+        point = point_eau_dao.create_point_eau(db_session, data)
         
         # Le point geom doit exister et être en Lambert-93 (SRID 2154)
         assert point.geom is not None
@@ -160,8 +139,7 @@ class TestPointEauDAO:
         ]
         
         for data in points_data:
-            point_data = PointEauCreate(**data)
-            point_eau_dao.create_point_eau(db_session, point_data)
+            point_eau_dao.create_point_eau(db_session, data)
         
         points = point_eau_dao.get_all_points_eau(db_session)
         assert len(points) == 3
@@ -340,8 +318,7 @@ class TestPointEauDAO:
             "press_deb": 5.0,
             "debit_1_bar": 60.0
         }
-        point_data = PointEauCreate(**data)
-        created = point_eau_dao.create_point_eau(db_session, point_data)
+        created = point_eau_dao.create_point_eau(db_session, data)
         assert created.id is not None
         
         # READ by ID

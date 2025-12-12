@@ -12,7 +12,6 @@ class TestPointsEauRouter:
     @pytest.fixture
     def client(self, db_session):
         """Client de test avec override de la dépendance DB"""
-        # Import LOCAL pour éviter l'import circulaire
         from app.main import app
         
         def override_get_db():
@@ -26,19 +25,6 @@ class TestPointsEauRouter:
             yield test_client
         app.dependency_overrides.clear()
     
-    # ============= FIXTURE CLEANUP =============
-    @pytest.fixture(autouse=True)
-    def cleanup(self, db_session):
-        """Nettoie la table points_eau entre chaque test"""
-        yield
-        # ✅ Rollback si la session est en erreur avant de nettoyer
-        try:
-            db_session.query(models.PointEau).delete()
-            db_session.commit()
-        except Exception:
-            db_session.rollback()
-            db_session.query(models.PointEau).delete()
-            db_session.commit()
     
     # ============= FIXTURES =============
     @pytest.fixture
@@ -126,11 +112,9 @@ class TestPointsEauRouter:
     # ============= TESTS INTEGRATION =================
     def test_create_and_retrieve_point(self, client, valid_point_payload):
         """Cycle complet : créer puis récupérer"""
-        # Créer
         create_response = client.post("/points-eau/", json=valid_point_payload)
         assert create_response.status_code == 200
         
-        # Récupérer tous
         get_response = client.get("/points-eau/")
         assert get_response.status_code == 200
         data = get_response.json()

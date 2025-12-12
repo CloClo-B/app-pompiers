@@ -20,18 +20,6 @@ class TestMissionsRouter:
             yield test_client
         app.dependency_overrides.clear()
 
-    # ============= FIXTURE CLEANUP =============
-    @pytest.fixture(autouse=True)
-    def cleanup(self, db_session):
-        yield
-        try:
-            db_session.query(models.Mission).delete()
-            db_session.query(models.Utilisateur).delete()
-            db_session.query(models.PointEau).delete()
-            db_session.commit()
-        except Exception:
-            db_session.rollback()
-
     # ============= FIXTURE UTILISATEUR =============
     @pytest.fixture
     def utilisateur_test(self, db_session):

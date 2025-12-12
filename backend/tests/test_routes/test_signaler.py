@@ -26,19 +26,6 @@ class TestSignalerRouter:
             yield test_client
         app.dependency_overrides.clear()
     
-    # ============= FIXTURE CLEANUP =============
-    @pytest.fixture(autouse=True)
-    def cleanup(self, db_session):
-        """Nettoie les tables APRÈS chaque test"""
-        yield  # ✅ Le test s'exécute AVANT ce code
-        # Nettoyage APRÈS le test
-        try:
-            db_session.query(models.Signaler).delete()
-            db_session.query(models.PointEau).delete()
-            db_session.commit()
-        except Exception:
-            db_session.rollback()
-    
     # ============= FIXTURES =============    
     @pytest.fixture
     def signalement_test(self, db_session):
@@ -82,7 +69,6 @@ class TestSignalerRouter:
     # ============= TESTS CREATE =================
     def test_create_signalement_success(self, client, db_session):
         """POST / doit créer un signalement valide"""
-        # Créer le point d'eau DANS le test
         numero_pei = random.randint(100000, 999999)
         point = models.PointEau(
             numero_pei=numero_pei,
@@ -119,7 +105,7 @@ class TestSignalerRouter:
         db_session.add(point)
         db_session.commit()
         
-        payload = {"id_point": numero_pei}  # probleme manquant
+        payload = {"id_point": numero_pei} 
         response = client.post("/signaler/", json=payload)
         assert response.status_code == 422
     
@@ -150,7 +136,6 @@ class TestSignalerRouter:
     # ============= TESTS INTEGRATION =================
     def test_create_and_retrieve_signalement(self, client, db_session):
         """Cycle complet : créer puis récupérer"""
-        # Créer le point d'eau
         numero_pei = random.randint(100000, 999999)
         point = models.PointEau(
             numero_pei=numero_pei,
@@ -168,11 +153,8 @@ class TestSignalerRouter:
             "photo": None
         }
         
-        # Créer
         create_response = client.post("/signaler/", json=payload)
         assert create_response.status_code == 200
-        
-        # Récupérer tous
         get_response = client.get("/signaler/")
         assert get_response.status_code == 200
         data = get_response.json()

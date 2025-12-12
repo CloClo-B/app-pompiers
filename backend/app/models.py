@@ -1,11 +1,10 @@
 from sqlalchemy import Column, Integer, String, Float, TIMESTAMP, Enum, ForeignKey, func, DateTime
-from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry
 import enum
 from .database import Base
 
 class RoleEnum(str, enum.Enum):
-    #Rôles possibles pour un utlisateur.
+    
     public = "public"
     pompier = "pompier"
     commandement = "commandement"
@@ -60,13 +59,13 @@ class Utilisateur(Base):
 class Mission(Base):
     __tablename__ = "missions"
     id_mission = Column(Integer, primary_key=True, index=True)
-    nom_mission = Column(String(20), nullable=False)
+    nom_mission = Column(String(100), nullable=False)
     id_point = Column(Integer, ForeignKey("points_eau.id"), nullable=False)
     id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
     date_creation = Column(DateTime, server_default=func.now())
     statut = Column(String(20), default="en_attente")
     commentaire = Column(String, nullable=True)
-    itineraire = Column(String, nullable=True)  # JSONB -> String ou JSONType selon SQLAlchemy
+    itineraire = Column(String, nullable=True)  
 
 class Historique(Base):
     __tablename__ = "historiques"
@@ -82,5 +81,5 @@ class Signaler(Base):
     id = Column(Integer, primary_key=True, index=True)
     id_point = Column(Integer, ForeignKey("points_eau.numero_pei"), nullable=False)
     probleme = Column(String(100), nullable=False)
-    photo = Column(String(255), nullable=True) # représente le chemin vers l'image pour l'afficher
+    photo = Column(String(255), nullable=True) 
 

@@ -8,6 +8,7 @@ from typing import Dict, Any, List
 from app.models import PointEau
 from pyproj import Transformer
 from geoalchemy2.elements import WKTElement
+from sqlalchemy.exc import IntegrityError
 
 
 def get_all_points_eau(db: Session) -> List[Dict[str, Any]]:
@@ -100,32 +101,41 @@ def get_point_eau_by_id(db: Session, point_id: int) -> Dict[str, Any]:
 
 
 def create_point_eau(db: Session, point_data: Dict[str, Any]):
-    # Conversion WGS84 (4326) -> Lambert-93 (2154)
+    existing = db.query(PointEau).filter(PointEau.numero_pei == point_data["numero_pei"]).first()
+    if existing:
+        raise ValueError(f"Le numero_pei {point_data['numero_pei']} existe déjà.")
+    
+    point_data["statut"] = point_data["statut"].upper()
+    point_data["type_nature"] = point_data["type_nature"].upper()
+    
     transformer = Transformer.from_crs("EPSG:4326", "EPSG:2154")
-    x, y = transformer.transform(point_data.latitude, point_data.longitude)
-
+    x, y = transformer.transform(point_data["latitude"], point_data["longitude"])
     wkt = WKTElement(f"POINT({x} {y})", srid=2154)
     
-
     new_point = PointEau(
-        numero_pei=point_data.numero_pei,
-        statut=point_data.statut,
-        type_nature=point_data.type_nature,
-        nom=point_data.nom,
-        insee5=point_data.insee5,
-        press_deb=point_data.press_deb,
-        debit_1_bar=point_data.debit_1_bar,
-        vol_eau_mi=point_data.vol_eau_mi,
-        accessibilite=point_data.accessibilite,
-        disponibilite=point_data.disponibilite,
-        carto_ref=point_data.carto_ref,
-        utilisateur=point_data.utilisateur,
+        numero_pei=point_data["numero_pei"],
+        statut=point_data["statut"],
+        type_nature=point_data["type_nature"],
+        nom=point_data.get("nom") or None,
+        insee5=point_data.get("insee5") or None,
+        press_deb=point_data.get("press_deb"),
+        debit_1_bar=point_data.get("debit_1_bar"),
+        vol_eau_mi=point_data.get("vol_eau_mi"),
+        accessibilite=point_data.get("accessibilite"),
+        disponibilite=point_data.get("disponibilite"),
+        carto_ref=point_data.get("carto_ref"),
+        utilisateur=point_data.get("utilisateur") or None,
         date_crea=datetime.now(),
         geom=wkt,
     )
-    db.add(new_point)
-    db.commit()
-    db.refresh(new_point)
+    try:
+        db.add(new_point)
+        db.commit()
+        db.refresh(new_point)
+    except IntegrityError as e:
+        db.rollback()
+        raise ValueError(f"Erreur base de données : {str(e)}")
+    
     return new_point
 
 
@@ -156,10 +166,50 @@ def update_point_eau_by_id(db: Session, point_id: int, point_data: Dict[str, Any
     # Si latitude/longitude sont fournis, recalculer geom
     if 'latitude' in point_data and 'longitude' in point_data:
         transformer = Transformer.from_crs("EPSG:4326", "EPSG:2154")
-        x, y = transformer.transform(point_data["latitude"], point_data["longitude"])
+        x, y = transformer.transform(point_data['latitude'], point_data['longitude'])
         wkt = WKTElement(f"POINT({x} {y})", srid=2154)
         db_point.geom = wkt
     
     db.commit()
     db.refresh(db_point)
     return db_point
+
+def get_point_eau_by_numero_pei(db: Session, numero_pei: int):
+    point = db.query(
+        PointEau,
+        func.ST_Y(PointEau.geom).label("latitude"),
+        func.ST_X(PointEau.geom).label("longitude"),
+    ).filter(PointEau.numero_pei == numero_pei).first()
+
+    if not point:
+        return None
+
+    p, lat, lon = point
+    return {
+        "id": p.id,
+        "numero_pei": p.numero_pei,
+        "nom": p.nom,
+        "statut": p.statut,
+        "type_nature": p.type_nature,
+        "insee5": p.insee5,
+        "accessibilite": p.accessibilite,
+        "disponibilite": p.disponibilite,
+        "carto_ref": p.carto_ref,
+        "press_deb": p.press_deb,
+        "debit_1_bar": p.debit_1_bar,
+        "vol_eau_mi": p.vol_eau_mi,
+        "date_crea": p.date_crea,
+        "date_maj": p.date_maj,
+        "utilisateur": p.utilisateur,
+        "latitude": lat,
+        "longitude": lon,
+    }
+
+def delete_point_eau_by_numero_pei(db: Session, numero_pei: int) -> bool:
+    point = db.query(PointEau).filter(PointEau.numero_pei == numero_pei).first()
+    if not point:
+        return False
+
+    db.delete(point)
+    db.commit()
+    return True

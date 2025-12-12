@@ -6,22 +6,6 @@ from app import models
 
 class TestMissionDAO:
     """Tests pour le DAO Mission"""
-
-    # ============= FIXTURES =============
-    
-    @pytest.fixture(autouse=True)
-    def cleanup(self, db_session):
-        """Nettoie la base entre chaque test"""
-        yield
-        try:
-            db_session.rollback()
-            # Ordre important : supprimer missions avant utilisateurs et points
-            db_session.query(models.Mission).delete()
-            db_session.query(models.Utilisateur).delete()
-            db_session.query(models.PointEau).delete()
-            db_session.commit()
-        except Exception:
-            db_session.rollback()
     
     @pytest.fixture
     def utilisateur_test(self, db_session):

@@ -5,16 +5,6 @@ from app import models
 
 class TestUtilisateurDAO:
     """Tests pour le DAO Utilisateur"""
-
-    # ============= FIXTURES =============
-    
-    @pytest.fixture(autouse=True)
-    def cleanup(self, db_session):
-        """Nettoie la base entre chaque test"""
-        yield
-        # Après chaque test, supprimer tous les utilisateurs
-        db_session.query(models.Utilisateur).delete()
-        db_session.commit()
     
     @pytest.fixture
     def sample_user_data(self):
