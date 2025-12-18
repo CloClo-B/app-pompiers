@@ -1,52 +1,170 @@
-import { Image } from 'expo-image';
-import { StyleSheet, View } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
 import HautPage from '../hautPage';
+import { router, useRouter } from 'expo-router';
+import axios from 'axios';
+
+
+const roue = require('@/assets/images/parametres.png');
+type User = {
+  id: string;
+  nom: string;
+  prenom: string;
+  role: string;
+  email: string;
+  telephone: string;
+};
+
 
 export default function HomeScreen() {
-  return (
 
+  const [chargement, setChargement] = useState(true);
+  const [utilisateur, setUtilisateur] = useState<User[]>([]);
+  
+  const router = useRouter();
+  
+  const renderItem = ({ item }: { item: User }) => (
+    <View style={styles.row}>
+      <Text style={styles.cell}>{item.nom}</Text>
+      <Text style={styles.cell}>{item.prenom}</Text>
+      <Text style={styles.cell}>{item.role}</Text>
+      <TouchableOpacity onPress={() => router.push({ pathname: '/infoUtilisateur', params: { id: item.id } })}>
+        <Image source={roue} style={styles.cellImage} />
+      </TouchableOpacity>
+    </View>
+  );
+  
+  useEffect(() => {
+    fetchUtilisateurs();
+  }, []);
+
+  const fetchUtilisateurs = async () => {
+    try {
+      const response = await axios.get("http://192.168.1.184:8000/utilisateurs/");
+      // affichage des données
+      console.log("Données reçues:", response.data);
+      
+      const UtilisateurRaw = Array.isArray(response.data) ? response.data : response.data.utilisateurs;
+
+      if (!UtilisateurRaw) {
+        console.error("Impossible de récupérer les utlisateur:", response.data);
+        setChargement(false);
+        return;
+      }
+      
+    const lesUtilisateurs: User[] = UtilisateurRaw.map((u: any) => ({
+      id: String(u.id_utilisateur),
+      nom: u.nom,
+      prenom: u.prenom,
+      role: u.role,
+      email: u.email,
+      telephone: u.telephone,
+    }));
+    
+    
+    
+    setUtilisateur(lesUtilisateurs);
+  } catch (error) {
+      console.error("Erreur lors du chargement des utilisateur :", error);
+      Alert.alert("Erreur", "Impossible de récupérer les utilisateurs.");
+    } finally {
+      setChargement(false);
+    }
+  };
+  
+  return (
+    
     <>
+
     <View>
       <HautPage title="Utilisateurs" />
     </View>
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Utilisateur</ThemedText>
-        <HelloWave />
-      </ThemedView>
 
-    </ParallaxScrollView>
-  </>
+    <View style={styles.container}>
+
+    <View>
+      <Text style={styles.titre2}>Liste des utilisateurs de l'application</Text>
+    </View>
+
+      <View style={styles.hautBleu}>
+        <Text style={styles.textTittre}>Nom</Text>
+        <Text style={styles.textTittre}>Prénom</Text>
+        <Text style={styles.textTittre}>Rôle</Text>
+        <Text style={styles.textTittre}>info</Text>
+      </View>
+
+      
+
+      <View style={styles.tableContainer}>
+        <FlatList
+          data={utilisateur}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+        />
+      </View>
+
+    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: { 
+    flex: 1, 
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  header: { 
+    flexDirection: 'row', 
+    backgroundColor: '#3498db', 
+    padding: 8 
+  },
+  headerCell: { 
+    flex: 1, 
+    color: 'white', 
+    fontWeight: 'bold' 
+  },
+  tableContainer: { 
+    width: 345, 
+    height: 365, 
+    borderWidth: 1, 
+    borderColor: '#ccc', 
+    marginTop: 8 
+  },
+  row: { 
+    justifyContent: 'center',
+    flexDirection: 'row', 
+    padding: 15, 
+    borderBottomWidth: 1, 
+    borderBottomColor: '#eee' 
+  },
+  cell: { 
+    flex: 1 
+  },
+  cellImage: { 
+    width: 25, 
+    height: 25 
+  },
+  hautBleu:{
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    width: 350,
+    height: 40,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-around',
+    backgroundColor: '#1D3557',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  textTittre:{
+    color: '#ffffff',
+    fontSize: 17,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  titre2: {
+    textAlign: 'center',
+    color: '#1D3557',
+    fontSize: 25,
+    marginBottom: 30,
+  }
+
 });
