@@ -26,6 +26,8 @@ export default function RootLayout() {
         <Stack.Screen name="creation_point_succes" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="creationSucces" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="infoUtilisateur" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="infoSignalement" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="marquerResolu" options={{ headerShown: false, gestureEnabled: false }} />
 
       </Stack>
       <StatusBar style="auto" />

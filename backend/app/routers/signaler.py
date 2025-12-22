@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+import uuid, os
 from sqlalchemy.orm import Session
 from ..database import SessionLocal
 from ..models import Signaler
@@ -27,7 +28,7 @@ def list_signaler(db: Session = Depends(get_db)):
     return pointSignale
 
 # ================= GET BY ID_POINT =================
-@router.get("/{id_point}", response_model=list[SignalerBase])
+@router.get("/id_p/{id_point}", response_model=list[SignalerBase])
 def get_signalements_by_point(id_point: int, db: Session = Depends(get_db)):
     """Récupère tous les signalements pour un point d'eau spécifique"""
     signalements = get_signale_by_id_point(db, id_point)
@@ -37,24 +38,51 @@ def get_signalements_by_point(id_point: int, db: Session = Depends(get_db)):
     
     return signalements
 
+
+# ================= GET BY ID_SIGNALEMENT =================
+@router.get("/id_s/{signalement_id}", response_model=SignalerBase)
+def get_user(signalement_id: int, db: Session = Depends(get_db)):
+    signal = db.query(Signaler).filter(Signaler.id == signalement_id).first()
+    if not signal:
+        raise HTTPException(status_code=404, detail=f"Signalement {signalement_id} non trouvé")
+    return signal
+
+
 # ================= CREATE =================
-@router.post("/", response_model=SignalerBase)
-def create_signalement(payload: SignalerCreate, db: Session = Depends(get_db)):
-    """Crée un nouveau signalement"""
+@router.post("/", response_model=SignalerCreate)
+def create_signalement(id_point: int = Form(...), probleme: str = Form(...), id_utilisateur: int = Form(...), photo: UploadFile = File(...), db: Session = Depends(get_db)):
+   
+    # création d'un id pour l'image
+    ext = os.path.splitext(photo.filename)[1] or ".jpg"
+    filename = f"{uuid.uuid4()}{ext}"
+    file_path = os.path.join("images/signalerImg", filename)
+
+    # sauvegarder l'image dans le dossier images
+    with open(file_path, "wb") as f:
+        f.write(photo.file.read())
+
+    # données pour le DAO
+    data = {
+        "id_point": id_point,
+        "probleme": probleme,
+        "photo": file_path,
+        "id_utilisateur": id_utilisateur,
+    }
+
     try:
-        nouveau_signal = dao_create_signale(db, payload.model_dump())
+        return dao_create_signale(db, data)
     except ValueError as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
-    return nouveau_signal
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 
 # ================= DELETE =================
-@router.delete("/{id_point}")
+@router.delete("/suprimmer/{id_point}")
 def delete_signalements(id_point: int, db: Session = Depends(get_db)):
     """Supprime tous les signalements d'un point d'eau"""
     success = delete_signale_by_id_point(db, id_point)
     
     if not success:
-        raise HTTPException(status_code=404, detail="Not Found")
+        raise HTTPException(status_code=404, detail="Not Found: id introuvble")
     
     return {"detail": f"Signalements du point {id_point} supprimés avec succès"}

@@ -63,7 +63,7 @@ export default function Connexion() {
     }
     else{
       try {
-        const response = await axios.post('http://172.20.10.2:8000/utilisateurs/', {
+        const response = await axios.post('http://192.168.1.178:8000/utilisateurs/', {
           nom: nom,        
           prenom: prenom,
           telephone : telephone,
@@ -110,12 +110,12 @@ export default function Connexion() {
 
                   <View style={styles.aligne}>
                     <Text style={styles.title_ID_MDP}>Numéro de téléphone</Text>
-                    <TextInput value={telephone} onChangeText={setTelephone} style={styles.saisiChamp}/>
+                    <TextInput keyboardType='phone-pad' value={telephone} onChangeText={setTelephone} style={styles.saisiChamp}/>
                   </View>
 
                   <View style={styles.aligne}>
                     <Text style={styles.title_ID_MDP}>Email</Text>
-                    <TextInput value={email} onChangeText={setEmail} style={styles.saisiChamp}/>
+                    <TextInput keyboardType='email-address' value={email} onChangeText={setEmail} style={styles.saisiChamp}/>
                   </View>
 
                   <View style={styles.aligne}>

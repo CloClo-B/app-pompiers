@@ -140,10 +140,18 @@ class HistoriqueOut(BaseModel):
 # =============== SIGNALER ==================
 
 class SignalerBase(BaseModel):
+    id:int
     id_point: int
     probleme: str
     photo: Optional[str]
+    id_utilisateur: int
+    date_creation: datetime
+    
 
 
-class SignalerCreate(SignalerBase):
+class SignalerCreate(BaseModel):
+    id_point: int
+    probleme: str
+    photo: Optional[str]
+    id_utilisateur: int
     model_config = ConfigDict(from_attributes=True)

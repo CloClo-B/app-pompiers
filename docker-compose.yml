@@ -32,6 +32,8 @@ services:
       - fenalim_net
     volumes:
     - ./backend/app:/app/app
+    - ./backend/images:/app/images
+
 
   #Conteneur pour pgadmin
   pgadmin:

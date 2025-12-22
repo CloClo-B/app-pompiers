@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from .database import Base, engine
 from .routers.points_eau import router as points_router
 from .routers.utilisateurs import router as users_router
@@ -29,6 +30,10 @@ app.include_router(users_router)
 app.include_router(missions_router)
 app.include_router(historique_router)
 app.include_router(signaler_router)
+
+# accéder au image depuis le front pour pouvoir les affihcer 
+app.mount("/images", StaticFiles(directory="images"), name="images")
+
 
 
 @app.get("/health")

@@ -81,5 +81,8 @@ class Signaler(Base):
     id = Column(Integer, primary_key=True, index=True)
     id_point = Column(Integer, ForeignKey("points_eau.numero_pei"), nullable=False)
     probleme = Column(String(100), nullable=False)
-    photo = Column(String(255), nullable=True) 
+    photo = Column(String(255), nullable=False) 
+    id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
+    date_creation = Column(DateTime, server_default=func.now(), nullable=False)
+
 

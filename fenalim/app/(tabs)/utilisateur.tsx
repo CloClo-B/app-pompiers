@@ -40,7 +40,7 @@ export default function HomeScreen() {
 
   const fetchUtilisateurs = async () => {
     try {
-      const response = await axios.get("http://192.168.1.184:8000/utilisateurs/");
+      const response = await axios.get("http://192.168.1.178:8000/utilisateurs/");
       // affichage des données
       console.log("Données reçues:", response.data);
       
