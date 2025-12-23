@@ -22,8 +22,6 @@ export default function Connexion() {
     return regex.test(email.trim());
   }
 
-  // communication avec l'api  /utilisateurs/
-  // valentin : 172.20.10.2 | 192.168.1.184
   const creerUtilisateur = async () => {
 
     // Avant l'appel API, pour vérifier les valeurs
@@ -40,26 +38,32 @@ export default function Connexion() {
     if(nom == null || !nom.trim()){
       console.log("Erreur le nom est incorrect");
       alert("Le nom est incorrect");
+      return;
     }
     else if(prenom == null || !prenom.trim()){
       console.log("Erreur le prénom est incorrect");
       alert("Le prénom est incorrect");
+      return;
     }
     else if(email == null || !email.trim() || !verifEmail(email)){
       console.log("Erreur le mail est incorrect");
       alert("Le mail est incorrect");
+      return;
     }
     else if(!/^\d{10}$/.test(telephone) || !telephone.trim()){
       console.log("Erreur le numéro de téléphone est incorrect");
       alert("Le numéro de téléphone est incorrect");
+      return;
     }
     else if(motDePasse.length < 12 || !motDePasse.trim()){
       console.log("Erreur a longeur du mot de passe est incorect il faut minimum 12 caracères");
       alert("La longeur du mot de passe est incorect il faut minimum 12 caracères");
+      return;
     }
     else if(motDePasse.trim() != ConfirmmotDePasse.trim() ){
       console.log("Erreur les mots de passe sont différents");
       alert("Les mots de passe sont différents");
+      return;
     }
     else{
       try {
@@ -73,9 +77,17 @@ export default function Connexion() {
         });
         
         router.navigate('/(tabs)/acceuil')
-        } catch (error) {
-            console.error(error);
-            alert("Erreur lors de la création de l'utilisateur");
+        } 
+      catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          // erreur renvoyée par l’API
+          console.log(error.response?.status);
+          console.log(error.response?.data);
+          alert(error.response?.data?.detail ?? "Erreur lors de l'inscription");
+        } else {
+          // autre erreur
+          alert("Erreur lors de l'inscription");
+        }
       }
     };
   }

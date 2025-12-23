@@ -128,50 +128,62 @@ export default function CreerPoint() {
   if(valueType == null || verifTypePoint(valueType) == false){
     console.log("Erreur le type de point est incorrect");
     alert("Le type de point est incorrect");
+    return;
   }
   else if(valueDispo == null || verifDispo(valueDispo) == false){
     console.log("Erreur la disponibilité du point est incorrect");
     alert("La disponibilité du point est incorrect");
+    return;  
   }
   else if(valueAcces == null || verifAcces(valueAcces) == false){
     console.log("Erreur l'accèe de point est incorrect");
     alert("Le type d'accèe du point est incorrect");
+    return; 
   }
   else if(valueStatut == null || verifTypeStatut(valueStatut) == false){
     console.log("Erreur le statut du point est incorrect");
     alert("Le statut du est incorrect");
+    return;  
   }
   else if(numeroPEI == null || !numeroPEI.trim() || Number.isInteger(Number(numeroPEI)) == false){
     console.log("Erreur le numéro pei est incorrect");
     alert("Le numéro pei est incorect");
+    return;  
   }
   else if(debit == null || !debit.trim() || isNaN(Number(debit.replace(',', '.'))) || (parseFloat(debit.replace(',', '.')) <=0)){
     console.log("Erreur le débit est incorrect");
     alert("Le débit est incorect");
+    return;  
   }
   else if(pression == null || !pression.trim() || isNaN(Number(pression.replace(',', '.'))) || (parseFloat(pression.replace(',', '.')) <=0)){
     console.log("Erreur la préssion est incorrect");
     alert("La préssion est incorect");
+    return;  
   }
   else if(volumeMin == null || !volumeMin.trim() || isNaN(Number(volumeMin.replace(',', '.'))) || (parseFloat(volumeMin.replace(',', '.')) <=0)){
     console.log("Erreur le volume minimum est incorrect");
     alert("Le volume minimum est incorect");
+    return;  
   }
   else if(insee5 == null || !insee5.trim() || insee5.length>10 || Number.isInteger(Number(insee5)) == false || parseInt(insee5) <=0 ){
     console.log("Erreur le code insee5 est incorrect");
     alert("Le code insee5 est incorect");
+    return;  
   }
   else if(refCarto == null || !refCarto.trim() || Number.isInteger(Number(refCarto)) == false || (parseInt(refCarto) <=0)){
     console.log("Erreur la référence carthographique est incorrect");
     alert("La référence carthographique est incorect");
+    return;  
   }
   else if(longitude == null || !longitude.trim() || isNaN(Number(longitude.replace(',', '.'))) || (parseFloat(longitude.replace(',', '.')) <-180) || (parseFloat(longitude.replace(',', '.'))) > 180){
     console.log("Erreur la longitude est incorrect");
     alert("La longitude est incorect");
+    return;  
   }
   else if(latitude == null || !latitude.trim() || isNaN(Number(latitude.replace(',', '.')))  || (parseFloat(latitude.replace(',', '.')) <-90) || (parseFloat(latitude.replace(',', '.')) > 90)){
     console.log("Erreur la latitude est incorrect");
     alert("La latitude est incorect");
+    return;  
   }
 
     else{
@@ -197,9 +209,17 @@ export default function CreerPoint() {
             pathname: '/creationSucces',
             params: { title: 'Point d’eau créé avec succès', nomPage: 'creer', chemainPage: '/point_eau' }
           });
-        } catch (error) {
-            console.error(error);
-            alert('Erreur lors de la création du point d’eau');
+        }
+      catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          // erreur renvoyée par l’API
+          console.log(error.response?.status);
+          console.log(error.response?.data);
+          alert(error.response?.data?.detail ?? "Erreur lors de la création du point d'eau");
+        } else {
+          // autre erreur
+          alert("Erreur lors de la création du point d'eau");
+        }
       }
 
     }

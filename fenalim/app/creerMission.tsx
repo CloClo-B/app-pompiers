@@ -31,8 +31,6 @@ export default function CreerMission() {
     return typeValides.includes(type);
   }
 
-  // communication avec l'api  /missions/
-  // valentin : 172.20.10.2 | 192.168.1.184
   const creerMission = async () => {
 
     // Avant l'appel API, pour vérifier les valeurs
@@ -46,29 +44,34 @@ export default function CreerMission() {
     if(nomMission == null || !nomMission.trim()){
       console.log("Erreur le nom de mission est incorrect");
       alert("Le nom de mission est incorect");
+      return;
     }
     else if(IDPoint == null || !IDPoint.trim() || Number.isInteger(Number(IDPoint)) == false){
       console.log("Erreur l'ID du point incorrect");
       alert("L'ID du point est incorect");
+      return;
     }
     else if(valueStatut == null || verifTypeStatut(valueStatut) == false){
       console.log("Erreur le statut de la mission incorrect");
       alert("Le statut de la mission est incorect");
+      return;
     }
     else if(commentaire == null || !commentaire.trim() || commentaire.length>250){
       console.log("Erreur le détail de la mission est incorrect");
       alert("Le détail de la mission incorect");
+      return;
     }
     else if(itineraire == null || !itineraire.trim()){
       console.log("Erreur l'adresse de la mission est incorrect");
       alert("L'adresse de la mission incorect");
+      return;
     }
     else{
       try {
         const response = await axios.post('http://192.168.1.178:8000/missions/', {
           nom_mission: nomMission,        
           id_point: parseInt(IDPoint),
-          
+          statut: valueStatut,
           id_utilisateur : 1,  // a changer par la suite celui ci est un utilisateur créer sur ma bdd
           commentaire: commentaire, 
           itineraire: itineraire,
@@ -79,9 +82,17 @@ export default function CreerMission() {
             pathname: '/creationSucces',
             params: { title: 'Mission créé avec succès', creerMission: 'creerMission', chemainPage: '/point_eau' }
           });
-        } catch (error) {
-            console.error(error);
-            alert('Erreur lors de la création de la mission');
+        }
+      catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          // erreur renvoyée par l’API
+          console.log(error.response?.status);
+          console.log(error.response?.data);
+          alert(error.response?.data?.detail ?? "Erreur lors de la création de la mission");
+        } else {
+          // autre erreur
+          alert("Erreur lors de la création de la mission");
+        }
       }
     }
   };

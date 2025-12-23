@@ -70,10 +70,14 @@ class UtilisateurUpdate(BaseModel):
     mot_de_passe: Optional[str] = None
 
 
-class UtilisateurOut(UtilisateurBase):
+class UtilisateurOut(BaseModel):
     id_utilisateur: int
 
     model_config = ConfigDict(from_attributes=True)
+
+class LoginPayload(BaseModel):
+    email: EmailStr
+    mot_de_passe: str
 
 
 # ============= MISSION ===============
@@ -87,8 +91,12 @@ class MissionBase(BaseModel):
 
 
 class MissionCreate(MissionBase):
-    commentaire: Optional[str] = None
-    itineraire: Optional[Any] = None
+    nom_mission: str
+    id_point: int
+    id_utilisateur: int
+    statut: str
+    commentaire: Optional[str]
+    itineraire: Optional[Any]
 
 
 class MissionUpdate(BaseModel):

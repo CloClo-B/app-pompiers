@@ -2,9 +2,18 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
+
 from ..database import SessionLocal
 from ..models import Mission
-from ..schemas import MissionCreate, MissionUpdate, MissionOut
+from ..schemas import MissionCreate, MissionUpdate, MissionOut, MissionBase
+from app.DAO.DAOMissions import (
+    create_mission,
+    delete_mission_by_id,
+    get_all_mission,
+    get_mission_by_date,
+    get_mission_by_id,
+    update_mission_by_id
+)
 
 router = APIRouter(prefix="/missions", tags=["Missions"])
 
@@ -17,69 +26,55 @@ def get_db():
 
 
 # ================= CREATE =================
-@router.post("/", response_model=MissionOut)  
-def create_mission(payload: MissionCreate, db: Session = Depends(get_db)):
-    new_mission = Mission(
-        nom_mission=payload.nom_mission,
-        id_point=payload.id_point,
-        id_utilisateur=payload.id_utilisateur,
-        statut="en_attente",
-        commentaire=payload.commentaire,
-        itineraire=payload.itineraire
-    )
-    db.add(new_mission)
-    db.commit()
-    db.refresh(new_mission)
-    return new_mission
+@router.post("/", response_model=MissionCreate)  
+def create_mission_route(payload: MissionCreate, db: Session = Depends(get_db)):
+    try:
+        nouveau_mission = create_mission(db, payload.model_dump())
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+    return {
+        "nom_mission": nouveau_mission.nom_mission,
+        "id_point": nouveau_mission.id_point,
+        "id_utilisateur": nouveau_mission.id_utilisateur,
+        "statut": nouveau_mission.statut,
+        "commentaire": nouveau_mission.commentaire,
+        "itineraire": nouveau_mission.itineraire,
+    }
 
 
 # ================= GET ALL =================
 @router.get("/", response_model=List[MissionOut])  
 def list_missions(db: Session = Depends(get_db)):
-    return db.query(Mission).all()
+    mission = get_all_mission(db)
+    return mission
 
 
 # ================= GET BY ID =================
 @router.get("/{mission_id}", response_model=MissionOut) 
 def get_mission(mission_id: int, db: Session = Depends(get_db)):
-    mission = db.query(Mission).filter(Mission.id_mission == mission_id).first()
+    mission = get_mission_by_id(db, mission_id)
     if not mission:
         raise HTTPException(status_code=404, detail=f"Mission {mission_id} non trouvée")
     return mission
 
 
 # ================= UPDATE =================
-@router.put("/{mission_id}", response_model=MissionOut)
-def update_mission(mission_id: int, payload: MissionUpdate, db: Session = Depends(get_db)):
-    mission = db.query(Mission).filter(Mission.id_mission == mission_id).first()
-    if not mission:
-        raise HTTPException(status_code=404, detail=f"Mission {mission_id} non trouvée")
-
-    if payload.nom_mission is not None:
-        mission.nom_mission = payload.nom_mission
-    if payload.id_point is not None:
-        mission.id_point = payload.id_point
-    if payload.id_utilisateur is not None:
-        mission.id_utilisateur = payload.id_utilisateur
-    if payload.statut is not None:
-        mission.statut = payload.statut
-    if payload.commentaire is not None:
-        mission.commentaire = payload.commentaire
-    if payload.itineraire is not None:
-        mission.itineraire = payload.itineraire
-
-    db.commit()
-    db.refresh(mission)
+@router.put("/{id_mission}", response_model=MissionOut)
+def update_mission(id_mission: int, payload: MissionUpdate, db: Session = Depends(get_db)):
+    try:
+        mission = update_mission_by_id(db, id_mission, payload.model_dump(exclude_unset=True))
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
     return mission
-
 
 # ================= DELETE =================
 @router.delete("/{mission_id}", response_model=dict)
 def delete_mission(mission_id: int, db: Session = Depends(get_db)):
-    mission = db.query(Mission).filter(Mission.id_mission == mission_id).first()
-    if not mission:
+    success = delete_mission_by_id(db, mission_id)
+    
+    if not success:
         raise HTTPException(status_code=404, detail=f"Mission {mission_id} non trouvée")
 
-    db.delete(mission)
-    db.commit()
     return {"detail": f"Mission {mission_id} supprimée"}

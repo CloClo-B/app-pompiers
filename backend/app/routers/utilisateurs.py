@@ -4,7 +4,7 @@ from datetime import datetime
 from passlib.context import CryptContext
 from ..database import SessionLocal
 from ..models import Utilisateur
-from ..schemas import UtilisateurCreate, UtilisateurOut, UtilisateurUpdate
+from ..schemas import UtilisateurCreate, UtilisateurOut, UtilisateurUpdate, LoginPayload
 
 router = APIRouter(prefix="/utilisateurs", tags=["Utilisateurs"])
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
@@ -29,7 +29,10 @@ def create_user(payload: UtilisateurCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Les mots de passe ne correspondent pas.")
     
     if db.query(Utilisateur).filter(Utilisateur.email == payload.email).first():
-        raise HTTPException(status_code=400, detail="Email déjà utilisé.")
+        raise HTTPException(status_code=400, detail="Compte déjà éxistant Email déjà utilisé.")
+    
+    if db.query(Utilisateur).filter(Utilisateur.telephone == payload.telephone).first():
+        raise HTTPException(status_code=400, detail="Compte déjà éxistant numéro de téléphone déjà utilisé.")
     
     new_user = Utilisateur(
         nom=payload.nom,
@@ -43,6 +46,23 @@ def create_user(payload: UtilisateurCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     return new_user
+
+
+# ================= VÉRIFIER SI UTILISATEUR EXISTE =================
+@router.post("/login", response_model=UtilisateurOut)
+def verif_login(payload: LoginPayload, db: Session = Depends(get_db)):
+    user = db.query(Utilisateur).filter(Utilisateur.email == payload.email).first()
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
+
+    if not verify_password(payload.mot_de_passe, user.mot_de_passe):
+        raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
+
+    return user
+
+
+
 
 # ================= GET ALL =================
 @router.get("/", response_model=list[UtilisateurOut])

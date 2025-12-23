@@ -78,45 +78,54 @@ const handlePickImage = () => {
   const creerSignalement = async () => {
 
     // Avant l'appel API, pour vérifier les valeurs
-  console.log("Vérification des valeurs à envoyer\n");
-  console.log("IDPoint:", IDPoint);
-  console.log("probleme:", probleme);
-  console.log("photo", photo);
+    console.log("Vérification des valeurs à envoyer\n");
+    console.log("IDPoint:", IDPoint);
+    console.log("probleme:", probleme);
+    console.log("photo", photo);
 
 
-  if(probleme == null || !probleme.trim() || probleme.trim().length<10 || probleme.trim().length> 100){
-    console.log("Erreur le nom est incorrect");
-    alert("La description du probleème est incorrect minimum 10 caractère maximum 100");
-  }
-      else if(image == null){
-        console.log("Erreur pas d'image");
-        alert("Image requise");
-      }
-      else{        
-        try {
-          const formData = new FormData();
-          formData.append("id_point", "444");
-          formData.append("probleme", probleme);
-          formData.append("photo", {
-            uri: image,
-            name: "pointsignaler.jpg",
-            type: "image/jpeg",
-          } as any);
-          formData.append("id_utilisateur", "1");
-          
-          const response = await axios.post("http://192.168.1.178:8000/signaler/", formData, {
-            headers: { "Content-Type": "multipart/form-data" }
+    if(probleme == null || !probleme.trim() || probleme.trim().length<10 || probleme.trim().length> 100){
+      console.log("Erreur le nom est incorrect");
+      alert("La description du probleème est incorrect minimum 10 caractère maximum 100");
+      return;
+    }
+    else if(image == null){
+      console.log("Erreur pas d'image");
+      alert("Image requise");
+      return;
+    }
+    else{        
+      try {
+        const formData = new FormData();
+        formData.append("id_point", "61278");
+        formData.append("probleme", probleme);
+        formData.append("photo", {
+          uri: image,
+          name: "pointsignaler.jpg",
+          type: "image/jpeg",
+        } as any);
+        formData.append("id_utilisateur", "1");
+        
+        const response = await axios.post("http://192.168.1.178:8000/signaler/", formData, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
+        router.push({
+            pathname: '/creationSucces',
+            params: { title: 'Signalement créé avec succès', creerMission: 'creerMission', chemainPage: '/point_eau' }
           });
-          router.push({
-              pathname: '/creationSucces',
-              params: { title: 'Signalement créé avec succès', creerMission: 'creerMission', chemainPage: '/point_eau' }
-            });
-          } 
-          catch (error) {
-            console.error(error);
-            alert('Erreur lors de la création du signalement');
-          }
+      } 
+      catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          // erreur renvoyée par l’API
+          console.log(error.response?.status);
+          console.log(error.response?.data);
+          alert(error.response?.data?.detail ?? "Erreur lors du signalement");
+        } else {
+          // autre erreur
+          alert("Erreur lors du signalement");
+        }
       }
+    }
   };
 
 

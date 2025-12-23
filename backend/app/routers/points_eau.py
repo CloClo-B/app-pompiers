@@ -33,7 +33,7 @@ def get_point(numero_pei: int, db: Session = Depends(get_db)):
     point = get_point_eau_by_numero_pei(db, numero_pei)
     
     if not point:
-        raise HTTPException(status_code=404, detail="Not Found")
+        raise HTTPException(status_code=404, detail="le numéro: {numero_pei} est incorect")
     
     return point
 
@@ -43,7 +43,7 @@ def create_point(payload: PointEauCreate, db: Session = Depends(get_db)):
     try:
         nouveau_point = create_point_eau(db, payload.model_dump())
     except ValueError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
     
     # Calculer latitude / longitude depuis geom
     latitude = db.scalar(func.ST_Y(nouveau_point.geom))
@@ -75,6 +75,6 @@ def delete_point(numero_pei: int, db: Session = Depends(get_db)):
     success = delete_point_eau_by_numero_pei(db, numero_pei)
     
     if not success:
-        raise HTTPException(status_code=404, detail="Not Found")
+        raise HTTPException(status_code=404, detail="Numéro pei: {numero_pei} introuvable")
     
     return {"detail": f"Point d'eau {numero_pei} supprimé avec succès"}

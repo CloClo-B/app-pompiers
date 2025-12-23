@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 import uuid, os
 from sqlalchemy.orm import Session
 from ..database import SessionLocal
-from ..models import Signaler
+from ..models import Signaler, PointEau, Utilisateur
 from ..schemas import SignalerBase, SignalerCreate
 from app.DAO.DAOSignaler import (
     create_signale as dao_create_signale,  
@@ -34,7 +34,7 @@ def get_signalements_by_point(id_point: int, db: Session = Depends(get_db)):
     signalements = get_signale_by_id_point(db, id_point)
     
     if not signalements:
-        raise HTTPException(status_code=404, detail="Not Found")
+        raise HTTPException(status_code=404, detail="Signalement pour le point : {id_point} non trouvé")
     
     return signalements
 
@@ -44,7 +44,7 @@ def get_signalements_by_point(id_point: int, db: Session = Depends(get_db)):
 def get_user(signalement_id: int, db: Session = Depends(get_db)):
     signal = db.query(Signaler).filter(Signaler.id == signalement_id).first()
     if not signal:
-        raise HTTPException(status_code=404, detail=f"Signalement {signalement_id} non trouvé")
+        raise HTTPException(status_code=404, detail=f"Le point numéro: {signalement_id} na pas été trouvé")
     return signal
 
 
@@ -52,6 +52,15 @@ def get_user(signalement_id: int, db: Session = Depends(get_db)):
 @router.post("/", response_model=SignalerCreate)
 def create_signalement(id_point: int = Form(...), probleme: str = Form(...), id_utilisateur: int = Form(...), photo: UploadFile = File(...), db: Session = Depends(get_db)):
    
+    # verification des info
+    point = db.query(PointEau).filter(PointEau.numero_pei == id_point).first()
+    if not point:
+        raise HTTPException(status_code=404, detail=f"Le point numéro : {id_point} na pas été trouvé")
+    utilisateurExite = db.query(Utilisateur).filter(Utilisateur.id_utilisateur == id_utilisateur).first()
+    if not utilisateurExite:
+        raise HTTPException(status_code=404, detail=f"L'utilisateur est introuvable")
+    
+
     # création d'un id pour l'image
     ext = os.path.splitext(photo.filename)[1] or ".jpg"
     filename = f"{uuid.uuid4()}{ext}"
@@ -83,6 +92,6 @@ def delete_signalements(id_point: int, db: Session = Depends(get_db)):
     success = delete_signale_by_id_point(db, id_point)
     
     if not success:
-        raise HTTPException(status_code=404, detail="Not Found: id introuvble")
+        raise HTTPException(status_code=404, detail="id numéro: {id_point} introuvble")
     
     return {"detail": f"Signalements du point {id_point} supprimés avec succès"}

@@ -60,7 +60,7 @@ class Mission(Base):
     __tablename__ = "missions"
     id_mission = Column(Integer, primary_key=True, index=True)
     nom_mission = Column(String(100), nullable=False)
-    id_point = Column(Integer, ForeignKey("points_eau.id"), nullable=False)
+    id_point = Column(Integer, ForeignKey("points_eau.numero_pei"), nullable=False)
     id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
     date_creation = Column(DateTime, server_default=func.now())
     statut = Column(String(20), default="en_attente")
