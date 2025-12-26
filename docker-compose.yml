@@ -33,6 +33,7 @@ services:
     volumes:
     - ./backend/app:/app/app
     - ./backend/images:/app/images
+    #- ./.env:/app/.env
 
 
   #Conteneur pour pgadmin

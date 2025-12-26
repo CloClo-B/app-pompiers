@@ -34,7 +34,7 @@ export default function UserDetails() {
   const infoUtilisateurSelect = async () => {
     try {
       console.log("iddddd", id_s)
-      const response = await axios.get(`http://192.168.1.178:8000/signaler/id_s/${id_s}`);
+      const response = await axios.get(`http://172.20.10.7:8000/signaler/id_s/${id_s}`);
       // affichage des données
       console.log("Données reçues:", response.data);
       

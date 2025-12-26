@@ -4,7 +4,6 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {

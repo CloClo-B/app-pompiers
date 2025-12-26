@@ -72,8 +72,17 @@ class UtilisateurUpdate(BaseModel):
 
 class UtilisateurOut(BaseModel):
     id_utilisateur: int
-
     model_config = ConfigDict(from_attributes=True)
+
+
+class AuthResponse(BaseModel):
+    id_utilisateur: int
+    token: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LogoutPayload(BaseModel):
+    id_utilisateur: int
 
 class LoginPayload(BaseModel):
     email: EmailStr

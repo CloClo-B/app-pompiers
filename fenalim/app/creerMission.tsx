@@ -68,7 +68,7 @@ export default function CreerMission() {
     }
     else{
       try {
-        const response = await axios.post('http://192.168.1.178:8000/missions/', {
+        const response = await axios.post('http://172.20.10.7:8000/missions/', {
           nom_mission: nomMission,        
           id_point: parseInt(IDPoint),
           statut: valueStatut,

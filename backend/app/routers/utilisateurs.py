@@ -4,7 +4,8 @@ from datetime import datetime
 from passlib.context import CryptContext
 from ..database import SessionLocal
 from ..models import Utilisateur
-from ..schemas import UtilisateurCreate, UtilisateurOut, UtilisateurUpdate, LoginPayload
+from ..schemas import UtilisateurCreate, UtilisateurOut, UtilisateurUpdate, LoginPayload, AuthResponse, LogoutPayload
+from ..token_jwt import createToken, getTokenUser
 
 router = APIRouter(prefix="/utilisateurs", tags=["Utilisateurs"])
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
@@ -23,7 +24,7 @@ def verify_password(password: str, hashed: str) -> bool:
     return pwd_context.verify(password, hashed)
 
 # ================= CREATE =================
-@router.post("/", response_model=UtilisateurOut)
+@router.post("/", response_model=AuthResponse)
 def create_user(payload: UtilisateurCreate, db: Session = Depends(get_db)):
     if payload.mot_de_passe != payload.confirm_password:
         raise HTTPException(status_code=400, detail="Les mots de passe ne correspondent pas.")
@@ -42,14 +43,18 @@ def create_user(payload: UtilisateurCreate, db: Session = Depends(get_db)):
         mot_de_passe=hash_password(payload.mot_de_passe),
         role=payload.role,
     )
+
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return new_user
-
+    
+    # Génération du token pour l'utilisateur 
+    data = {"sub": str(new_user.id_utilisateur), "email": new_user.email, "nom": new_user.nom, "prenom": new_user.prenom}
+    tokenUser = createToken(data)
+    return AuthResponse(id_utilisateur=new_user.id_utilisateur, token=tokenUser)
 
 # ================= VÉRIFIER SI UTILISATEUR EXISTE =================
-@router.post("/login", response_model=UtilisateurOut)
+@router.post("/login", response_model=AuthResponse)
 def verif_login(payload: LoginPayload, db: Session = Depends(get_db)):
     user = db.query(Utilisateur).filter(Utilisateur.email == payload.email).first()
 
@@ -59,14 +64,18 @@ def verif_login(payload: LoginPayload, db: Session = Depends(get_db)):
     if not verify_password(payload.mot_de_passe, user.mot_de_passe):
         raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
 
-    return user
-
-
+    user.derniere_connexion = datetime.now()
+    db.commit()
+    
+    # Générer JWT
+    data = {"sub": str(user.id_utilisateur), "email": user.email, "role": user.role, "nom": user.nom, "prenom": user.prenom}
+    tokenUser = createToken(data)
+    return AuthResponse(id_utilisateur=user.id_utilisateur, token=tokenUser)
 
 
 # ================= GET ALL =================
 @router.get("/", response_model=list[UtilisateurOut])
-def list_users(db: Session = Depends(get_db)):
+def list_users(current_user: dict = Depends(getTokenUser), db: Session = Depends(get_db)):
     return db.query(Utilisateur).all()
 
 # ================ GET BY ID =================
@@ -104,3 +113,13 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.delete(user)
     db.commit()
     return {"detail": f"Utilisateur {user_id} supprimé avec succès"}
+
+
+@router.post("/logout")
+def logout(payload: LogoutPayload, db: Session = Depends(get_db)):
+    # Avec JWT, pas besoin de stocker en DB
+    # Le client supprime simplement le token localement
+    user = db.query(Utilisateur).filter(Utilisateur.id_utilisateur == payload.id_utilisateur).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    return {"detail": "Déconnexion réussie (supprimez le token côté client)"}

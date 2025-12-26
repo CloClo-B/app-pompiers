@@ -26,7 +26,7 @@ export default function PointSignale() {
 
   const fetchPointSignale = async () => {
     try {
-      const response = await axios.get("http://192.168.1.178:8000/signaler/");
+      const response = await axios.get("http://172.20.10.7:8000/signaler/");
       // affichage des données
       console.log("Données reçues:", response.data);
       
@@ -85,6 +85,7 @@ export default function PointSignale() {
           data={signaler}
           renderItem={renderItem}
           keyExtractor={(item, index) => `${item.id}-${index}`}
+          scrollEnabled={false}
         />
       </View>
     </View>
