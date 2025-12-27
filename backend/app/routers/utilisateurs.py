@@ -6,6 +6,7 @@ from ..database import SessionLocal
 from ..models import Utilisateur
 from ..schemas import UtilisateurCreate, UtilisateurOut, UtilisateurUpdate, LoginPayload, AuthResponse, LogoutPayload
 from ..token_jwt import createToken, getTokenUser
+from dependencies import rolesChecker
 
 router = APIRouter(prefix="/utilisateurs", tags=["Utilisateurs"])
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
@@ -26,6 +27,7 @@ def verify_password(password: str, hashed: str) -> bool:
 # ================= CREATE =================
 @router.post("/", response_model=AuthResponse)
 def create_user(payload: UtilisateurCreate, db: Session = Depends(get_db)):
+    
     if payload.mot_de_passe != payload.confirm_password:
         raise HTTPException(status_code=400, detail="Les mots de passe ne correspondent pas.")
     
@@ -49,13 +51,14 @@ def create_user(payload: UtilisateurCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     
     # Génération du token pour l'utilisateur 
-    data = {"sub": str(new_user.id_utilisateur), "email": new_user.email, "nom": new_user.nom, "prenom": new_user.prenom}
+    data = {"sub": new_user.id_utilisateur, "role": new_user.role}
     tokenUser = createToken(data)
     return AuthResponse(id_utilisateur=new_user.id_utilisateur, token=tokenUser)
 
 # ================= VÉRIFIER SI UTILISATEUR EXISTE =================
 @router.post("/login", response_model=AuthResponse)
 def verif_login(payload: LoginPayload, db: Session = Depends(get_db)):
+
     user = db.query(Utilisateur).filter(Utilisateur.email == payload.email).first()
 
     if not user:
@@ -68,19 +71,19 @@ def verif_login(payload: LoginPayload, db: Session = Depends(get_db)):
     db.commit()
     
     # Générer JWT
-    data = {"sub": str(user.id_utilisateur), "email": user.email, "role": user.role, "nom": user.nom, "prenom": user.prenom}
+    data = {"sub": user.id_utilisateur, "role": user.role}
     tokenUser = createToken(data)
     return AuthResponse(id_utilisateur=user.id_utilisateur, token=tokenUser)
 
 
 # ================= GET ALL =================
 @router.get("/", response_model=list[UtilisateurOut])
-def list_users(current_user: dict = Depends(getTokenUser), db: Session = Depends(get_db)):
+def list_users(current_user: Utilisateur = Depends(getTokenUser), db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
     return db.query(Utilisateur).all()
 
 # ================ GET BY ID =================
 @router.get("/{user_id}", response_model=UtilisateurOut)
-def get_user(user_id: int, db: Session = Depends(get_db)):
+def get_user(user_id: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
     user = db.query(Utilisateur).filter(Utilisateur.id_utilisateur == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail=f"Utilisateur {user_id} non trouvé")
@@ -105,7 +108,7 @@ def update_user(user_id: int, payload: UtilisateurUpdate, db: Session = Depends(
 
 # ================ DELETE =================
 @router.delete("/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(user_id: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
     user = db.query(Utilisateur).filter(Utilisateur.id_utilisateur == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
@@ -115,11 +118,13 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     return {"detail": f"Utilisateur {user_id} supprimé avec succès"}
 
 
+# ================ LOGOUT =================
 @router.post("/logout")
 def logout(payload: LogoutPayload, db: Session = Depends(get_db)):
-    # Avec JWT, pas besoin de stocker en DB
-    # Le client supprime simplement le token localement
+    
+    # Suppression du token coté client
     user = db.query(Utilisateur).filter(Utilisateur.id_utilisateur == payload.id_utilisateur).first()
+    
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
-    return {"detail": "Déconnexion réussie (supprimez le token côté client)"}
+    return {"detail": "Déconnexion réussie"}

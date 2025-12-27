@@ -21,20 +21,20 @@ def get_db():
 
 # ================= GET ALL =================
 @router.get("/", response_model=List[HistoriqueBase])
-def list_history(db: Session = Depends(get_db)):
+def list_history(db: Session = Depends(get_db), user: Utilisateur = Depends(rolesChecker("pompier"))):
     return get_all_historique(db)
 
 # ================= GET BY USER =================
 @router.get("/utilisateur/{id_utilisateur}", response_model=List[HistoriqueBase])
-def history_by_user(id_utilisateur: int, db: Session = Depends(get_db)):
+def history_by_user(id_utilisateur: int, db: Session = Depends(get_db), user: Utilisateur = Depends(rolesChecker("commandement"))):
     return get_historique_by_utilisateur(db, id_utilisateur)
 
 # ================= GET ACTIONS BY USER =================
 @router.get("/derniere-actions", response_model=List[HistoriqueBase])
-def recent_actions(limit: int = 20, db: Session = Depends(get_db)):
+def recent_actions(limit: int = 20, db: Session = Depends(get_db), user: Utilisateur = Depends(rolesChecker("commandement"))):
     return get_derniere_action(db, limit)
 
 # ================= CREATE =================
 @router.post("/", response_model=HistoriqueBase)
-def create_entry(payload: HistoriqueCreate, db: Session = Depends(get_db)):
+def create_entry(payload: HistoriqueCreate, db: Session = Depends(get_db), user: Utilisateur = Depends(rolesChecker("admin"))):
     return create_historique(db, payload.model_dump())
