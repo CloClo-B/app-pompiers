@@ -37,7 +37,6 @@ def create_mission_route(payload: MissionCreate, db: Session = Depends(get_db)):
         "nom_mission": nouveau_mission.nom_mission,
         "id_point": nouveau_mission.id_point,
         "id_utilisateur": nouveau_mission.id_utilisateur,
-        "statut": nouveau_mission.statut,
         "commentaire": nouveau_mission.commentaire,
         "itineraire": nouveau_mission.itineraire,
     }
@@ -60,7 +59,7 @@ def get_mission(mission_id: int, db: Session = Depends(get_db)):
 
 
 # ================= UPDATE =================
-@router.put("/{id_mission}", response_model=MissionOut)
+@router.put("/update/{id_mission}", response_model=MissionOut)
 def update_mission(id_mission: int, payload: MissionUpdate, db: Session = Depends(get_db)):
     try:
         mission = update_mission_by_id(db, id_mission, payload.model_dump(exclude_unset=True))
@@ -70,7 +69,7 @@ def update_mission(id_mission: int, payload: MissionUpdate, db: Session = Depend
     return mission
 
 # ================= DELETE =================
-@router.delete("/{mission_id}", response_model=dict)
+@router.delete("/supprimer/{mission_id}", response_model=dict)
 def delete_mission(mission_id: int, db: Session = Depends(get_db)):
     success = delete_mission_by_id(db, mission_id)
     

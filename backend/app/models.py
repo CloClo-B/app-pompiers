@@ -20,7 +20,7 @@ class PointEau(Base):
     statut = Column(        
         Enum('PUBLIC', 'PRIVE', name="type_statut_autorise"),
         nullable=False
-        )
+    )
     type_nature = Column(
         Enum('BI', 'BI100', 'PENA', 'PI100', 'PI110','PI150', 'PI65', 'PI70','PI80','RESERVE EAU INCENDIE', name="type_point_autorise"),
         nullable=False
@@ -63,9 +63,14 @@ class Mission(Base):
     id_point = Column(Integer, ForeignKey("points_eau.numero_pei"), nullable=False)
     id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
     date_creation = Column(DateTime, server_default=func.now())
-    statut = Column(String(20), default="en_attente")
-    commentaire = Column(String, nullable=True)
-    itineraire = Column(String, nullable=True)  
+    statut = Column(
+        Enum('EN COURS', 'TERMINER', name="type_mission_autorise"),
+        default="EN COURS"
+    )
+    commentaire = Column(String(100), nullable=True)
+    itineraire = Column(String, nullable=True)
+    date_fin = Column(DateTime, nullable=True)
+
 
 class Historique(Base):
     __tablename__ = "historiques"

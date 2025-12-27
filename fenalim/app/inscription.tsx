@@ -67,7 +67,7 @@ export default function Connexion() {
     }
     else{
       try {
-        const response = await axios.post('http://172.20.10.7:8000/utilisateurs/', {
+        const response = await axios.post('http://192.168.1.178:8000/utilisateurs/', {
           nom: nom,        
           prenom: prenom,
           telephone : telephone,
@@ -75,7 +75,6 @@ export default function Connexion() {
           mot_de_passe: motDePasse,
           confirm_password: ConfirmmotDePasse, 
         });
-        
         console.log("Token du compte", email, ":", response.data.token);
         router.navigate('/(tabs)/acceuil')
         } 
@@ -133,12 +132,12 @@ export default function Connexion() {
 
                   <View style={styles.aligne}>
                     <Text style={styles.title_ID_MDP}>Mot de passe</Text>
-                    <TextInput value={motDePasse} onChangeText={setMDP} style={styles.saisiChamp}/>
+                    <TextInput value={motDePasse} secureTextEntry onChangeText={setMDP} style={styles.saisiChamp}/>
                   </View>
 
                   <View style={styles.aligne}>
                       <Text style={styles.title_ID_MDP}>Confirmer le mot de passe</Text>
-                    <TextInput value={ConfirmmotDePasse} onChangeText={setConfirmMDP} style={styles.saisiChamp}/>
+                    <TextInput value={ConfirmmotDePasse} secureTextEntry onChangeText={setConfirmMDP} style={styles.saisiChamp}/>
                   </View>
 
                   <View style={{ marginTop: 50}}>

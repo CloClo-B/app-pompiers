@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {
@@ -27,7 +28,7 @@ export default function RootLayout() {
         <Stack.Screen name="infoUtilisateur" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="infoSignalement" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="marquerResolu" options={{ headerShown: false, gestureEnabled: false }} />
-
+        <Stack.Screen name="infoMissionTerminer" options={{ headerShown: false, gestureEnabled: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

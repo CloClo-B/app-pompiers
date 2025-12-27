@@ -26,7 +26,7 @@ export default function PointSignale() {
 
   const fetchPointSignale = async () => {
     try {
-      const response = await axios.get("http://172.20.10.7:8000/signaler/");
+      const response = await axios.get("http://192.168.1.178:8000/signaler/");
       // affichage des données
       console.log("Données reçues:", response.data);
       
@@ -54,14 +54,16 @@ export default function PointSignale() {
     }
   };
 
+
+  
   
 
   // affichage en tableau
   const renderItem = ({ item }: { item: Signale }) => (
     <View style={styles.row}>
       <Text style={styles.cell}>{item.id}</Text>
-      <Text style={styles.cell}>  {item.probleme.length > 10 ? item.probleme.slice(0, 10) + ' ...' : item.probleme}</Text>
-      <Text style={styles.cell}>  {new Date(item.date).toLocaleDateString()}</Text>
+      <Text style={styles.cell}> {item.probleme.length > 10 ? item.probleme.slice(0, 10) + ' ...' : item.probleme}</Text>
+      <Text style={styles.cell}> {new Date(item.date).toLocaleDateString()}</Text>
       <TouchableOpacity onPress={() => router.push({ pathname: '/infoSignalement', params: { id_s: item.id_s } })}>
         <Image source={roue} style={styles.cellImage} />
       </TouchableOpacity>

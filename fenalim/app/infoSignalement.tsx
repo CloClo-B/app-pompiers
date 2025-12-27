@@ -56,33 +56,33 @@ export default function UserDetails() {
     }
   };
 
-    const fetchPointsEau = async (id_point: string) => {
-      try {
-        // affichage des données
-        // console.log("Données reçues:", response.data);
-        
-        const response = await axios.get(`http://192.168.1.178:8000/points-eau/${id_point}`);
-        const point = response.data; // supposé contenir {id, latitude, longitude} ou geom
-        if (point) {
-          const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
-          const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
-          const [longitude, latitude] = proj4(lambert93, wgs84, [point.longitude, point.latitude]);
+  const fetchPointsEau = async (id_point: string) => {
+    try {
+      // affichage des données
+      // console.log("Données reçues:", response.data);
+      
+      const response = await axios.get(`http://192.168.1.178:8000/points-eau/${id_point}`);
+      const point = response.data; 
+      if (point) {
+        const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
+        const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+        const [longitude, latitude] = proj4(lambert93, wgs84, [point.longitude, point.latitude]);
 
-          setPointSignale({
-            latitude,
-            longitude,
-          });
-        } 
+        setPointSignale({
+          latitude,
+          longitude,
+        });
       } 
-      catch (error) {
-        console.error("Erreur lors du chargement du points d'eau :", error);
-        Alert.alert("Erreur", "Impossible de récupérerle point d'eau.");
-      } 
-      finally {
-        setChargement(false);
-      }
-    };
-  
+    } 
+    catch (error) {
+      console.error("Erreur lors du chargement du points d'eau :", error);
+      Alert.alert("Erreur", "Impossible de récupérer le point d'eau.");
+    } 
+    finally {
+      setChargement(false);
+    }
+  };
+
 
   return (
 
@@ -106,8 +106,8 @@ export default function UserDetails() {
             <View style={{ gap: 10 }}>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>ID signalement : </Text>{signalement?.id}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>ID du point signaler : </Text> {signalement?.id_point}</Text>
-              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Date du signalement : </Text>  {signalement?.date_creation ? new Date(signalement.date_creation).toLocaleDateString() : ''}</Text>
-              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Heure du signalement : </Text>  {signalement?.date_creation ? new Date(signalement.date_creation).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</Text>
+              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Date du signalement : </Text> {signalement?.date_creation ? new Date(signalement.date_creation).toLocaleDateString() : ''}</Text>
+              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Heure du signalement : </Text> {signalement?.date_creation ? new Date(signalement.date_creation).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Signaler par : </Text> {signalement?.id_utilisateur}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Problème : </Text> {signalement?.probleme}</Text>
               {signalement?.photo && (

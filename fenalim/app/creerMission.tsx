@@ -8,9 +8,6 @@ import { setNativeProps } from 'react-native-reanimated';
 export default function CreerMission() {
    
   // variable pour ensuite envoyer à l'api
-  // liste déroulante
-  const [valueStatut, setValueStatut] = useState(null);
-  
   // text input
   const [nomMission, setnomMission] = useState(''); 
   const [IDPoint, setIDPoint] = useState(''); 
@@ -25,12 +22,6 @@ export default function CreerMission() {
     { label : 'Terminer' , value : 'TERMINER' }, 
   ]);
 
-  // méthode de vérification
-  const verifTypeStatut = (type: string) => {
-    const typeValides = ['EN ATTENTE', 'EN COURS', 'TERMINER'];
-    return typeValides.includes(type);
-  }
-
   const creerMission = async () => {
 
     // Avant l'appel API, pour vérifier les valeurs
@@ -38,7 +29,6 @@ export default function CreerMission() {
   console.log("nomMission:", nomMission);
   console.log("IDPoint:", IDPoint);
   console.log("idUtilisateur temporaire", "1")
-  console.log("statut:", valueStatut);
   console.log("commentaire:", commentaire);
   console.log("itinéraire:", itineraire);
     if(nomMission == null || !nomMission.trim()){
@@ -49,11 +39,6 @@ export default function CreerMission() {
     else if(IDPoint == null || !IDPoint.trim() || Number.isInteger(Number(IDPoint)) == false){
       console.log("Erreur l'ID du point incorrect");
       alert("L'ID du point est incorect");
-      return;
-    }
-    else if(valueStatut == null || verifTypeStatut(valueStatut) == false){
-      console.log("Erreur le statut de la mission incorrect");
-      alert("Le statut de la mission est incorect");
       return;
     }
     else if(commentaire == null || !commentaire.trim() || commentaire.length>250){
@@ -68,10 +53,9 @@ export default function CreerMission() {
     }
     else{
       try {
-        const response = await axios.post('http://172.20.10.7:8000/missions/', {
+        const response = await axios.post('http://192.168.1.178:8000/missions/', {
           nom_mission: nomMission,        
           id_point: parseInt(IDPoint),
-          statut: valueStatut,
           id_utilisateur : 1,  // a changer par la suite celui ci est un utilisateur créer sur ma bdd
           commentaire: commentaire, 
           itineraire: itineraire,
@@ -114,22 +98,6 @@ export default function CreerMission() {
       <TextInput value={IDPoint} onChangeText={setIDPoint} style={styles.entree} keyboardType='number-pad' placeholder=""></TextInput>
     </View> 
 
-
-    {/* statut */}
-    <View style={[styles.tout, {zIndex: 100, marginTop:20}]}>
-      <Text style={styles.text}>Statut du point d’eau</Text> 
-      <DropDownPicker 
-        open={openStatuts} 
-        value={valueStatut} 
-        items={etatStatuts} 
-        setOpen={setOpenStatuts} 
-        setValue={setValueStatut} 
-        setItems={setItemsSatatus}
-        placeholder="Sélectionnez le statut de la mission" 
-        listMode= "SCROLLVIEW"
-        style={styles.menuD}
-      /> 
-    </View> 
 
     {/* message mission */}
     <View style={styles.tout}>

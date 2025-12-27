@@ -34,7 +34,7 @@ export default function UserDetails() {
   const infoUtilisateurSelect = async () => {
     try {
       console.log("iddddd", id_s)
-      const response = await axios.get(`http://172.20.10.7:8000/signaler/id_s/${id_s}`);
+      const response = await axios.get(`http://192.168.1.178:8000/signaler/id_s/${id_s}`);
       // affichage des données
       console.log("Données reçues:", response.data);
       
@@ -54,29 +54,6 @@ export default function UserDetails() {
     }
   };
 
-    const fetchPointsEau = async () => {
-      try {
-        const response = await axios.get(`http://192.168.1.178:8000/points-eau/`);
-        // affichage des données
-        // console.log("Données reçues:", response.data);
-
-        const lambert93 =
-          "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
-        const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
-        const [longitude, latitude] = proj4(lambert93,wgs84,[response.data.longitude, response.data.latitude]);
-
-      setPointSignale({
-        latitude,
-        longitude,
-      });      } 
-      catch (error) {
-        console.error("Erreur lors du chargement du points d'eau :", error);
-        Alert.alert("Erreur", "Impossible de récupérerle point d'eau.");
-      } 
-      finally {
-        setChargement(false);
-      }
-    };
   
   const suprimmerSignalement = async () => {
 

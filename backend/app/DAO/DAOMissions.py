@@ -39,7 +39,6 @@ def create_mission(db: Session, mission_data: Dict[str, Any]):
         nom_mission=mission_data["nom_mission"],
         id_point=mission_data["id_point"],
         id_utilisateur=mission_data["id_utilisateur"],
-        statut=mission_data.get("statut", "en attente"),
         commentaire=mission_data.get("commentaire"),
         itineraire=mission_data.get("itineraire")
     )

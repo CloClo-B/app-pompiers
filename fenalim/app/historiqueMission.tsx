@@ -1,22 +1,221 @@
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Platform, Linking, TouchableHighlight } from 'react-native';
+import {useRouter } from 'expo-router';
+import axios from 'axios';
 
 
-export default function HistoriqueMission() {
+const info = require('@/assets/images/information.png');
+type MissionAvecPoint = {
+  id_mission: string;
+  nom_mission: string;
+  date_fin: string;
+  date_creation: string;
+
+};
+
+export default function historiqueMission() {
+
+  const [mission, seetMission] = useState<MissionAvecPoint[]>([]);
+
+  const router = useRouter();
+  
+
+  // afficher la mission a supprimer
+  const appuieLongSupp = (nomMisson : string, id: string) => {
+    Alert.alert(
+    "Suprrimer la mission ?",
+    "Nom de la mission: "+ nomMisson,
+    [
+        {
+        text: "Non", style: "cancel" },
+        {
+        text: "Oui", onPress: async () => {confirmeSupp(nomMisson, id)},
+        },
+    ]
+    );
+  };
+  // confirmer suppression DÉFINITIVE
+  const confirmeSupp = (nomMisson : string, id: string) => {
+    Alert.alert(
+    "Confirmer la suppression définitive de la mission: " + nomMisson,
+    "",
+    [
+        {
+        text: "Non", style: "cancel" },
+        {
+        text: "Oui", onPress: async () => {supprimerMission(id)},
+        },
+    ]
+    );
+  };
+
+
+  // calculer la durée total de la mission
+  const calculerDuree = (dateDebut: string, dateFin: string) => {
+    const debut = new Date(dateDebut).getTime();
+    const fin = new Date(dateFin).getTime();
+
+    const diffMs = fin - debut;
+    const diffHeures = Math.floor(diffMs / (1000 * 60 * 60));
+    const jours = Math.floor(diffHeures / 24);
+    const heures = diffHeures % 24;
+
+    if (jours > 0) {
+      return `${jours} j ${heures} h`;
+    }
+    return `${heures} h`;
+  };
+
+
+
+  
+  const renderItem = ({ item }: { item: MissionAvecPoint }) => (
+    <View >
+      <TouchableHighlight onLongPress={() => appuieLongSupp(item.nom_mission, item.id_mission)}  underlayColor="white">
+        <View style={styles.row}>
+          <Text style={styles.cell}>{item.nom_mission.length > 7 ? item.nom_mission.slice(0, 7) + ' ...' : item.nom_mission}</Text>
+          <Text style={styles.cell}>{item?.date_creation ? new Date(item.date_creation).toLocaleDateString() : ''}</Text>
+          <Text style={styles.cell}>    {item.date_fin ? calculerDuree(item.date_creation, item.date_fin): ''}</Text>
+          <TouchableOpacity onPress={() => router.push({ pathname: '/infoMissionTerminer', params: { id_m: item.id_mission } })}>
+            <Image source={info} style={styles.cellImage} />
+          </TouchableOpacity>
+        </View>
+      </TouchableHighlight>
+    
+    </View>
+  );
+  
+  useEffect(() => {
+    fetchMissions();
+  }, []);
+
+  const fetchMissions = async () => {
+    try {
+      const responseMission = await axios.get("http://192.168.1.178:8000/missions/");
+            
+      // affichage des données
+      console.log("Données reçues:", responseMission.data);
+      
+      const MissionsRaw = Array.isArray(responseMission.data) ? responseMission.data : responseMission.data.missions;
+      
+      if (!MissionsRaw) {
+        console.error("Impossible de récupérer l'historique des mission:", responseMission.data);
+        return;
+      }
+    
+      const lesMissions: MissionAvecPoint[] = await Promise.all(
+      
+        MissionsRaw.filter((u: any) => u.statut === "TERMINER").map(async (u: any) => {
+          
+          return {
+            id_mission: String(u.id_mission),
+            nom_mission: u.nom_mission,
+            date_creation: u.date_creation,
+            date_fin: u.date_fin,
+          }; 
+      })
+    );
+    
+    seetMission(lesMissions);
+    
+  } catch (error) {
+      console.error("Erreur lors du chargement de l'historique des missions :", error);
+      Alert.alert("Erreur", "Impossible de récupérer l'historique des missions.");
+    }
+  };
+
+  const supprimerMission = async (id_mission : string) => {
+    // Avant l'appel API, pour vérifier les valeurs
+    console.log("Vérification de l'id à envoyer pour supprimer\n");
+    console.log("Id mission: ",id_mission);
+
+    try {
+    
+      const response = await axios.delete(`http://192.168.1.178:8000/missions/supprimer/${id_mission}`)
+
+    
+    router.push({
+        pathname: '/creationSucces',
+        params: { title: 'Mission supprimer avec succès', creerMission: 'creerMission', chemainPage: '/point_eau' }
+        });
+    } catch (error) {
+        console.error(error);
+        alert('Erreur lors de la suprression de la mission');
+    }
+  };
+
+
   return (
     <>    
 
+    
+    <View style={styles.container}>
+
     <View style={styles.hautBleu}>
-      <Text style={styles.textTittre}>Nom mission</Text>
-      <Text style={styles.textTittre}>Jour commencement</Text>
+      <Text style={styles.textTittre}>Nom</Text>
+      <Text style={styles.textTittre}>commencement</Text>
       <Text style={styles.textTittre}>Durée</Text>
-      <Text style={styles.textTittre}>Équipe présente</Text>
+      <Text style={styles.textTittre}>Infos</Text>
     </View> 
-       
+
+
+      <View style={styles.tableContainer}>
+        <FlatList
+          data={mission}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id_mission}
+        />
+      </View>
+
+    </View>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { 
+    flex: 1, 
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  vert:{
+    backgroundColor:'#4CAF50',
+    paddingHorizontal: 5,
+    paddingVertical:2,
+    borderRadius:10,
+  },
+  header: { 
+    flexDirection: 'row', 
+    backgroundColor: '#3498db', 
+    padding: 8 
+  },
+  headerCell: { 
+    flex: 1, 
+    color: 'white', 
+    fontWeight: 'bold' 
+  },
+  tableContainer: { 
+    width: 345, 
+    height: 365, 
+    borderWidth: 1, 
+    borderColor: '#ccc', 
+    marginTop: 8 
+  },
+  row: { 
+    justifyContent: 'center',
+    flexDirection: 'row', 
+    padding: 15, 
+    borderBottomWidth: 1, 
+    borderBottomColor: '#eee' 
+  },
+  cell: { 
+    flex: 1 
+  },
+  cellImage: { 
+    width: 25, 
+    height: 25 
+  },
   hautBleu:{
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
@@ -30,5 +229,12 @@ const styles = StyleSheet.create({
   textTittre:{
     color: '#ffffff',
     fontSize: 17,
+  },
+  titre2: {
+    textAlign: 'center',
+    color: '#1D3557',
+    fontSize: 25,
+    marginBottom: 30,
   }
+
 });

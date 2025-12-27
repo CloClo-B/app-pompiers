@@ -103,7 +103,6 @@ class MissionCreate(MissionBase):
     nom_mission: str
     id_point: int
     id_utilisateur: int
-    statut: str
     commentaire: Optional[str]
     itineraire: Optional[Any]
 
@@ -115,7 +114,7 @@ class MissionUpdate(BaseModel):
     statut: Optional[str] = None
     commentaire: Optional[str] = None
     itineraire: Optional[Any] = None
-
+    date_fin: Optional[datetime]
 
 class MissionOut(BaseModel):
     id_mission: int
@@ -126,6 +125,7 @@ class MissionOut(BaseModel):
     statut: str
     commentaire: Optional[str]
     itineraire: Optional[Any]
+    date_fin: Optional[datetime]
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 

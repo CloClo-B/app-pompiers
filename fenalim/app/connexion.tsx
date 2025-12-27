@@ -38,12 +38,11 @@ export default function Connexion() {
 
     else{
       try {
-        const response = await axios.post('http://172.20.10.7:8000/utilisateurs/login', {
+        const response = await axios.post('http://192.168.1.178:8000/utilisateurs/login', {
           email: email,        
           mot_de_passe: motDePasse,
         });
         
-        console.log("Token du compte", email, ":", response.data.token);
         router.navigate('/(tabs)/acceuil')
         }
       catch (error: unknown) {
