@@ -4,11 +4,9 @@ services:
     image: postgis/postgis:16-3.4
     container_name: fenalim_db
     restart: unless-stopped
-    #Informations de connexion pour la base de données
-    environment:
-      POSTGRES_USER: fenalim
-      POSTGRES_PASSWORD: fenalim123
-      POSTGRES_DB: fenalim_db
+    #Informations de connexion pour la base de données fournies par le fichier .env
+    env_file:
+      - .env
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
@@ -21,8 +19,9 @@ services:
     build: ./backend
     container_name: fenalim_api
     restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql+psycopg2://fenalim:fenalim123@db:5432/fenalim_db
+    # URL de la base de données fournie par le fichier .env
+    env_file:
+      - .env
     #L'api dépend de la base de données
     depends_on:
       - db
@@ -41,9 +40,9 @@ services:
     image: dpage/pgadmin4
     container_name: fenalim_pgadmin
     restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@fenalim.fr
-      PGADMIN_DEFAULT_PASSWORD: E03?M12/
+    # Informations de connexion fournies par le fichier .env
+    env_file:
+      - .env
     ports:
       - "5051:80"
     #pgadmin dépend de la base de données
