@@ -10,6 +10,8 @@ from app.DAO.DAOSignaler import (
     get_signale_by_id_point,
     delete_signale_by_id_point
 )
+from ..models import Utilisateur
+from .dependencies import rolesChecker
 
 router = APIRouter(prefix="/signaler", tags=["Signaler"])
 
@@ -22,29 +24,29 @@ def get_db():
 
 # ================= GET ALL =================
 @router.get("/", response_model=list[SignalerBase])
-def list_signaler(db: Session = Depends(get_db)):
+def list_signaler(db: Session = Depends(get_db),user_check: Utilisateur = Depends(rolesChecker("commandement"))):
     """Liste tous les signalements"""
     pointSignale = get_all_signale(db)
     return pointSignale
 
 # ================= GET BY ID_POINT =================
 @router.get("/id_p/{id_point}", response_model=list[SignalerBase])
-def get_signalements_by_point(id_point: int, db: Session = Depends(get_db)):
+def get_signalements_by_point(id_point: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("pompier"))):
     """Récupère tous les signalements pour un point d'eau spécifique"""
     signalements = get_signale_by_id_point(db, id_point)
     
     if not signalements:
-        raise HTTPException(status_code=404, detail="Signalement pour le point : {id_point} non trouvé")
+        raise HTTPException(status_code=404, detail=f"Signalement pour le point : {id_point} non trouvé")
     
     return signalements
 
 
 # ================= GET BY ID_SIGNALEMENT =================
 @router.get("/id_s/{signalement_id}", response_model=SignalerBase)
-def get_user(signalement_id: int, db: Session = Depends(get_db)):
+def get_user(signalement_id: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("pompier"))):
     signal = db.query(Signaler).filter(Signaler.id == signalement_id).first()
     if not signal:
-        raise HTTPException(status_code=404, detail=f"Le point numéro: {signalement_id} na pas été trouvé")
+        raise HTTPException(status_code=404, detail=f"Le point numéro: {signalement_id} n'a pas été trouvé")
     return signal
 
 
@@ -55,10 +57,10 @@ def create_signalement(id_point: int = Form(...), probleme: str = Form(...), id_
     # verification des info
     point = db.query(PointEau).filter(PointEau.numero_pei == id_point).first()
     if not point:
-        raise HTTPException(status_code=404, detail=f"Le point numéro : {id_point} na pas été trouvé")
+        raise HTTPException(status_code=404, detail=f"Le point numéro : {id_point} n'a pas été trouvé")
     utilisateurExite = db.query(Utilisateur).filter(Utilisateur.id_utilisateur == id_utilisateur).first()
     if not utilisateurExite:
-        raise HTTPException(status_code=404, detail=f"L'utilisateur est introuvable")
+        raise HTTPException(status_code=404, detail="L'utilisateur est introuvable")
     
 
     # création d'un id pour l'image
@@ -87,7 +89,7 @@ def create_signalement(id_point: int = Form(...), probleme: str = Form(...), id_
 
 # ================= DELETE =================
 @router.delete("/suprimmer/{id_point}")
-def delete_signalements(id_point: int, db: Session = Depends(get_db)):
+def delete_signalements(id_point: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
     """Supprime tous les signalements d'un point d'eau"""
     success = delete_signale_by_id_point(db, id_point)
     

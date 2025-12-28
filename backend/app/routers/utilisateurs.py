@@ -6,7 +6,7 @@ from ..database import SessionLocal
 from ..models import Utilisateur
 from ..schemas import UtilisateurCreate, UtilisateurOut, UtilisateurUpdate, LoginPayload, AuthResponse, LogoutPayload
 from ..token_jwt import createToken, getTokenUser
-from dependencies import rolesChecker
+from .dependencies import rolesChecker
 
 router = APIRouter(prefix="/utilisateurs", tags=["Utilisateurs"])
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
