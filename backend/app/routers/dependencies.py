@@ -1,5 +1,5 @@
 from fastapi import HTTPException, Depends
-from .token_jwt import getTokenUser
+from ..token_jwt import getTokenUser
 
 #Identifie les roles qui ont accès à la route demandée
 def rolesChecker(*roles_access):
