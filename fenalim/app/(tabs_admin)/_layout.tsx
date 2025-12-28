@@ -36,7 +36,7 @@ export default function TabLayout() {
 
 
       <Tabs.Screen
-        name="acceuil"
+        name="acceuil_admin"
         options={{
           title: 'ACCUEIL',
           tabBarIcon: ({ focused }) => (

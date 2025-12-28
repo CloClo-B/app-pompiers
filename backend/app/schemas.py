@@ -78,6 +78,7 @@ class UtilisateurOut(BaseModel):
 class AuthResponse(BaseModel):
     id_utilisateur: int
     token: str
+    role: str
     model_config = ConfigDict(from_attributes=True)
 
 

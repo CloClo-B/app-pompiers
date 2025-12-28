@@ -42,8 +42,23 @@ export default function Connexion() {
           email: email,        
           mot_de_passe: motDePasse,
         });
-        
-        router.navigate('/(tabs)/acceuil')
+
+        // recup token
+        console.log("Token du compte", email, ":", response.data.token);
+
+        const role = response.data.role;  //recuperation du role de l'utilisateur
+        console.log(role);
+        // affichage en focntion du role
+        if (role === 'public') {
+          router.replace('/(tabs_public)/acceuil');
+        } else if (role === 'pompier') {
+          router.replace('/(tabs_pompier)/acceuil_pompier');
+        } else if (role === 'commandement') {
+          router.replace('/(tabs_commandement)/acceuil_commandement');
+        } else if (role === 'admin') {
+          router.replace('/(tabs_admin)/acceuil_admin');
+        }
+
         }
       catch (error: unknown) {
         if (axios.isAxiosError(error)) {

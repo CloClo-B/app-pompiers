@@ -53,7 +53,7 @@ def create_user(payload: UtilisateurCreate, db: Session = Depends(get_db)):
     # Génération du token pour l'utilisateur 
     data = {"sub": new_user.id_utilisateur, "role": new_user.role}
     tokenUser = createToken(data)
-    return AuthResponse(id_utilisateur=new_user.id_utilisateur, token=tokenUser)
+    return AuthResponse(id_utilisateur=new_user.id_utilisateur, token=tokenUser, role=new_user.role)
 
 # ================= VÉRIFIER SI UTILISATEUR EXISTE =================
 @router.post("/login", response_model=AuthResponse)
@@ -73,7 +73,7 @@ def verif_login(payload: LoginPayload, db: Session = Depends(get_db)):
     # Générer JWT
     data = {"sub": user.id_utilisateur, "role": user.role}
     tokenUser = createToken(data)
-    return AuthResponse(id_utilisateur=user.id_utilisateur, token=tokenUser)
+    return AuthResponse(id_utilisateur=user.id_utilisateur, token=tokenUser, role=user.role)
 
 
 # ================= GET ALL =================

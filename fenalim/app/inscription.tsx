@@ -7,7 +7,7 @@ import axios from 'axios';
 import { useState } from 'react';
 
 export default function Connexion() {
-  
+
   // variable pour ensuite envoyer à l'api
   // text input
   const [nom, setNom] = useState(''); 
@@ -75,9 +75,22 @@ export default function Connexion() {
           mot_de_passe: motDePasse,
           confirm_password: ConfirmmotDePasse, 
         });
+        // recup token
         console.log("Token du compte", email, ":", response.data.token);
-        router.navigate('/(tabs)/acceuil')
-        } 
+
+        const role = response.data.role;  //recuperation du role de l'utilisateur
+        console.log(role);
+        // affichage en focntion du role
+        if (role === 'public') {
+          router.replace('/(tabs_public)/acceuil');
+        } else if (role === 'pompier') {
+          router.replace('/(tabs_pompier)/acceuil_pompier');
+        } else if (role === 'commandement') {
+          router.replace('/(tabs_commandement)/acceuil_commandement');
+        } else if (role === 'admin') {
+          router.replace('/(tabs_admin)/acceuil_admin');
+        }
+      } 
       catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           // erreur renvoyée par l’API
