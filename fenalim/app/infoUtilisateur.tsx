@@ -77,7 +77,7 @@ export default function UserDetails() {
           
           {/* BOUTONS */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-            <TouchableOpacity style={[styles.boutton ,{ backgroundColor: '#457B9D', width: 150, height: 45 }]} onPress={() => router.navigate('/(tabs)/utilisateur')}>
+            <TouchableOpacity style={[styles.boutton ,{ backgroundColor: '#457B9D', width: 150, height: 45 }]} onPress={() => router.navigate('/(tabs_admin)/utilisateur')}>
                 <Text style={{color:'#ffffff'}}>FERMER</Text>
             </TouchableOpacity>
 
