@@ -1,15 +1,29 @@
-import { router } from 'expo-router';
-import React, { createRef, useState } from 'react';
-import { AccessibilityInfo, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import React, {useEffect, useState } from 'react';
+import {StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import axios from 'axios';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function CreerPoint() {
-  
-  
-  
+  const router = useRouter();
+  const [token, setToken] = useState<string | null>(null);
+
+  // récupérer le token 
+  useEffect(() => {
+    getData();
+  }, []);
+  const getData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('@token')
+      if(value !== null) {
+        setToken(value);
+      }
+    } catch(e) {
+      console.log("erreur token creation point eau");
+    }
+  }
   
   // variable pour ensuite envoyer à l'api
 
@@ -28,7 +42,7 @@ export default function CreerPoint() {
   const [latitude, setLatitude] = useState('');
   const [insee5, setInsee5] = useState('');
   const [refCarto, setRefCarto] = useState('');
-
+  
   
   
   
@@ -99,9 +113,9 @@ export default function CreerPoint() {
     const typeValides = ['PUBLIC', 'PRIVE'];
     return typeValides.includes(type);
   }
- 
+  
 
-
+  
   // communication avec l'api  /points-eau/
   // valentin : 172.20.10.2 | 192.168.1.184
   const creerPointAPI = async () => {
@@ -122,7 +136,14 @@ export default function CreerPoint() {
   console.log("longitude:", parseFloat(longitude));
   console.log("latitude:", parseFloat(latitude));
   console.log("utilisateur:", "");
-
+  
+  if (!token) {
+    alert("Token manquant, impossible de créer le point d'eau");
+    return;
+  }
+  else{
+    console.log(token);
+  }
 
   // vérfication des valeurs correct avant envoyer à l'api + affichage message de l'erreur
   if(valueType == null || verifTypePoint(valueType) == false){
@@ -203,7 +224,13 @@ export default function CreerPoint() {
           longitude: parseFloat(longitude.replace(',', '.')),
           latitude: parseFloat(latitude.replace(',', '.')),
           utilisateur: '', //ne pas oublié par la suite c'est pour savoir qui a ajouter le point 
-        });
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
         
         router.push({
             pathname: '/creationSucces',
@@ -224,10 +251,6 @@ export default function CreerPoint() {
 
     }
   };
-
-
-
-
 
   
   return (

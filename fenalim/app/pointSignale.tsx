@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
 import { router, useRouter } from 'expo-router';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const roue = require('@/assets/images/parametres.png');
 
@@ -18,15 +19,39 @@ export default function PointSignale() {
   
   const [signaler, setSignale] = useState<Signale[]>([]);
   const [chargement, setChargement] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
   
-  
+  // récupérer le token 
   useEffect(() => {
-    fetchPointSignale();
+    getData();
   }, []);
-
-  const fetchPointSignale = async () => {
+  const getData = async () => {
     try {
-      const response = await axios.get("http://192.168.1.178:8000/signaler/");
+      const value = await AsyncStorage.getItem('@token')
+      if(value !== null) {
+        setToken(value);
+        fetchPointSignale(value);
+      }
+    } catch(e) {
+      console.log("erreur token affichage point eau signaler");
+    }
+  }
+  
+
+  const fetchPointSignale = async (token: string) => {
+    if (!token) {
+      alert("Token manquant, impossible de créer le point d'eau");
+      return;
+    }
+    else{
+      console.log(token);
+    }
+    try {
+      const response = await axios.get("http://192.168.1.178:8000/signaler/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       // affichage des données
       console.log("Données reçues:", response.data);
       

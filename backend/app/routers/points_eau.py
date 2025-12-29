@@ -32,7 +32,7 @@ def list_points(db: Session = Depends(get_db)):
 
 # ================= GET BY NUMERO_PEI =================
 @router.get("/{numero_pei}", response_model=PointEauBase)
-def get_point(numero_pei: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("commandement"))):
+def get_point(numero_pei: int, db: Session = Depends(get_db)):
     point = get_point_eau_by_numero_pei(db, numero_pei)
     
     if not point:

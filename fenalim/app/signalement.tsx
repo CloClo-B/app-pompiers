@@ -86,7 +86,7 @@ const handlePickImage = () => {
 
     if(probleme == null || !probleme.trim() || probleme.trim().length<10 || probleme.trim().length> 100){
       console.log("Erreur le nom est incorrect");
-      alert("La description du probleème est incorrect minimum 10 caractère maximum 100");
+      alert("La description du problème est incorrect minimum 10 caractère maximum 100");
       return;
     }
     else if(image == null){
@@ -97,7 +97,7 @@ const handlePickImage = () => {
     else{        
       try {
         const formData = new FormData();
-        formData.append("id_point", "222");
+        formData.append("id_point", "666");
         formData.append("probleme", probleme);
         formData.append("photo", {
           uri: image,

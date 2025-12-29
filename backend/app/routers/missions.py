@@ -4,7 +4,7 @@ from typing import List
 
 
 from ..database import SessionLocal
-from ..models import Mission
+from ..models import Mission, Utilisateur
 from ..schemas import MissionCreate, MissionUpdate, MissionOut, MissionBase
 from app.DAO.DAOMissions import (
     create_mission,
@@ -14,6 +14,8 @@ from app.DAO.DAOMissions import (
     get_mission_by_id,
     update_mission_by_id
 )
+from .dependencies import rolesChecker
+
 
 router = APIRouter(prefix="/missions", tags=["Missions"])
 
@@ -27,7 +29,7 @@ def get_db():
 
 # ================= CREATE =================
 @router.post("/", response_model=MissionCreate)  
-def create_mission_route(payload: MissionCreate, db: Session = Depends(get_db)):
+def create_mission_route(payload: MissionCreate, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("commandement","admin"))):
     try:
         nouveau_mission = create_mission(db, payload.model_dump())
     except ValueError as e:
@@ -44,14 +46,14 @@ def create_mission_route(payload: MissionCreate, db: Session = Depends(get_db)):
 
 # ================= GET ALL =================
 @router.get("/", response_model=List[MissionOut])  
-def list_missions(db: Session = Depends(get_db)):
+def list_missions(db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("pompier", "commandement","admin"))):
     mission = get_all_mission(db)
     return mission
 
 
 # ================= GET BY ID =================
 @router.get("/{mission_id}", response_model=MissionOut) 
-def get_mission(mission_id: int, db: Session = Depends(get_db)):
+def get_mission(mission_id: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("pompier", "commandement","admin"))):
     mission = get_mission_by_id(db, mission_id)
     if not mission:
         raise HTTPException(status_code=404, detail=f"Mission {mission_id} non trouvée")
@@ -60,7 +62,7 @@ def get_mission(mission_id: int, db: Session = Depends(get_db)):
 
 # ================= UPDATE =================
 @router.put("/update/{id_mission}", response_model=MissionOut)
-def update_mission(id_mission: int, payload: MissionUpdate, db: Session = Depends(get_db)):
+def update_mission(id_mission: int, payload: MissionUpdate, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("commandement","admin"))):
     try:
         mission = update_mission_by_id(db, id_mission, payload.model_dump(exclude_unset=True))
     except ValueError as e:
@@ -70,7 +72,7 @@ def update_mission(id_mission: int, payload: MissionUpdate, db: Session = Depend
 
 # ================= DELETE =================
 @router.delete("/supprimer/{mission_id}", response_model=dict)
-def delete_mission(mission_id: int, db: Session = Depends(get_db)):
+def delete_mission(mission_id: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("commandement","admin"))):
     success = delete_mission_by_id(db, mission_id)
     
     if not success:

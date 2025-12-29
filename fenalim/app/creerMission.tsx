@@ -1,12 +1,30 @@
 import axios from 'axios';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { setNativeProps } from 'react-native-reanimated';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CreerMission() {
-   
+
+  const [token, setToken] = useState<string | null>(null);
+
+  // récupérer le token 
+  useEffect(() => {
+    getData();
+  }, []);
+  const getData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('@token')
+      if(value !== null) {
+        setToken(value);
+      }
+    } catch(e) {
+      console.log("erreur token creation point eau");
+    }
+  }
+
   // variable pour ensuite envoyer à l'api
   // text input
   const [nomMission, setnomMission] = useState(''); 
@@ -23,7 +41,13 @@ export default function CreerMission() {
   ]);
 
   const creerMission = async () => {
-
+    if (!token) {
+      alert("Token manquant, impossible de créer la mission");
+      return;
+    }
+    else{
+      console.log(token);
+    }
     // Avant l'appel API, pour vérifier les valeurs
   console.log("Vérification des valeurs à envoyer\n");
   console.log("nomMission:", nomMission);
@@ -60,7 +84,13 @@ export default function CreerMission() {
           commentaire: commentaire, 
           itineraire: itineraire,
   
-        });
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
         
         router.push({
             pathname: '/creationSucces',

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Platform, Linking, TouchableHighlight } from 'react-native';
 import {useRouter } from 'expo-router';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const info = require('@/assets/images/information.png');
@@ -18,7 +19,24 @@ export default function historiqueMission() {
   const [mission, seetMission] = useState<MissionAvecPoint[]>([]);
 
   const router = useRouter();
+
+  const [token, setToken] = useState<string | null>(null);
   
+  // récupérer le token 
+  useEffect(() => {
+    getData();
+  }, []);
+  const getData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('@token')
+      if(value !== null) {
+        setToken(value);
+        fetchMissions(value);
+      }
+    } catch(e) {
+      console.log("erreur token affichage point eau signaler");
+    }
+  }
 
   // afficher la mission a supprimer
   const appuieLongSupp = (nomMisson : string, id: string) => {
@@ -85,13 +103,20 @@ export default function historiqueMission() {
     </View>
   );
   
-  useEffect(() => {
-    fetchMissions();
-  }, []);
 
-  const fetchMissions = async () => {
+
+  const fetchMissions = async (token: string) => {
+    if (!token) {
+      alert("Token manquant, impossible d'afficher l'historique des mission");
+      return;
+    }
+    else{
+      console.log(token);
+    }
     try {
-      const responseMission = await axios.get("http://192.168.1.178:8000/missions/");
+      const responseMission = await axios.get("http://192.168.1.178:8000/missions/", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
             
       // affichage des données
       console.log("Données reçues:", responseMission.data);
@@ -131,7 +156,9 @@ export default function historiqueMission() {
 
     try {
     
-      const response = await axios.delete(`http://192.168.1.178:8000/missions/supprimer/${id_mission}`)
+      const response = await axios.delete(`http://192.168.1.178:8000/missions/supprimer/${id_mission}`,  {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
     
     router.push({

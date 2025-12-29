@@ -24,14 +24,14 @@ def get_db():
 
 # ================= GET ALL =================
 @router.get("/", response_model=list[SignalerBase])
-def list_signaler(db: Session = Depends(get_db),user_check: Utilisateur = Depends(rolesChecker("commandement"))):
+def list_signaler(db: Session = Depends(get_db),user_check: Utilisateur = Depends(rolesChecker("pompier", "commandement","admin"))):
     """Liste tous les signalements"""
     pointSignale = get_all_signale(db)
     return pointSignale
 
 # ================= GET BY ID_POINT =================
 @router.get("/id_p/{id_point}", response_model=list[SignalerBase])
-def get_signalements_by_point(id_point: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("pompier"))):
+def get_signalements_by_point(id_point: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("pompier", "commandement","admin"))):
     """Récupère tous les signalements pour un point d'eau spécifique"""
     signalements = get_signale_by_id_point(db, id_point)
     
@@ -43,7 +43,7 @@ def get_signalements_by_point(id_point: int, db: Session = Depends(get_db), user
 
 # ================= GET BY ID_SIGNALEMENT =================
 @router.get("/id_s/{signalement_id}", response_model=SignalerBase)
-def get_user(signalement_id: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("pompier"))):
+def get_user(signalement_id: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("pompier", "commandement","admin"))):
     signal = db.query(Signaler).filter(Signaler.id == signalement_id).first()
     if not signal:
         raise HTTPException(status_code=404, detail=f"Le point numéro: {signalement_id} n'a pas été trouvé")
@@ -89,7 +89,7 @@ def create_signalement(id_point: int = Form(...), probleme: str = Form(...), id_
 
 # ================= DELETE =================
 @router.delete("/suprimmer/{id_point}")
-def delete_signalements(id_point: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
+def delete_signalements(id_point: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("pompier", "commandement","admin"))):
     """Supprime tous les signalements d'un point d'eau"""
     success = delete_signale_by_id_point(db, id_point)
     

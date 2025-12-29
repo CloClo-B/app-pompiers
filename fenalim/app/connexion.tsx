@@ -6,6 +6,7 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Button from '@/components/ButtonLog';
 import { useState } from 'react';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Connexion() {
   const router = useRouter();
@@ -48,6 +49,11 @@ export default function Connexion() {
 
         const role = response.data.role;  //recuperation du role de l'utilisateur
         console.log(role);
+        try {
+            await AsyncStorage.setItem('@token', response.data.token)
+        } catch (e) {
+          console.log("erreur token")
+        }
         // affichage en focntion du role
         if (role === 'public') {
           router.replace('/(tabs_public)/acceuil');

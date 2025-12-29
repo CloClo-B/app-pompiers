@@ -4,7 +4,10 @@ import HautPage from './hautPage';
 import axios from "axios";
 import { router, useLocalSearchParams} from 'expo-router';
 import proj4 from "proj4";
-  
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { naviguerPointEau } from '../config/navigation';
+import { getUserInfo } from "../config/userAPI"; 
+
 
 type Signale = {
   id: string;
@@ -20,21 +23,42 @@ type lePoint = {
 };
 
 export default function UserDetails() {
-  const [chargement, setChargement] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  
+  // récupérer le token 
+  useEffect(() => {
+    getData();
+  }, []);
+  const getData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('@token');
+      if (value !== null) {
+        setToken(value);
+        const user = await getUserInfo(value);
+        if (user) setUserRole(user);
+        infoSignalementSelect(value);
+      }
+    } catch (e) {
+      console.log("erreur token affichage utilisateur");
+    }
+  };
   const [signalement, setSignalement] = useState<Signale | null>(null);
-  const [pointSignale, setPointSignale] = useState<lePoint | null>(null);
 
   const params = useLocalSearchParams();
   const id_s = params.id_s as string
 
-  useEffect(() => {
-    infoUtilisateurSelect();
-  }, []);
-  
-  const infoUtilisateurSelect = async () => {
+
+  const infoSignalementSelect = async (token: string) => {
+    if (!token) {
+      alert("Token manquant, impossible d'afficher les missions en cours");
+      return;
+    }
     try {
       console.log("iddddd", id_s)
-      const response = await axios.get(`http://192.168.1.178:8000/signaler/id_s/${id_s}`);
+      const response = await axios.get(`http://192.168.1.178:8000/signaler/id_s/${id_s}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       // affichage des données
       console.log("Données reçues:", response.data);
       
@@ -49,9 +73,7 @@ export default function UserDetails() {
   } catch (error) {
     console.error("Erreur lors du chargement du signalement :", error);
     Alert.alert("Erreur", "Impossible de récupérer le signalement.");
-  } finally {
-      setChargement(false);
-    }
+  }
   };
 
   
@@ -64,7 +86,9 @@ export default function UserDetails() {
 
         try {
         
-        const response = await axios.delete(`http://192.168.1.178:8000/signaler/suprimmer/${signalement?.id_point}`)
+        const response = await axios.delete(`http://192.168.1.178:8000/signaler/suprimmer/${signalement?.id_point}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
         
         router.push({
             pathname: '/creationSucces',
@@ -75,6 +99,8 @@ export default function UserDetails() {
             alert('Erreur lors de la supression du signalement');
         }
     };
+
+
 
   return (
 
@@ -113,7 +139,7 @@ export default function UserDetails() {
             
             {/* BOUTONS */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-              <TouchableOpacity style={[styles.boutton, { backgroundColor: '#457B9D', width: 150, height: 45 }]} onPress={() => router.navigate('/(tabs)/point_eau')}>
+              <TouchableOpacity style={[styles.boutton, { backgroundColor: '#457B9D', width: 150, height: 45 }]}  onPress={() => {if (userRole) naviguerPointEau(userRole); else alert("Rôle utilisateur introuvable"); }}>
                 <Text style={{color:'#ffffff'}}>Annuler</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.boutton, { backgroundColor: '#457B9D', width: 150, height: 45 }]} onPress={suprimmerSignalement}>

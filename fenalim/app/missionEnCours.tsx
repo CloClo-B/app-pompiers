@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Platform, Li
 import {useRouter } from 'expo-router';
 import axios from 'axios';
 import proj4 from "proj4";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 type MissionAvecPoint = {
@@ -22,6 +23,24 @@ export default function MissionEnCours() {
 
   const router = useRouter();
   
+  const [token, setToken] = useState<string | null>(null);
+  
+  // récupérer le token 
+  useEffect(() => {
+    getData();
+  }, []);
+  const getData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('@token')
+      if(value !== null) {
+        setToken(value);
+        fetchMissions(value);
+      }
+    } catch(e) {
+      console.log("erreur token affichage point eau signaler");
+    }
+  }
+
 
   // alerte terminer mission
   const appuieLongSupp = (nomMission : string, id: string) => {
@@ -108,62 +127,60 @@ export default function MissionEnCours() {
     </View>
   );
   
-  useEffect(() => {
-    fetchMissions();
-  }, []);
 
-  const fetchMissions = async () => {
-    try {
-      const responseMission = await axios.get("http://192.168.1.178:8000/missions/");
-            
-      // affichage des données
-      console.log("Données reçues:", responseMission.data);
-      
-      const MissionsRaw = Array.isArray(responseMission.data) ? responseMission.data : responseMission.data.missions;
-      
-      if (!MissionsRaw) {
-        console.error("Impossible de récupérer les mission:", responseMission.data);
-        return;
-      }
-    
-      const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
-      const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
-      
+const fetchMissions = async (token: string) => {
+  if (!token) {
+    alert("Token manquant, impossible d'afficher les missions en cours");
+    return;
+  }
 
-      const lesMissions: MissionAvecPoint[] = await Promise.all(
-      
-        MissionsRaw.filter((u: any) => u.statut === "EN COURS").map(async (u: any) => {
-          const responsePoint = await axios.get(`http://192.168.1.178:8000/points-eau/${u.id_point}`);
-          
-        const point = responsePoint.data;
+  try {
+    const responseMission = await axios.get("http://192.168.1.178:8000/missions/", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-        let latitude;
-        let longitude;
-
-        if (point){
-          [longitude, latitude] = proj4(lambert93, wgs84, [point.longitude, point.latitude]);
-        }
-                  
-        return {
-          id_mission: String(u.id_mission),
-          id_point: String(u.id_point),
-          nom_mission: u.nom_mission,
-          commentaire: u.commentaire,
-          date_creation: u.date_creation,
-          address: u.itineraire,
-          latitude,
-          longitude,
-        };
-      })
-    );
-    
-    setMissions(lesMissions);
-    
-  } catch (error) {
-      console.error("Erreur lors du chargement des mission :", error);
-      Alert.alert("Erreur", "Impossible de récupérer les mission.");
+    const MissionsRaw = Array.isArray(responseMission.data) ? responseMission.data : responseMission.data.missions;
+    if (!MissionsRaw) {
+      console.error("Impossible de récupérer les missions:", responseMission.data);
+      return;
     }
-  };
+
+    const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
+    const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+
+    const lesMissions: MissionAvecPoint[] = [];
+
+    for (const u of MissionsRaw.filter((m: any) => m.statut === "EN COURS")) {
+      // Appel séquentiel pour chaque point
+      const responsePoint = await axios.get(`http://192.168.1.178:8000/points-eau/${u.id_point}`);
+      const point = responsePoint.data;
+
+      let latitude = 0;
+      let longitude = 0;
+
+      if (point) {
+        [longitude, latitude] = proj4(lambert93, wgs84, [point.longitude, point.latitude]);
+      }
+
+      lesMissions.push({
+        id_mission: String(u.id_mission),
+        id_point: String(u.id_point),
+        nom_mission: u.nom_mission,
+        commentaire: u.commentaire,
+        date_creation: u.date_creation,
+        address: u.itineraire,
+        latitude,
+        longitude,
+      });
+    }
+
+    setMissions(lesMissions);
+  } catch (error) {
+    console.error("Erreur lors du chargement des missions :", error);
+    Alert.alert("Erreur", "Impossible de récupérer les missions.");
+  }
+};
+
 
   const terminerMission = async (id_mission : string) => {
     // Avant l'appel API, pour vérifier les valeurs
@@ -175,7 +192,11 @@ export default function MissionEnCours() {
       const response = await axios.put(`http://192.168.1.178:8000/missions/update/${id_mission}`, {
         statut: "TERMINER",
         date_fin: new Date().toISOString(),
-      });
+      },
+      {headers: {
+        Authorization: `Bearer ${token}`,
+      }}    
+    );
     
     router.push({
         pathname: '/creationSucces',

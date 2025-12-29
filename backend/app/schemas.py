@@ -49,7 +49,7 @@ class UtilisateurBase(BaseModel):
     prenom: str
     email: EmailStr
     telephone: Optional[str] = None
-    role: Optional[str] = "public"
+    role: Optional[str] = "admin"
 
 
 class UtilisateurCreate(UtilisateurBase):
@@ -72,6 +72,11 @@ class UtilisateurUpdate(BaseModel):
 
 class UtilisateurOut(BaseModel):
     id_utilisateur: int
+    nom: str
+    prenom: str
+    email: EmailStr
+    telephone: Optional[str] = None
+    role: Optional[str] = "admin"
     model_config = ConfigDict(from_attributes=True)
 
 

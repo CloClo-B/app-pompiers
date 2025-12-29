@@ -5,6 +5,7 @@ import { KeyboardAvoidingView,Platform, ScrollView, StyleSheet, Text, TextInput,
 import Button from '@/components/ButtonLog';
 import axios from 'axios';
 import { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Connexion() {
 
@@ -80,6 +81,13 @@ export default function Connexion() {
 
         const role = response.data.role;  //recuperation du role de l'utilisateur
         console.log(role);
+
+        
+        try {
+            await AsyncStorage.setItem('@token', response.data.token)
+          } catch (e) {
+            console.log("erreur token")
+          }
         // affichage en focntion du role
         if (role === 'public') {
           router.replace('/(tabs_public)/acceuil');

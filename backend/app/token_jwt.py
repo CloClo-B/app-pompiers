@@ -37,10 +37,13 @@ print(f"time_token: {time_token}")
 
 def createToken(data: dict):
     copyDict = data.copy()
-    copyDict["exp"] = timedelta(hours=time_token) + datetime.utcnow()
-    encoding = jwt.encode(copyDict, key_use, algorithm=algo_use)
-    return encoding
-
+    expire = datetime.utcnow() + timedelta(hours=time_token)  # expiration correcte
+    copyDict.update({
+        "exp": expire,              # PyJWT accepte datetime directement
+        "sub": str(data["sub"])     # s'assurer que sub est une string
+    })
+    token = jwt.encode(copyDict, key_use, algorithm=algo_use)
+    return token
 
 
 def validityToken(token: str):
@@ -63,9 +66,10 @@ def getTokenUser(token: str = Depends(token_client), db: Session = Depends(lambd
         decodeToken = jwt.decode(token, key_use, algorithms=[algo_use])
         user_sub = decodeToken.get("sub")
         user_exp = decodeToken.get("exp")
-
+        
         if user_exp is None:
             raise HTTPException(status_code=401, detail="Le token n'est plus valide")
+
 
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Le token est expiré")

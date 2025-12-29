@@ -4,7 +4,8 @@ import HautPage from './hautPage';
 import axios from "axios";
 import { router, useLocalSearchParams} from 'expo-router';
 import proj4 from "proj4";
-  
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 type Signale = {
   id: string;
@@ -20,6 +21,24 @@ type lePoint = {
 };
 
 export default function UserDetails() {
+  const [token, setToken] = useState<string | null>(null);
+  
+  // récupérer le token 
+  useEffect(() => {
+    getData();
+  }, []);
+  const getData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('@token')
+      if(value !== null) {
+        setToken(value);
+        infoSignalementSelect(value);
+      }
+    } catch(e) {
+      console.log("erreur token affichage utilisateur");
+    }
+  }
+
   const [chargement, setChargement] = useState(true);
   const [signalement, setSignalement] = useState<Signale | null>(null);
   const [pointSignale, setPointSignale] = useState<lePoint | null>(null);
@@ -27,14 +46,17 @@ export default function UserDetails() {
   const params = useLocalSearchParams();
   const id_s = params.id_s as string
 
-  useEffect(() => {
-    infoUtilisateurSelect();
-  }, []);
   
-  const infoUtilisateurSelect = async () => {
+  const infoSignalementSelect = async (token: string) => {
+    if (!token) {
+      alert("Token manquant, impossible d'afficher les missions en cours");
+      return;
+    }
     try {
       console.log("iddddd", id_s)
-      const response = await axios.get(`http://192.168.1.178:8000/signaler/id_s/${id_s}`);
+      const response = await axios.get(`http://192.168.1.178:8000/signaler/id_s/${id_s}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       // affichage des données
       console.log("Données reçues:", response.data);
       

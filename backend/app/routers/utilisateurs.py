@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from ..database import SessionLocal
 from ..models import Utilisateur
@@ -76,6 +76,12 @@ def verif_login(payload: LoginPayload, db: Session = Depends(get_db)):
     return AuthResponse(id_utilisateur=user.id_utilisateur, token=tokenUser, role=user.role)
 
 
+# ================= info de l'utilisateur ===========
+@router.get("/infoRole")
+def info_role(current_user: Utilisateur = Depends(getTokenUser)):
+    return {"id_utilisateur": current_user.id_utilisateur, "role": current_user.role}
+
+
 # ================= GET ALL =================
 @router.get("/", response_model=list[UtilisateurOut])
 def list_users(current_user: Utilisateur = Depends(getTokenUser), db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
@@ -91,7 +97,7 @@ def get_user(user_id: int, db: Session = Depends(get_db), user_check: Utilisateu
 
 # ============== UPDATE =================
 @router.put("/{user_id}", response_model=UtilisateurOut)
-def update_user(user_id: int, payload: UtilisateurUpdate, db: Session = Depends(get_db)):
+def update_user(user_id: int, payload: UtilisateurUpdate, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
     user = db.query(Utilisateur).filter(Utilisateur.id_utilisateur == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
@@ -128,3 +134,6 @@ def logout(payload: LogoutPayload, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     return {"detail": "Déconnexion réussie"}
+
+
+

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from
 import HautPage from '../hautPage';
 import { router, useRouter } from 'expo-router';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const roue = require('@/assets/images/parametres.png');
@@ -17,6 +18,23 @@ type User = {
 
 
 export default function HomeScreen() {
+  const [token, setToken] = useState<string | null>(null);
+  
+  // récupérer le token 
+  useEffect(() => {
+    getData();
+  }, []);
+  const getData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('@token')
+      if(value !== null) {
+        setToken(value);
+        fetchUtilisateurs(value);
+      }
+    } catch(e) {
+      console.log("erreur token affichage utilisateur");
+    }
+  }
 
   const [chargement, setChargement] = useState(true);
   const [utilisateur, setUtilisateur] = useState<User[]>([]);
@@ -34,13 +52,16 @@ export default function HomeScreen() {
     </View>
   );
   
-  useEffect(() => {
-    fetchUtilisateurs();
-  }, []);
 
-  const fetchUtilisateurs = async () => {
+  const fetchUtilisateurs = async (token: string) => {
+    if (!token) {
+      alert("Token manquant, impossible d'afficher les missions en cours");
+      return;
+    }
     try {
-      const response = await axios.get("http://192.168.1.178:8000/utilisateurs/");
+      const response = await axios.get("http://192.168.1.178:8000/utilisateurs/", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
       // affichage des données
       console.log("Données reçues:", response.data);
       
