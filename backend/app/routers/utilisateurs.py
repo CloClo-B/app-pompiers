@@ -76,11 +76,6 @@ def verif_login(payload: LoginPayload, db: Session = Depends(get_db)):
     return AuthResponse(id_utilisateur=user.id_utilisateur, token=tokenUser, role=user.role)
 
 
-# ================= info de l'utilisateur ===========
-@router.get("/infoRole")
-def info_role(current_user: Utilisateur = Depends(getTokenUser)):
-    return {"id_utilisateur": current_user.id_utilisateur, "role": current_user.role}
-
 
 # ================= GET ALL =================
 @router.get("/", response_model=list[UtilisateurOut])

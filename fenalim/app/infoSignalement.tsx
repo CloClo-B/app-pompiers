@@ -5,6 +5,8 @@ import axios from "axios";
 import { router, useLocalSearchParams} from 'expo-router';
 import proj4 from "proj4";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getData } from "../config/recupRole"; 
+import { naviguerPointEau } from '../config/navigation';
 
 
 type Signale = {
@@ -22,22 +24,32 @@ type lePoint = {
 
 export default function UserDetails() {
   const [token, setToken] = useState<string | null>(null);
-  
-  // récupérer le token 
+  const [userRole, setUserRole] = useState<string | null>(null);
+    
   useEffect(() => {
-    getData();
-  }, []);
-  const getData = async () => {
-    try {
-      const value = await AsyncStorage.getItem('@token')
-      if(value !== null) {
-        setToken(value);
-        infoSignalementSelect(value);
+    const chargerRoleEtToken = async () => {
+      try {
+        // recup role et token
+        const tokenValue = await AsyncStorage.getItem('@token');
+        const roleValue = await getData();
+        if (tokenValue){
+          setToken(tokenValue);
+        }
+        if (roleValue){
+          setUserRole(roleValue);
+        }
+        // afficher info
+        if (tokenValue) {
+          infoSignalementSelect(tokenValue); 
+        }
+      } 
+      catch (e) {
+        console.log("erreur récupération token ou rôle");
       }
-    } catch(e) {
-      console.log("erreur token affichage utilisateur");
-    }
-  }
+    };
+
+    chargerRoleEtToken();
+  }, []);
 
   const [chargement, setChargement] = useState(true);
   const [signalement, setSignalement] = useState<Signale | null>(null);
@@ -116,7 +128,7 @@ export default function UserDetails() {
       
       <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
         <View style={styles.container}>
-            <TouchableOpacity style={[{width: 150, height: 45, alignSelf: 'flex-start' }]} onPress={() => router.navigate('/point_eau')}>
+            <TouchableOpacity style={[{width: 150, height: 45, alignSelf: 'flex-start' }]} onPress={() => {if (userRole) naviguerPointEau(userRole); else alert("Rôle utilisateur introuvable"); }}>
                 <Text style={{color:'#000', fontWeight:'bold', fontSize:22}}>&lt; Retour</Text>
             </TouchableOpacity>
 

@@ -233,8 +233,8 @@ export default function CreerPoint() {
       );
         
         router.push({
-            pathname: '/creationSucces',
-            params: { title: 'Point d’eau créé avec succès', nomPage: 'creer', chemainPage: '/point_eau' }
+            pathname: '/succes',
+            params: { title: 'Point d’eau créé avec succès', page:"point_eau" }
           });
         }
       catch (error: unknown) {

@@ -162,8 +162,8 @@ export default function historiqueMission() {
 
     
     router.push({
-        pathname: '/creationSucces',
-        params: { title: 'Mission supprimer avec succès', creerMission: 'creerMission', chemainPage: '/point_eau' }
+        pathname: '/succes',
+        params: { title: 'Mission supprimer avec succès', page:"missions" }
         });
     } catch (error) {
         console.error(error);

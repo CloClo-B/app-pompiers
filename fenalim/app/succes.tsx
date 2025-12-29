@@ -1,15 +1,42 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { naviguerPointEau, naviguerMission } from '../config/navigation';
 const reussi = require('@/assets/images/succes.png');
+import { getData } from "../config/recupRole"; 
 
 export default function CreationSucces() {
-  const router = useRouter();
+  const [userRole, setUserRole] = useState<string | null>(null);
+  
+  // récupérer le role 
+  useEffect(() => {
+  const chargerRole = async () => {
+    const role = await getData();
+    setUserRole(role);
+  };
+    chargerRole();
+  }, []);
   const params = useLocalSearchParams();
 
   const title = params.title;
-  const nomPage = params.nomPage;
-  const chemainPage = params.chemainPage;
+  const page = params.page;
+
+  const choixType = () => {
+  if (userRole){
+    if(page=="point_eau"){
+      naviguerPointEau(userRole);
+    }
+    else if(page=="missions"){
+      naviguerMission(userRole);
+    }
+    else{
+      console.log("nom de la route incorect");
+    }
+  }
+  else {
+    alert("Rôle utilisateur introuvable")
+  };
+}
   return (
     <>    
 
@@ -20,7 +47,7 @@ export default function CreationSucces() {
         <Image source={reussi} style={styles.imageR}></Image>
 
     {/* retour */}
-        <TouchableOpacity style={styles.boutton} onPress={() => router.push({ pathname: chemainPage as any, params: { page: nomPage }})}>
+        <TouchableOpacity style={styles.boutton} onPress={() => {choixType()}}>
           <Text style={{color:'#ffffff', fontSize:20}}>CONTINUER</Text>
         </TouchableOpacity>
     </View>

@@ -51,6 +51,7 @@ export default function Connexion() {
         console.log(role);
         try {
             await AsyncStorage.setItem('@token', response.data.token)
+            await AsyncStorage.setItem('@role', response.data.role)
         } catch (e) {
           console.log("erreur token")
         }

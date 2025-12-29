@@ -4,7 +4,10 @@ import HautPage from './hautPage';
 import axios from "axios";
 import { router, useLocalSearchParams} from 'expo-router';
 import proj4 from "proj4";
-  
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getData } from "../config/recupRole"; 
+import { naviguerMission } from '../config/navigation';
+
 
 type Mission = {
   id_mission: string;
@@ -23,6 +26,35 @@ type lePoint = {
 export default function MissionDetails() {
   const [mission, setMission] = useState<Mission | null>(null);
   const [pointMission, setPointMission] = useState<lePoint | null>(null);
+
+
+  const [token, setToken] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+    
+  useEffect(() => {
+    const chargerRoleEtToken = async () => {
+      try {
+        // recup role et token
+        const tokenValue = await AsyncStorage.getItem('@token');
+        const roleValue = await getData();
+        if (tokenValue){
+          setToken(tokenValue);
+        }
+        if (roleValue){
+          setUserRole(roleValue);
+        }
+        // afficher info
+        if (tokenValue) {
+          infoMissionSelect(tokenValue); 
+        }
+      } 
+      catch (e) {
+        console.log("erreur récupération token ou rôle");
+      }
+    };
+
+    chargerRoleEtToken();
+  }, []);
 
   // recuperer l'id de la mission 
   const params = useLocalSearchParams();
@@ -45,15 +77,20 @@ export default function MissionDetails() {
     return `${heures} h`;
   };
 
-  useEffect(() => {
-    infoMissionSelect();
-  }, []);
+
   
   // recuperer la mission
-  const infoMissionSelect = async () => {
+  const infoMissionSelect = async (token: string) => {
+    if (!token) {
+      alert("Token manquant, impossible d'afficher la missions séléctionne");
+      return;
+    }
     try {
       console.log("iddddd", id_m)
-      const responseMission = await axios.get(`http://192.168.1.178:8000/missions/${id_m}`);
+      const responseMission = await axios.get(`http://192.168.1.178:8000/missions/${id_m}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       // affichage des données
       console.log("Données reçues:", responseMission.data);
       
@@ -137,7 +174,7 @@ export default function MissionDetails() {
             
             {/* BOUTONS */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-              <TouchableOpacity style={[styles.boutton, { backgroundColor: '#457B9D', width: 150, height: 45 }]} onPress={() => router.navigate("/(tabs)/mission") }>
+              <TouchableOpacity style={[styles.boutton, { backgroundColor: '#457B9D', width: 150, height: 45 }]} onPress={() => {if (userRole) naviguerMission(userRole); else alert("Rôle utilisateur introuvable"); } }>
                 <Text style={{color:'#ffffff'}}>Fermer</Text>
               </TouchableOpacity>
 

@@ -3,10 +3,9 @@ import { View, Text, StyleSheet, Button, TouchableOpacity, Alert, Image, ScrollV
 import HautPage from './hautPage';
 import axios from "axios";
 import { router, useLocalSearchParams} from 'expo-router';
-import proj4 from "proj4";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { naviguerPointEau } from '../config/navigation';
-import { getUserInfo } from "../config/userAPI"; 
+import { getData } from "../config/recupRole"; 
 
 
 type Signale = {
@@ -26,23 +25,32 @@ export default function UserDetails() {
   const [token, setToken] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   
-  // récupérer le token 
   useEffect(() => {
-    getData();
-  }, []);
-  const getData = async () => {
-    try {
-      const value = await AsyncStorage.getItem('@token');
-      if (value !== null) {
-        setToken(value);
-        const user = await getUserInfo(value);
-        if (user) setUserRole(user);
-        infoSignalementSelect(value);
+    const chargerRoleEtToken = async () => {
+      try {
+        // recup role et token
+        const tokenValue = await AsyncStorage.getItem('@token');
+        const roleValue = await getData();
+        if (tokenValue){
+          setToken(tokenValue);
+        }
+        if (roleValue){
+          setUserRole(roleValue);
+        }
+        // afficher info
+        if (tokenValue) {
+          infoSignalementSelect(tokenValue); 
+        }
+      } 
+      catch (e) {
+        console.log("erreur récupération token ou rôle");
       }
-    } catch (e) {
-      console.log("erreur token affichage utilisateur");
-    }
-  };
+    };
+
+    chargerRoleEtToken();
+  }, []);
+
+
   const [signalement, setSignalement] = useState<Signale | null>(null);
 
   const params = useLocalSearchParams();
@@ -91,8 +99,8 @@ export default function UserDetails() {
       });
         
         router.push({
-            pathname: '/creationSucces',
-            params: { title: 'Signalement suprrimer avec succès', creerMission: 'creerMission', chemainPage: '/point_eau' }
+            pathname: '/succes',
+            params: { title: 'Signalement suprrimer avec succès', page:"point_eau" }
             });
         } catch (error) {
             console.error(error);

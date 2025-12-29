@@ -32,13 +32,7 @@ export default function CreerMission() {
   const [commentaire, setCommentaire] = useState('');
   const [itineraire, setItineraire] = useState('');
 
-  // liste pour les différents niveau de statuts
-  const [openStatuts, setOpenStatuts] = useState(false);
-  const [etatStatuts, setItemsSatatus] = useState ([ 
-    { label : 'En attente' , value : 'EN ATTENTE'}, 
-    { label : 'En cours' , value : 'EN COURS' }, 
-    { label : 'Terminer' , value : 'TERMINER' }, 
-  ]);
+
 
   const creerMission = async () => {
     if (!token) {
@@ -49,12 +43,12 @@ export default function CreerMission() {
       console.log(token);
     }
     // Avant l'appel API, pour vérifier les valeurs
-  console.log("Vérification des valeurs à envoyer\n");
-  console.log("nomMission:", nomMission);
-  console.log("IDPoint:", IDPoint);
-  console.log("idUtilisateur temporaire", "1")
-  console.log("commentaire:", commentaire);
-  console.log("itinéraire:", itineraire);
+    console.log("Vérification des valeurs à envoyer\n");
+    console.log("nomMission:", nomMission);
+    console.log("IDPoint:", IDPoint);
+    console.log("idUtilisateur temporaire", "1")
+    console.log("commentaire:", commentaire);
+    console.log("itinéraire:", itineraire);
     if(nomMission == null || !nomMission.trim()){
       console.log("Erreur le nom de mission est incorrect");
       alert("Le nom de mission est incorect");
@@ -93,8 +87,8 @@ export default function CreerMission() {
       );
         
         router.push({
-            pathname: '/creationSucces',
-            params: { title: 'Mission créé avec succès', creerMission: 'creerMission', chemainPage: '/point_eau' }
+            pathname: '/succes',
+            params: { title: 'Mission créé avec succès', page:"missions" }
           });
         }
       catch (error: unknown) {

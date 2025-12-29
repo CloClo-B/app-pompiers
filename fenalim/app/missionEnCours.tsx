@@ -18,7 +18,7 @@ type MissionAvecPoint = {
 };
 
 export default function MissionEnCours() {
-
+  const [chargement, setChargement] = useState(false);
   const [missions, setMissions] = useState<MissionAvecPoint[]>([]);
 
   const router = useRouter();
@@ -133,7 +133,8 @@ const fetchMissions = async (token: string) => {
     alert("Token manquant, impossible d'afficher les missions en cours");
     return;
   }
-
+  if (chargement) return;
+    setChargement(true);
   try {
     const responseMission = await axios.get("http://192.168.1.178:8000/missions/", {
       headers: { Authorization: `Bearer ${token}` },
@@ -178,6 +179,8 @@ const fetchMissions = async (token: string) => {
   } catch (error) {
     console.error("Erreur lors du chargement des missions :", error);
     Alert.alert("Erreur", "Impossible de récupérer les missions.");
+  }finally {
+    setChargement(false);
   }
 };
 
@@ -199,8 +202,8 @@ const fetchMissions = async (token: string) => {
     );
     
     router.push({
-        pathname: '/creationSucces',
-        params: { title: 'Mission terminé avec succès', creerMission: 'creerMission', chemainPage: '/point_eau' }
+        pathname: '/succes',
+        params: { title: 'Mission terminé avec succès', page:"missions" }
         });
     } catch (error) {
         console.error(error);

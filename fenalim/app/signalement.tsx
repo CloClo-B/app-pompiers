@@ -3,8 +3,10 @@ import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, T
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import HautPage from './hautPage';
+import { getData } from "../config/recupRole"; 
+import { naviguerPointEau } from '../config/navigation';
 
 // petit encadrer pour choix photo
 const ajouterPhoto = require('@/assets/images/ajouter_photo.png');
@@ -14,7 +16,19 @@ const ajouterPhoto = require('@/assets/images/ajouter_photo.png');
 
 export default function Signalement() {
   const router = useRouter();
+  const [userRole, setUserRole] = useState<string | null>(null);
   
+
+  useEffect(() => {
+  const chargerRole = async () => {
+    const role = await getData();
+    setUserRole(role);
+  };
+    chargerRole();
+  }, []);
+
+
+
   // variable pour ensuite envoyer à l'api
   
   const [IDPoint, setIDPoint] = useState(''); 
@@ -110,8 +124,8 @@ const handlePickImage = () => {
           headers: { "Content-Type": "multipart/form-data" }
         });
         router.push({
-            pathname: '/creationSucces',
-            params: { title: 'Signalement créé avec succès', creerMission: 'creerMission', chemainPage: '/point_eau' }
+            pathname: '/succes',
+            params: { title: 'Signalement créé avec succès',  page:"point_eau"  }
           });
       } 
       catch (error: unknown) {
@@ -168,7 +182,7 @@ const handlePickImage = () => {
             {/* choix validation annulation */}
             <View style={styles.validation}>
 
-                <TouchableOpacity style={styles.boutton} onPress={() => router.navigate('/(tabs)/acceuil')}>
+                <TouchableOpacity style={styles.boutton} onPress={() => {if (userRole) naviguerPointEau(userRole); else alert("Rôle utilisateur introuvable"); }}>
                 <Text style={{color:'#ffffff'}}>ANNULER</Text>
                 </TouchableOpacity>
 
@@ -262,3 +276,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
 });
+function setUserRole(value: any) {
+  throw new Error('Function not implemented.');
+}
+
