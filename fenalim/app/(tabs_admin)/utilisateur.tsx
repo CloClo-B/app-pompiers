@@ -59,7 +59,7 @@ export default function HomeScreen() {
       return;
     }
     try {
-      const response = await axios.get("http://192.168.1.178:8000/utilisateurs/", {
+      const response = await axios.get("http://172.20.10.2:8000/utilisateurs/", {
       headers: { Authorization: `Bearer ${token}` },
     });
       // affichage des données

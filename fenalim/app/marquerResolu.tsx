@@ -64,7 +64,7 @@ export default function UserDetails() {
     }
     try {
       console.log("iddddd", id_s)
-      const response = await axios.get(`http://192.168.1.178:8000/signaler/id_s/${id_s}`, {
+      const response = await axios.get(`http://172.20.10.2:8000/signaler/id_s/${id_s}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       // affichage des données
@@ -94,7 +94,7 @@ export default function UserDetails() {
 
         try {
         
-        const response = await axios.delete(`http://192.168.1.178:8000/signaler/suprimmer/${signalement?.id_point}`, {
+        const response = await axios.delete(`http://172.20.10.2:8000/signaler/suprimmer/${signalement?.id_point}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
         
@@ -135,7 +135,7 @@ export default function UserDetails() {
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Problème : </Text> {signalement?.probleme}</Text>
               {signalement?.photo && (
                 <Image
-                  source={{ uri: `http://192.168.1.178:8000/${signalement.photo}` }}
+                  source={{ uri: `http://172.20.10.2:8000/${signalement.photo}` }}
                   style={{ width: 300, height: 200, borderRadius: 10, marginTop: 10, marginBottom:10 }}
                   resizeMode="cover"
                 />

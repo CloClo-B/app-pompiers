@@ -178,3 +178,35 @@ class SignalerCreate(BaseModel):
     photo: Optional[str]
     id_utilisateur: int
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserProfileOut(BaseModel):
+    id_utilisateur: int
+    nom: str
+    prenom: str
+    email: EmailStr
+    telephone: str
+    role: str
+    date_creation: datetime
+    derniere_connexion: Optional[datetime] = None
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserProfileUpdate(BaseModel):
+    nom: Optional[str] = Field(None, min_length=2, max_length=40)
+    prenom: Optional[str] = Field(None, min_length=2, max_length=40)
+    email: Optional[EmailStr] = None
+    telephone: Optional[str] = Field(None, pattern=r'^\d{10}$') 
+
+
+class PasswordChangeRequest(BaseModel):
+    old_password: str
+    new_password: str = Field(min_length=12)
+    confirm_new_password: str = Field(min_length=12)
+    
+    def validate_passwords(self):
+        if self.new_password != self.confirm_new_password:
+            raise ValueError("Le nouveau mot de passe et sa confirmation sont différents ")
+        if self.old_password == self.new_password:
+            raise ValueError("Le nouveau mot de passe doit être différent de l'ancien")

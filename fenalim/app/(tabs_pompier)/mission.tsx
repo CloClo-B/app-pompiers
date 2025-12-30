@@ -1,9 +1,8 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import HautPage from '../hautPage';
 
-import CreerMission from '../creerMission';
 import HistoriqueMission from '../historiqueMission';
 import MissionEnCours from '../missionEnCours';
 

@@ -100,3 +100,72 @@ def update_utilisateur_by_id(db: Session, id_utilisateur: int, user_data: Dict[s
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+def update_own_profile(db: Session, id_utilisateur: int, user_data: Dict[str, Any]):
+    db_user = db.query(models.Utilisateur).filter(
+        models.Utilisateur.id_utilisateur == id_utilisateur
+    ).first()
+    
+    if not db_user:
+        return None
+    
+    # Liste des champs modifiables par l'utilisateur lui-même
+    allowed_fields = ["nom", "prenom", "email", "telephone"]
+    
+    for key, value in user_data.items():
+        if key not in allowed_fields:
+            continue
+            
+        if key == "email" and value:
+            # Vérifier que l'email n'est pas déjà utilisé par un autre utilisateur
+            existe = get_utilisateur_by_email(db, value)
+            if existe and existe.id_utilisateur != db_user.id_utilisateur:
+                raise ValueError("Email déjà utilisé.")
+            setattr(db_user, key, value)
+        
+        elif key == "telephone" and value:
+            # Vérifier que le téléphone n'est pas déjà utilisé
+            existe = db.query(models.Utilisateur).filter(
+                models.Utilisateur.telephone == value,
+                models.Utilisateur.id_utilisateur != id_utilisateur
+            ).first()
+            if existe:
+                raise ValueError("Numéro de téléphone déjà utilisé.")
+            setattr(db_user, key, value)
+        
+        elif hasattr(db_user, key) and value is not None:
+            setattr(db_user, key, value)
+    
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
+def change_password(db: Session, id_utilisateur: int, old_password: str, new_password: str) -> bool:
+    db_user = db.query(models.Utilisateur).filter(
+        models.Utilisateur.id_utilisateur == id_utilisateur
+    ).first()
+    
+    if not db_user:
+        return False
+    
+    # Vérifier l'ancien mot de passe
+    if not verify_password(old_password, db_user.mot_de_passe):
+        raise ValueError("Ancien mot de passe incorrect")
+    
+    # Hasher et enregistrer le nouveau mot de passe
+    db_user.mot_de_passe = hash_password(new_password)
+    db.commit()
+    return True
+
+
+def verify_user_password(db: Session, id_utilisateur: int, password: str) -> bool:
+    db_user = db.query(models.Utilisateur).filter(
+        models.Utilisateur.id_utilisateur == id_utilisateur
+    ).first()
+    
+    if not db_user:
+        return False
+    
+    return verify_password(password, db_user.mot_de_passe)

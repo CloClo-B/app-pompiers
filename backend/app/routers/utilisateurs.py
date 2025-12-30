@@ -4,9 +4,10 @@ from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from ..database import SessionLocal
 from ..models import Utilisateur
-from ..schemas import UtilisateurCreate, UtilisateurOut, UtilisateurUpdate, LoginPayload, AuthResponse, LogoutPayload
+from ..schemas import UtilisateurCreate, UtilisateurOut, UtilisateurUpdate, LoginPayload, AuthResponse, LogoutPayload, UserProfileOut, UserProfileUpdate, PasswordChangeRequest
 from ..token_jwt import createToken, getTokenUser
 from .dependencies import rolesChecker
+from ..DAO.DAOUtilisateurs import (update_own_profile, change_password as dao_change_password, verify_user_password)
 
 router = APIRouter(prefix="/utilisateurs", tags=["Utilisateurs"])
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
@@ -23,6 +24,108 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, hashed: str) -> bool:
     return pwd_context.verify(password, hashed)
+
+# ================= GESTION DU COMPTE PERSONNEL =================
+
+@router.get("/me", response_model=UserProfileOut)
+def get_my_profile(current_user: Utilisateur = Depends(getTokenUser)):
+    return current_user
+
+
+@router.put("/me", response_model=UserProfileOut)
+def update_my_profile(
+    payload: UserProfileUpdate,
+    current_user: Utilisateur = Depends(getTokenUser),
+    db: Session = Depends(get_db)
+):
+    try:
+        # Convertir le payload en dict et retirer les None
+        update_data = payload.model_dump(exclude_unset=True)
+        
+        if not update_data:
+            raise HTTPException(status_code=400, detail="Aucune donnée à mettre à jour")
+        
+        updated_user = update_own_profile(db, current_user.id_utilisateur, update_data)
+        
+        if not updated_user:
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+        
+        return updated_user
+    
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la mise à jour: {str(e)}")
+
+
+@router.post("/me/change-password")
+def change_my_password(
+    payload: PasswordChangeRequest,
+    current_user: Utilisateur = Depends(getTokenUser),
+    db: Session = Depends(get_db)
+):
+    
+    try:
+        # Valider que les mots de passe correspondent
+        payload.validate_passwords()
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+    try:
+        success = dao_change_password(
+            db, 
+            current_user.id_utilisateur,
+            payload.old_password,
+            payload.new_password
+        )
+        
+        if not success:
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+        
+        return {
+            "detail": "Mot de passe modifié avec succès",
+            "success": True
+        }
+    
+    except ValueError as e:
+        # Erreur de vérification de l'ancien mot de passe
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lors du changement de mot de passe: {str(e)}")
+
+
+@router.delete("/me")
+def delete_my_account(
+    current_user: Utilisateur = Depends(getTokenUser),
+    db: Session = Depends(get_db)
+):
+
+    try:
+        # Vérifier que l'utilisateur n'est pas le dernier admin
+        if current_user.role == "admin":
+            admin_count = db.query(Utilisateur).filter(Utilisateur.role == "admin").count()
+            if admin_count <= 1:
+                raise HTTPException(
+                    status_code=400, 
+                    detail="Impossible de supprimer le dernier administrateur"
+                )
+        
+        db.delete(current_user)
+        db.commit()
+        
+        return {
+            "detail": "Compte supprimé avec succès",
+            "success": True
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erreur lors de la suppression du compte: {str(e)}"
+        )
 
 # ================= CREATE =================
 @router.post("/", response_model=AuthResponse)
@@ -109,15 +212,60 @@ def update_user(user_id: int, payload: UtilisateurUpdate, db: Session = Depends(
 
 # ================ DELETE =================
 @router.delete("/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
-    user = db.query(Utilisateur).filter(Utilisateur.id_utilisateur == user_id).first()
-    if not user:
+def delete_user(
+    user_id: int, 
+    current_user: Utilisateur = Depends(getTokenUser),
+    db: Session = Depends(get_db), 
+    user_check: Utilisateur = Depends(rolesChecker("admin"))
+):
+    # Récupérer l'utilisateur à supprimer
+    user_to_delete = db.query(Utilisateur).filter(
+        Utilisateur.id_utilisateur == user_id
+    ).first()
+    
+    if not user_to_delete:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     
-    db.delete(user)
-    db.commit()
-    return {"detail": f"Utilisateur {user_id} supprimé avec succès"}
-
+    # Vérification 1 : Un admin ne peut pas se supprimer lui-même
+    if user_to_delete.id_utilisateur == current_user.id_utilisateur:
+        raise HTTPException(
+            status_code=400, 
+            detail="Vous ne pouvez pas supprimer votre propre compte. Demandez à un autre administrateur."
+        )
+    
+    # Vérification 2 : Protection du dernier administrateur
+    if user_to_delete.role == "admin":
+        admin_count = db.query(Utilisateur).filter(
+            Utilisateur.role == "admin"
+        ).count()
+        
+        if admin_count <= 1:
+            raise HTTPException(
+                status_code=400,
+                detail="Impossible de supprimer le dernier administrateur du système. Créez d'abord un nouvel administrateur."
+            )
+    
+    # Suppression sécurisée
+    try:
+        db.delete(user_to_delete)
+        db.commit()
+        
+        return {
+            "detail": f"Utilisateur {user_to_delete.prenom} {user_to_delete.nom} (ID: {user_id}) supprimé avec succès",
+            "success": True,
+            "deleted_user": {
+                "id": user_to_delete.id_utilisateur,
+                "nom": user_to_delete.nom,
+                "prenom": user_to_delete.prenom,
+                "role": user_to_delete.role
+            }
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erreur lors de la suppression : {str(e)}"
+        )
 
 # ================ LOGOUT =================
 @router.post("/logout")
@@ -129,6 +277,3 @@ def logout(payload: LogoutPayload, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     return {"detail": "Déconnexion réussie"}
-
-
-

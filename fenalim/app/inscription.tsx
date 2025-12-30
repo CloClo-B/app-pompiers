@@ -68,7 +68,7 @@ export default function Connexion() {
     }
     else{
       try {
-        const response = await axios.post('http://192.168.1.178:8000/utilisateurs/', {
+        const response = await axios.post('http://172.20.10.2:8000/utilisateurs/', {
           nom: nom,        
           prenom: prenom,
           telephone : telephone,

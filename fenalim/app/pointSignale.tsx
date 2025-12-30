@@ -47,7 +47,7 @@ export default function PointSignale() {
       console.log(token);
     }
     try {
-      const response = await axios.get("http://192.168.1.178:8000/signaler/", {
+      const response = await axios.get("http://172.20.10.2:8000/signaler/", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

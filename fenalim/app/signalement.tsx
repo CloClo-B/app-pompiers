@@ -120,7 +120,7 @@ const handlePickImage = () => {
         } as any);
         formData.append("id_utilisateur", "1");
         
-        const response = await axios.post("http://192.168.1.178:8000/signaler/", formData, {
+        const response = await axios.post("http://172.20.10.2:8000/signaler/", formData, {
           headers: { "Content-Type": "multipart/form-data" }
         });
         router.push({

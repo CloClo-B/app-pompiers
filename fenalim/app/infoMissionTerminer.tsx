@@ -87,7 +87,7 @@ export default function MissionDetails() {
     }
     try {
       console.log("iddddd", id_m)
-      const responseMission = await axios.get(`http://192.168.1.178:8000/missions/${id_m}`, {
+      const responseMission = await axios.get(`http://172.20.10.2:8000/missions/${id_m}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -126,7 +126,7 @@ export default function MissionDetails() {
       // affichage des données
       // console.log("Données reçues:", response.data);
       
-      const response = await axios.get(`http://192.168.1.178:8000/points-eau/${id_point}`);
+      const response = await axios.get(`http://172.20.10.2:8000/points-eau/${id_point}`);
       const point = response.data; 
       if (point) {
         const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
