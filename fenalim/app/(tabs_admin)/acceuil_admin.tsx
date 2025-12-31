@@ -2,8 +2,8 @@ import axios from "axios";
 import { FontAwesome } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, ActivityIndicator, StyleSheet, TouchableOpacity, View, Text, Linking, Platform } from 'react-native';
-import MapView, { Marker, Callout} from 'react-native-maps';
+import { Alert, ActivityIndicator, StyleSheet, TouchableOpacity, View, Linking, Platform } from 'react-native';
+import MapView, { Marker} from 'react-native-maps';
 import HautPage from '../hautPage';
 import proj4 from "proj4";
 import { API_ENDPOINTS } from '../config/api';
@@ -13,10 +13,12 @@ type PointEau = {
   numero_pei: string;
   nom: string | null;
   statut: string;
-  latitude: number;
-  longitude: number;
+  type_nature: string;
   press_deb: number | null;
   debit_1_bar: number | null;
+  vol_eau_mil: number | null;
+  latitude: number;
+  longitude: number;
 };
 
 export default function HomeScreen() {
@@ -122,6 +124,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <HautPage title="Carte des points d’eau" />
 
+      {/* Affichage des markers avec desciption */}
       <MapView
         ref={referenceCarte}
         style={styles.map}
@@ -132,56 +135,31 @@ export default function HomeScreen() {
           longitudeDelta: 0.2,
         }}
         showsUserLocation
-        showsMyLocationButton = {true}
+        showsMyLocationButton={true}
       >
-        {pointsEau.slice(0, 10).map((point) => (
+        {pointsEau.slice(0, 100).map((point) => (
           <Marker
             key={point.id}
             coordinate={{ latitude: point.latitude, longitude: point.longitude }}
-          >
-            <Callout>
-              <View style={{ padding: 10, width: 200 }}>
-                <Text>{"Point d’eau : " + point.numero_pei}</Text>
-                <Text>{"Status : " + point.statut}</Text>
-                <Text>{"Presion : " + point.press_deb}</Text>
-                <Text>{"Débit : " + point.debit_1_bar}</Text>
-
-                <TouchableOpacity
-                  style={{
-                    marginTop: 10,
-                    backgroundColor: '#28a745',
-                    padding: 8,
-                    borderRadius: 5,
-                    alignItems: 'center',
-                  }}
-                  onPress={() => {
-                    const latitude = point.latitude;
-                    const longitude = point.longitude;
-                
-                    let url = "";
-                    if (Platform.OS === "ios") {
-                      // Apple Maps
-                      url = `http://maps.apple.com/?daddr=${latitude},${longitude}&dirflg=d`;
-                    } else {
-                      // Android / Google Maps
-                      url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-                    }
-                
-                    Linking.openURL(url).catch((err) =>
-                      console.error("Impossible d'ouvrir l'application de navigation", err)
-                    );
-                  }}
-                >
-                  <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Itinéraire</Text>
-                </TouchableOpacity>
-              </View>
-            </Callout>
-          </Marker>
+            title={`Numero PEI : ${point.numero_pei}`}
+            description="Cliquez ici pour avoir plus d'infos"
+            onCalloutPress={() =>
+              infoPointEau(
+                point.numero_pei,
+                point.statut,
+                point.type_nature,
+                point.press_deb,
+                point.debit_1_bar,
+                point.vol_eau_mil,
+                point.latitude,
+                point.longitude
+              )
+            }
+          />
         ))}
-
         
-
       </MapView>
+
 
       <TouchableOpacity style={styles.boutonLocalisation} onPress={allerPosition}>
         <FontAwesome name="location-arrow" size={24} color="#FFF" />
@@ -189,6 +167,43 @@ export default function HomeScreen() {
     </View>
   );
 }
+
+// Decription du Point d'eau
+const infoPointEau = (
+  numero: string,
+  statut: string,
+  type_nature: string,
+  pressDeb: number | null,
+  debit1Bar: number | null,
+  vol_eau_mil: number | null,
+  latitude: number,
+  longitude: number
+) => {
+  Alert.alert(
+    `Numero PEI : ${numero}`,
+    `Statut : ${statut}\nType : ${type_nature ?? "N/A"}\nPression : ${pressDeb ?? "N/A"} bar\nDébit : ${debit1Bar ?? "N/A"} m3/h\nVolume d'eau : ${vol_eau_mil ?? "N/A"}`,
+
+    [
+      { text: "Fermer", style: "cancel" },
+      {
+        text: "Itinéraire",
+        onPress: () => {
+          const url =
+            Platform.OS === "ios"
+              ? `maps://maps.apple.com/?daddr=${latitude},${longitude}&dirflg=d`
+              : `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+          Linking.canOpenURL(url)
+            .then((supported) => {
+              if (supported) Linking.openURL(url);
+              else Alert.alert("Erreur", "Impossible d'ouvrir l'application de navigation");
+            })
+            .catch((err) => console.error("Erreur ouverture navigation", err));
+        },
+      },
+    ]
+  );
+};
+
 
 const styles = StyleSheet.create({
   container: {
