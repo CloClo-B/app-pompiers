@@ -6,10 +6,7 @@ import { Alert, ActivityIndicator, StyleSheet, TouchableOpacity, View, Text, Lin
 import MapView, { Marker, Callout} from 'react-native-maps';
 import HautPage from '../hautPage';
 import proj4 from "proj4";
-
-const API_URL = "http://172.20.10.2:8000/points-eau/";
-
-// valentin : 172.20.10.2 | 192.168.1.184
+import { API_ENDPOINTS } from '../config/api';
 
 type PointEau = {
   id: number;
@@ -34,7 +31,7 @@ export default function HomeScreen() {
 
     const fetchPointsEau = async () => {
       try {
-        const response = await axios.get(API_URL);
+        const response = await axios.get(API_ENDPOINTS.POINTS_EAU);
         // affichage des données
         // console.log("Données reçues:", response.data);
 

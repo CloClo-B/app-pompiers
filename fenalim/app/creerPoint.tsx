@@ -4,6 +4,7 @@ import {StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native
 import DropDownPicker from 'react-native-dropdown-picker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_ENDPOINTS } from './config/api';
 
 
 export default function CreerPoint() {
@@ -209,7 +210,7 @@ export default function CreerPoint() {
 
     else{
       try {
-        const response = await axios.post('http://172.20.10.2:8000/points-eau/', {
+        const response = await axios.post(API_ENDPOINTS.POINTS_EAU, {
           numero_pei: parseInt(numeroPEI),
           nom: '',
           statut: valueStatut,

@@ -6,6 +6,8 @@ import Button from '@/components/ButtonLog';
 import axios from 'axios';
 import { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_ENDPOINTS } from './config/api';
+
 
 export default function Connexion() {
 
@@ -68,7 +70,7 @@ export default function Connexion() {
     }
     else{
       try {
-        const response = await axios.post('http://172.20.10.2:8000/utilisateurs/', {
+        const response = await axios.post(API_ENDPOINTS.REGISTER, {
           nom: nom,        
           prenom: prenom,
           telephone : telephone,

@@ -7,11 +7,11 @@ import { useEffect, useState } from 'react';
 import HautPage from './hautPage';
 import { getData } from "../config/recupRole"; 
 import { naviguerPointEau } from '../config/navigation';
+import { API_ENDPOINTS } from './config/api';
+
 
 // petit encadrer pour choix photo
 const ajouterPhoto = require('@/assets/images/ajouter_photo.png');
-
-
 
 
 export default function Signalement() {
@@ -120,7 +120,7 @@ const handlePickImage = () => {
         } as any);
         formData.append("id_utilisateur", "1");
         
-        const response = await axios.post("http://172.20.10.2:8000/signaler/", formData, {
+        const response = await axios.post(API_ENDPOINTS.SIGNALEMENTS, formData, {
           headers: { "Content-Type": "multipart/form-data" }
         });
         router.push({

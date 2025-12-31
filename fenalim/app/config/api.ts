@@ -1,12 +1,7 @@
+// Fichier de centralisation des URL pour les fichiers frontend
 
-const getApiUrl = () => {
-  // En développement
-  if (__DEV__) {
-    return 'http://172.20.10.2:8000';
-  }
-};
-
-export const API_URL = getApiUrl();
+// IP A CHANGER
+export const API_URL = 'http://192.168.2.215:8000';
 
 
 export const API_ENDPOINTS = {
@@ -23,8 +18,8 @@ export const API_ENDPOINTS = {
   USER_BY_ID: (id: number) => `${API_URL}/utilisateurs/${id}`,
   
 
-  POINTS_EAU: `${API_URL}/points_eau/`,
-  POINT_EAU_BY_ID: (id: number) => `${API_URL}/points_eau/${id}`,
+  POINTS_EAU: `${API_URL}/points-eau/`,
+  POINT_EAU_BY_ID: (id: number) => `${API_URL}/points-eau/${id}`,
   
 
   MISSIONS: `${API_URL}/missions/`,

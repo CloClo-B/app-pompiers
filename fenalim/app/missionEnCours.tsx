@@ -136,7 +136,7 @@ const fetchMissions = async (token: string) => {
   if (chargement) return;
     setChargement(true);
   try {
-    const responseMission = await axios.get("http://172.20.10.2:8000/missions/", {
+    const responseMission = await axios.get("http://192.168.2.215:8000/missions/", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -153,7 +153,7 @@ const fetchMissions = async (token: string) => {
 
     for (const u of MissionsRaw.filter((m: any) => m.statut === "EN COURS")) {
       // Appel séquentiel pour chaque point
-      const responsePoint = await axios.get(`http://172.20.10.2:8000/points-eau/${u.id_point}`);
+      const responsePoint = await axios.get(`http://192.168.2.215:8000/points-eau/${u.id_point}`);
       const point = responsePoint.data;
 
       let latitude = 0;
@@ -192,7 +192,7 @@ const fetchMissions = async (token: string) => {
 
     try {
     
-      const response = await axios.put(`http://172.20.10.2:8000/missions/update/${id_mission}`, {
+      const response = await axios.put(`http://192.168.2.215:8000/missions/update/${id_mission}`, {
         statut: "TERMINER",
         date_fin: new Date().toISOString(),
       },

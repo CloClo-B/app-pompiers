@@ -2,9 +2,9 @@ import axios from 'axios';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
-import { setNativeProps } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_ENDPOINTS } from './config/api';
+
 
 export default function CreerMission() {
 
@@ -71,7 +71,7 @@ export default function CreerMission() {
     }
     else{
       try {
-        const response = await axios.post('http://172.20.10.2:8000/missions/', {
+        const response = await axios.post(API_ENDPOINTS.MISSIONS, {
           nom_mission: nomMission,        
           id_point: parseInt(IDPoint),
           id_utilisateur : 1,  // a changer par la suite celui ci est un utilisateur créer sur ma bdd

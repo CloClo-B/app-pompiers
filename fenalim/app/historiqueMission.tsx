@@ -114,7 +114,7 @@ export default function historiqueMission() {
       console.log(token);
     }
     try {
-      const responseMission = await axios.get("http://172.20.10.2:8000/missions/", {
+      const responseMission = await axios.get("http://192.168.2.215:8000/missions/", {
         headers: { Authorization: `Bearer ${token}` },
       });
             
@@ -156,7 +156,7 @@ export default function historiqueMission() {
 
     try {
     
-      const response = await axios.delete(`http://172.20.10.2:8000/missions/supprimer/${id_mission}`,  {
+      const response = await axios.delete(`http://192.168.2.215:8000/missions/supprimer/${id_mission}`,  {
         headers: { Authorization: `Bearer ${token}` },
       });
 

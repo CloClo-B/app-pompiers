@@ -34,7 +34,7 @@ export default function HomeScreen() {
   <View style={styles.typeD}>
 
       <TouchableOpacity style={[styles.bouttonG, styles.boutton, choix === "creer" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("creer"); setChoix("creer");}}>
-      <Text style={choix === "creer" ? styles.txtActif : styles.txtInactif}>Créer une mission</Text>
+      <Text style={choix === "creer" ? styles.txtActif : styles.txtInactif}>Créer mission</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={[styles.boutton, choix === "enCours" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("enCours"); setChoix("enCours");}}>

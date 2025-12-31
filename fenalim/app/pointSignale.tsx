@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from
 import { router, useRouter } from 'expo-router';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_ENDPOINTS } from './config/api';
+
 
 const roue = require('@/assets/images/parametres.png');
 
@@ -47,7 +49,7 @@ export default function PointSignale() {
       console.log(token);
     }
     try {
-      const response = await axios.get("http://172.20.10.2:8000/signaler/", {
+      const response = await axios.get(API_ENDPOINTS.SIGNALEMENTS, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
