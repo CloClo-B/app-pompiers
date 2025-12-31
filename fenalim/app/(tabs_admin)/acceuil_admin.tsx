@@ -1,12 +1,13 @@
 import axios from "axios";
-import { FontAwesome } from '@expo/vector-icons';
-import * as Location from 'expo-location';
-import React, { useEffect, useRef, useState } from 'react';
-import { Alert, ActivityIndicator, StyleSheet, TouchableOpacity, View, Linking, Platform } from 'react-native';
-import MapView, { Marker} from 'react-native-maps';
-import HautPage from '../hautPage';
+import {FontAwesome} from "@expo/vector-icons";
+import * as Location from "expo-location";
+import React, {useEffect, useRef, useState} from "react";
+import {ActivityIndicator, StyleSheet, TouchableOpacity, View, Linking, Platform, Modal, Text} from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import { useRouter } from 'expo-router';
+import HautPage from "../hautPage";
 import proj4 from "proj4";
-import { API_ENDPOINTS } from '../config/api';
+import { API_ENDPOINTS } from "../config/api";
 
 type PointEau = {
   id: number;
@@ -26,6 +27,10 @@ export default function HomeScreen() {
   const [pointsEau, setPointsEau] = useState<PointEau[]>([]);
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedPEI, setSelectedPEI] = useState<PointEau | null>(null);
+  const router = useRouter();
+
   const referenceCarte = useRef<MapView>(null);
 
   useEffect(() => {
@@ -34,20 +39,14 @@ export default function HomeScreen() {
     const fetchPointsEau = async () => {
       try {
         const response = await axios.get(API_ENDPOINTS.POINTS_EAU);
-        // affichage des données
-        // console.log("Données reçues:", response.data);
 
         const lambert93 =
           "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
         const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
-        const pointsRaw = Array.isArray(response.data) ? response.data : response.data.points_eau;
-
-        if (!pointsRaw) {
-          console.error("Impossible de récupérer les points d'eau :", response.data);
-          setLoading(false);
-          return;
-        }
+        const pointsRaw = Array.isArray(response.data)
+          ? response.data
+          : response.data.points_eau;
 
         const pointsEauWGS84 = pointsRaw.map((p: any) => {
           const [lon, lat] = proj4(lambert93, wgs84, [p.longitude, p.latitude]);
@@ -56,19 +55,16 @@ export default function HomeScreen() {
 
         setPointsEau(pointsEauWGS84);
       } catch (error) {
-        console.error("Erreur lors du chargement des points d'eau :", error);
-        Alert.alert("Erreur", "Impossible de récupérer les points d’eau.");
+        console.error(error);
       } finally {
         setLoading(false);
       }
     };
 
+    // Obtenir sa localisation
     const getLocation = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission refusée", "Impossible d'accéder à la localisation.");
-        return;
-      }
+      if (status !== "granted") return;
 
       const loc = await Location.getCurrentPositionAsync({});
       setLocalisation(loc);
@@ -98,6 +94,7 @@ export default function HomeScreen() {
     };
   }, []);
 
+  // Aller a la position
   const allerPosition = () => {
     if (referenceCarte.current && localisation?.coords) {
       referenceCarte.current.animateToRegion(
@@ -112,6 +109,12 @@ export default function HomeScreen() {
     }
   };
 
+  // Description des points d'eaux
+  const infoPointEau = (point: PointEau) => {
+    setSelectedPEI(point);
+    setModalVisible(true);
+  };
+
   if (loading || !location) {
     return (
       <View style={styles.loader}>
@@ -124,7 +127,6 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <HautPage title="Carte des points d’eau" />
 
-      {/* Affichage des markers avec desciption */}
       <MapView
         ref={referenceCarte}
         style={styles.map}
@@ -135,7 +137,6 @@ export default function HomeScreen() {
           longitudeDelta: 0.2,
         }}
         showsUserLocation
-        showsMyLocationButton={true}
       >
         {pointsEau.slice(0, 100).map((point) => (
           <Marker
@@ -143,99 +144,145 @@ export default function HomeScreen() {
             coordinate={{ latitude: point.latitude, longitude: point.longitude }}
             title={`Numero PEI : ${point.numero_pei}`}
             description="Cliquez ici pour avoir plus d'infos"
-            onCalloutPress={() =>
-              infoPointEau(
-                point.numero_pei,
-                point.statut,
-                point.type_nature,
-                point.press_deb,
-                point.debit_1_bar,
-                point.vol_eau_mil,
-                point.latitude,
-                point.longitude
-              )
-            }
+            onCalloutPress={() => infoPointEau(point)}
           />
         ))}
-        
       </MapView>
 
-
+      {/* Bouton retour a la Positions */}
       <TouchableOpacity style={styles.boutonLocalisation} onPress={allerPosition}>
         <FontAwesome name="location-arrow" size={24} color="#FFF" />
       </TouchableOpacity>
+
+      <Modal transparent animationType="fade" visible={modalVisible}>
+        <View style={styles.overlay}>
+          <View style={styles.alertBox}>
+            <Text style={styles.title}>
+              Numero PEI : {selectedPEI?.numero_pei}
+            </Text>
+
+            <Text style={styles.message}>
+              Statut : {selectedPEI?.statut}{"\n"}
+              Type : {selectedPEI?.type_nature ?? "N/A"}{"\n"}
+              Pression : {selectedPEI?.press_deb ?? "N/A"} bar{"\n"}
+              Débit : {selectedPEI?.debit_1_bar ?? "N/A"} m3/h{"\n"}
+              Volume d'eau : {selectedPEI?.vol_eau_mil ?? "N/A"}
+            </Text>
+
+            {/* Itinéraire pour aller au point d'eau */}
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={() => {
+                if (!selectedPEI) return;
+                const url =
+                  Platform.OS === "ios"
+                    ? `maps://maps.apple.com/?daddr=${selectedPEI.latitude},${selectedPEI.longitude}`
+                    : `https://www.google.com/maps/dir/?api=1&destination=${selectedPEI.latitude},${selectedPEI.longitude}`;
+                Linking.openURL(url);
+              }}
+            >
+              <Text style={styles.buttonText}>Itinéraire</Text>
+            </TouchableOpacity>
+
+            {/* Signaler le point d'eau */}
+            <TouchableOpacity
+              style={styles.dangerButton}
+              onPress={() => {
+                if (selectedPEI) {
+
+                  // MANQUE ICI L'ENVOIE DU PARAMETRE (ID POINT)
+                  router.push({
+                    pathname: '/signalement',
+                    params: {idPoint: selectedPEI.id.toString()},
+                  });
+                  
+                };
+                setModalVisible(false)
+              }}
+            >
+              <Text style={styles.buttonText}>Signaler</Text>
+            </TouchableOpacity>
+
+
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text style={styles.cancelText}>Fermer</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
-// Decription du Point d'eau
-const infoPointEau = (
-  numero: string,
-  statut: string,
-  type_nature: string,
-  pressDeb: number | null,
-  debit1Bar: number | null,
-  vol_eau_mil: number | null,
-  latitude: number,
-  longitude: number
-) => {
-  Alert.alert(
-    `Numero PEI : ${numero}`,
-    `Statut : ${statut}\nType : ${type_nature ?? "N/A"}\nPression : ${pressDeb ?? "N/A"} bar\nDébit : ${debit1Bar ?? "N/A"} m3/h\nVolume d'eau : ${vol_eau_mil ?? "N/A"}`,
 
-    [
-      { text: "Fermer", style: "cancel" },
-      {
-        text: "Itinéraire",
-        onPress: () => {
-          const url =
-            Platform.OS === "ios"
-              ? `maps://maps.apple.com/?daddr=${latitude},${longitude}&dirflg=d`
-              : `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-          Linking.canOpenURL(url)
-            .then((supported) => {
-              if (supported) Linking.openURL(url);
-              else Alert.alert("Erreur", "Impossible d'ouvrir l'application de navigation");
-            })
-            .catch((err) => console.error("Erreur ouverture navigation", err));
-        },
-      },
-    ]
-  );
-};
-
-
+// Styles
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    flex: 1,
-  },
+  container: { flex: 1 },
+  map: { flex: 1 },
+
   boutonLocalisation: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 20,
     right: 20,
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     borderRadius: 30,
     width: 60,
     height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 5,
   },
+
   loader: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
+
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  alertBox: {
+    width: "85%",
+    backgroundColor: "white",
+    borderRadius: 14,
+    padding: 20,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  message: {
+    fontSize: 15,
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  primaryButton: {
+    backgroundColor: "#007AFF",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  dangerButton: {
+    backgroundColor: "#FF9500",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: "white",
+    textAlign: "center",
+    fontWeight: "600",
+  },
+  cancelText: {
+    color: "#007AFF",
+    textAlign: "center",
+    fontWeight: "600",
+    marginTop: 10,
+  },
 });
-
-
-
-// exemple format:
-// {"id": 11362, "latitude": 6788543, "longitude": 225566, "nom": "", "numero_pei": "562100009", "statut": "PUBLIC"}
