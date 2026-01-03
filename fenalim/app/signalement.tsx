@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import HautPage from './hautPage';
 import { getData } from "../config/recupRole"; 
 import { naviguerPointEau } from '../config/navigation';
+import { useLocalSearchParams } from 'expo-router';
 import { API_ENDPOINTS } from './config/api';
 
 
@@ -16,8 +17,15 @@ const ajouterPhoto = require('@/assets/images/ajouter_photo.png');
 
 export default function Signalement() {
   const router = useRouter();
+  const { idPoint } = useLocalSearchParams<{ idPoint: string }>();
   const [userRole, setUserRole] = useState<string | null>(null);
-  
+
+  useEffect(() => {
+    if (idPoint) {
+      setIDPoint(idPoint);
+    }
+  }, [idPoint]);
+
 
   useEffect(() => {
   const chargerRole = async () => {
@@ -111,7 +119,7 @@ const handlePickImage = () => {
     else{        
       try {
         const formData = new FormData();
-        formData.append("id_point", "666");
+        formData.append("id_point", IDPoint);
         formData.append("probleme", probleme);
         formData.append("photo", {
           uri: image,
@@ -143,8 +151,6 @@ const handlePickImage = () => {
   };
 
 
-
-
   return (
     <>
     <View>
@@ -161,8 +167,7 @@ const handlePickImage = () => {
         <View style={styles.info}>
 
             {/* hydrant selectionner */}
-            <Text style= {styles.choixhydrant} >Hydrant #235</Text>
-
+            <Text style={styles.choixhydrant}> Hydrant #{IDPoint}</Text>
 
             {/* message signalement */}
             <View style={styles.total}>

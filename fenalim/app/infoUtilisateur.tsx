@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
-import { Picker } from '@react-native-picker/picker';
 import HautPage from './hautPage';
 import axios from "axios";
 import { router, useLocalSearchParams } from 'expo-router';

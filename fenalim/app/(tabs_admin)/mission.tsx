@@ -45,24 +45,33 @@ export default function HomeScreen() {
       <Text style={choix === "historique" ? styles.txtActif : styles.txtInactif}>Historique</Text>
       </TouchableOpacity>
    
-
-   {/* affichage */}
   </View>
+
+    {/* affichage */}
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      keyboardVerticalOffset={0}
     >
 
+      {page === "creer" && (
+        <ScrollView>
+          <CreerMission />
+        </ScrollView>
+      )}
 
-      <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
-      <View>
-          {page === "creer" && <CreerMission />}
-          {page === "enCours" && <MissionEnCours />}
-          {page === "historique" && <HistoriqueMission />}
-      </View>
-        
-      </ScrollView>
+      {page === "enCours" && (
+        <View style={{ flex: 1 }}>
+          <MissionEnCours />
+        </View>
+      )}
+
+      {page === "historique" && (
+        <View style={{ flex: 1 }}>
+          <HistoriqueMission />
+        </View>
+      )}
+
     </KeyboardAvoidingView>
 
     </>

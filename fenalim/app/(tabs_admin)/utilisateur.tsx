@@ -4,6 +4,7 @@ import HautPage from '../hautPage';
 import { router, useRouter } from 'expo-router';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_ENDPOINTS } from '../config/api';
 
 
 const roue = require('@/assets/images/parametres.png');
@@ -59,7 +60,7 @@ export default function HomeScreen() {
       return;
     }
     try {
-      const response = await axios.get("http://192.168.2.215:8000/utilisateurs/", {
+      const response = await axios.get(API_ENDPOINTS.REGISTER, {
       headers: { Authorization: `Bearer ${token}` },
     });
       // affichage des données

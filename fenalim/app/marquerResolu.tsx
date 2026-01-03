@@ -5,7 +5,8 @@ import axios from "axios";
 import { router, useLocalSearchParams} from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { naviguerPointEau } from '../config/navigation';
-import { getData } from "../config/recupRole"; 
+import { getData } from "../config/recupRole";
+import { API_URL, API_ENDPOINTS } from './config/api';
 
 
 type Signale = {
@@ -64,7 +65,7 @@ export default function UserDetails() {
     }
     try {
       console.log("iddddd", id_s)
-      const response = await axios.get(`http://192.168.2.215:8000/signaler/id_s/${id_s}`, {
+      const response = await axios.get(API_ENDPOINTS.SIGNALEMENT_BY_ID(id_s), {
         headers: { Authorization: `Bearer ${token}` },
       });
       // affichage des données
@@ -94,7 +95,7 @@ export default function UserDetails() {
 
         try {
         
-        const response = await axios.delete(`http://192.168.2.215:8000/signaler/suprimmer/${signalement?.id_point}`, {
+        const response = await axios.delete(`${API_URL}${signalement?.id_point}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
         
@@ -135,7 +136,7 @@ export default function UserDetails() {
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Problème : </Text> {signalement?.probleme}</Text>
               {signalement?.photo && (
                 <Image
-                  source={{ uri: `http://192.168.2.215:8000/${signalement.photo}` }}
+                  source={{ uri: `${API_URL}${signalement.photo}` }}
                   style={{ width: 300, height: 200, borderRadius: 10, marginTop: 10, marginBottom:10 }}
                   resizeMode="cover"
                 />

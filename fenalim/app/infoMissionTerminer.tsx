@@ -7,6 +7,7 @@ import proj4 from "proj4";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getData } from "../config/recupRole"; 
 import { naviguerMission } from '../config/navigation';
+import { API_ENDPOINTS } from './config/api';
 
 
 type Mission = {
@@ -87,12 +88,12 @@ export default function MissionDetails() {
     }
     try {
       console.log("iddddd", id_m)
-      const responseMission = await axios.get(`http://192.168.2.215:8000/missions/${id_m}`, {
+      const responseMission = await axios.get(API_ENDPOINTS.MISSION_BY_ID(id_m), {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       // affichage des données
-      console.log("Données reçues:", responseMission.data);
+      console.log("Données reçues :", responseMission.data);
       
       setMission({
         id_mission: String(responseMission.data.id_mission),
@@ -126,7 +127,7 @@ export default function MissionDetails() {
       // affichage des données
       // console.log("Données reçues:", response.data);
       
-      const response = await axios.get(`http://192.168.2.215:8000/points-eau/${id_point}`);
+      const response = await axios.get(API_ENDPOINTS.POINT_EAU_BY_ID(id_point));
       const point = response.data; 
       if (point) {
         const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";

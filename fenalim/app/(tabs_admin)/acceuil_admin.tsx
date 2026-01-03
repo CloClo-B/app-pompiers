@@ -189,8 +189,7 @@ export default function HomeScreen() {
               style={styles.dangerButton}
               onPress={() => {
                 if (selectedPEI) {
-
-                  // MANQUE ICI L'ENVOIE DU PARAMETRE (ID POINT)
+                  
                   router.push({
                     pathname: '/signalement',
                     params: {idPoint: selectedPEI.id.toString()},

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Platf
 import {useRouter } from 'expo-router';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL, API_ENDPOINTS } from './config/api';
 
 
 const info = require('@/assets/images/information.png');
@@ -114,7 +115,7 @@ export default function historiqueMission() {
       console.log(token);
     }
     try {
-      const responseMission = await axios.get("http://192.168.2.215:8000/missions/", {
+      const responseMission = await axios.get(API_ENDPOINTS.MISSIONS, {
         headers: { Authorization: `Bearer ${token}` },
       });
             
@@ -156,7 +157,7 @@ export default function historiqueMission() {
 
     try {
     
-      const response = await axios.delete(`http://192.168.2.215:8000/missions/supprimer/${id_mission}`,  {
+      const response = await axios.delete(`${API_URL}/missions/supprimer/${id_mission}`,  {
         headers: { Authorization: `Bearer ${token}` },
       });
 

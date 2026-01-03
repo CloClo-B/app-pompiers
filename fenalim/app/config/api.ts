@@ -19,7 +19,7 @@ export const API_ENDPOINTS = {
   
 
   POINTS_EAU: `${API_URL}/points-eau/`,
-  POINT_EAU_BY_ID: (id: number) => `${API_URL}/points-eau/${id}`,
+  POINT_EAU_BY_ID: (id: string) => `${API_URL}/points-eau/${id}`,
   
 
   MISSIONS: `${API_URL}/missions/`,
@@ -27,7 +27,7 @@ export const API_ENDPOINTS = {
   
 
   SIGNALEMENTS: `${API_URL}/signaler/`,
-  SIGNALEMENT_BY_ID: (id: number) => `${API_URL}/signaler/${id}`,
+  SIGNALEMENT_BY_ID: (id: string) => `${API_URL}/signaler/${id}`,
   
   HISTORIQUE: `${API_URL}/historiques/`,
 };
