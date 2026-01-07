@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Button, TouchableOpacity, Alert, Image, ScrollView, Platform, Linking } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, ScrollView, Platform, Linking } from "react-native";
 import HautPage from './hautPage';
 import axios from "axios";
-import { router, useLocalSearchParams} from 'expo-router';
+import {useLocalSearchParams} from 'expo-router';
 import proj4 from "proj4";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getData } from "../config/recupRole"; 
-import { naviguerMission } from '../config/navigation';
-import { API_ENDPOINTS } from './config/api';
+import { getData } from '@/config/recupRole'; 
+import { naviguerMission } from '@/config/navigation';
+import { API_ENDPOINTS } from '@/config/api';
 
 
 type Mission = {

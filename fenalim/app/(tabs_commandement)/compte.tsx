@@ -2,7 +2,7 @@ import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, Te
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import HautPage from '../hautPage';
-import authService, { UserData } from '../service/authService';
+import authService, { UserData } from '@/service/authService';
 
 const imgMonCompte = require('@/assets/images/mon_compte.png');
 const imgCrayon = require('@/assets/images/stylo.png');

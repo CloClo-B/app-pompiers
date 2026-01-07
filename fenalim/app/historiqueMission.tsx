@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Platf
 import {useRouter } from 'expo-router';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL, API_ENDPOINTS } from './config/api';
+import { API_ENDPOINTS } from '@/config/api';
 
 
 const info = require('@/assets/images/information.png');
@@ -157,7 +157,7 @@ export default function historiqueMission() {
 
     try {
     
-      const response = await axios.delete(`${API_URL}/missions/supprimer/${id_mission}`,  {
+      const response = await axios.delete(API_ENDPOINTS.MISSION_DELETE(Number(id_mission)),  {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -207,22 +207,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
-  vert:{
-    backgroundColor:'#4CAF50',
-    paddingHorizontal: 5,
-    paddingVertical:2,
-    borderRadius:10,
-  },
-  header: { 
-    flexDirection: 'row', 
-    backgroundColor: '#3498db', 
-    padding: 8 
-  },
-  headerCell: { 
-    flex: 1, 
-    color: 'white', 
-    fontWeight: 'bold' 
-  },
   tableContainer: { 
     width: 345, 
     height: 365, 
@@ -254,15 +238,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     backgroundColor: '#1D3557',
   },
+
   textTittre:{
     color: '#ffffff',
     fontSize: 17,
   },
-  titre2: {
-    textAlign: 'center',
-    color: '#1D3557',
-    fontSize: 25,
-    marginBottom: 30,
-  }
 
 });

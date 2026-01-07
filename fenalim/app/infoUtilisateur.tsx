@@ -4,7 +4,7 @@ import HautPage from './hautPage';
 import axios from "axios";
 import { router, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL } from './config/api';
+import {API_ENDPOINTS } from '@/config/api';
 
 type User = {
   id: string;
@@ -52,7 +52,7 @@ export default function UserDetails() {
       return;
     }
     try {
-      const response = await axios.get(`${API_URL}/utilisateurs/${id}`, {
+      const response = await axios.get(API_ENDPOINTS.USER_BY_ID(Number(id)), {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -101,7 +101,7 @@ export default function UserDetails() {
             try {
               setUpdating(true);
               await axios.put(
-                `${API_URL}/utilisateurs/${id}`,
+                API_ENDPOINTS.USER_BY_ID(Number(id)),
                 { role: selectedRole },
                 { headers: { Authorization: `Bearer ${token}` } }
               );
@@ -131,7 +131,7 @@ export default function UserDetails() {
     // Vérifier si c'est le dernier admin
     if (utilisateur.role === 'admin') {
       try {
-        const response = await axios.get(`${API_URL}/utilisateurs/`, {
+        const response = await axios.get(API_ENDPOINTS.USERS_LIST, {
           headers: { Authorization: `Bearer ${token}` },
         });
         
@@ -161,7 +161,7 @@ export default function UserDetails() {
           onPress: async () => {
             try {
               setDeleting(true);
-              await axios.delete(`${API_URL}/utilisateurs/${id}`, {
+              await axios.delete(API_ENDPOINTS.USER_BY_ID(Number(id)), {
                 headers: { Authorization: `Bearer ${token}` },
               });
 
@@ -284,7 +284,7 @@ export default function UserDetails() {
             </Text>
           </View>
 
-          {/* Sélecteur de rôle simplifié */}
+          {/* Sélecteur de rôle  */}
           <View style={styles.roleSelector}>
             <Text style={styles.roleSelectorLabel}>Choisir un nouveau rôle :</Text>
             <View style={styles.roleButtonsContainer}>
@@ -311,7 +311,7 @@ export default function UserDetails() {
             
             {roleModified && (
               <Text style={styles.modifiedIndicator}>
-                ⚠️ Modification en attente d'application
+                Modification en attente d'application
               </Text>
             )}
           </View>

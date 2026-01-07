@@ -5,10 +5,10 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import HautPage from './hautPage';
-import { getData } from "../config/recupRole"; 
-import { naviguerPointEau } from '../config/navigation';
+import { getData } from '@/config/recupRole'; 
+import { naviguerAccueil} from '@/config/navigation';
+import { API_ENDPOINTS } from '@/config/api';
 import { useLocalSearchParams } from 'expo-router';
-import { API_ENDPOINTS } from './config/api';
 
 
 // petit encadrer pour choix photo
@@ -133,7 +133,7 @@ const handlePickImage = () => {
         });
         router.push({
             pathname: '/succes',
-            params: { title: 'Signalement créé avec succès',  page:"point_eau"  }
+            params: { title: 'Signalement créé avec succès',  page:"acceuil"  }
           });
       } 
       catch (error: unknown) {
@@ -187,7 +187,7 @@ const handlePickImage = () => {
             {/* choix validation annulation */}
             <View style={styles.validation}>
 
-                <TouchableOpacity style={styles.boutton} onPress={() => {if (userRole) naviguerPointEau(userRole); else alert("Rôle utilisateur introuvable"); }}>
+                <TouchableOpacity style={styles.boutton} onPress={() => {if (userRole) naviguerAccueil(userRole); else alert("Rôle utilisateur introuvable"); }}>
                 <Text style={{color:'#ffffff'}}>ANNULER</Text>
                 </TouchableOpacity>
 
@@ -231,7 +231,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap:'10%',    
   },
-
 
   total:{
     backgroundColor:'#ffffff',
@@ -281,7 +280,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
 });
-function setUserRole(value: any) {
-  throw new Error('Function not implemented.');
-}
+
 

@@ -1,7 +1,7 @@
 // Fichier de centralisation des URL pour les fichiers frontend
 
 // IP A CHANGER
-export const API_URL = 'http://192.168.2.215:8000';
+export const API_URL = 'http://192.168.1.184:8000';
 
 
 export const API_ENDPOINTS = {
@@ -24,10 +24,19 @@ export const API_ENDPOINTS = {
 
   MISSIONS: `${API_URL}/missions/`,
   MISSION_BY_ID: (id: number) => `${API_URL}/missions/${id}`,
-  
+  MISSION_UPDATE: (id: number) => `${API_URL}/missions/update/${id}`,
+  MISSION_DELETE: (id: number) => `${API_URL}/missions/supprimer/${id}`,
+
 
   SIGNALEMENTS: `${API_URL}/signaler/`,
+  SIGNALEMENT_BY_ID_SIGNALEMENT: (id: string) => `${API_URL}/signaler/id_s/${id}`,
+  SIGNALEMENT_BY_ID_POINT: (id: string) => `${API_URL}/signaler/id_p/${id}`,
   SIGNALEMENT_BY_ID: (id: string) => `${API_URL}/signaler/${id}`,
-  
+  SIGNALEMENT_SUPPRIMER: (id: string) => `${API_URL}/signaler/suprimmer/${id}`,
+
+
   HISTORIQUE: `${API_URL}/historiques/`,
+
+  IMAGE: (id: string) => `${API_URL}/${id}`,
+
 };

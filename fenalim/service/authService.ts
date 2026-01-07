@@ -98,7 +98,6 @@ async getUserInfo(): Promise<UserData | null> {
       console.log("Status:", response.status);
       const text = await response.text(); 
       console.log("Réponse serveur:", text);
-      console.log("------------------");
 
       if (response.status === 401) {
         await this.removeToken();
@@ -193,7 +192,6 @@ async getUserInfo(): Promise<UserData | null> {
   // Se déconnecter
   async logout(userId?: number): Promise<void> {
     try {
-      // Optionnel : appeler l'endpoint logout si besoin
       if (userId) {
         const token = await this.getToken();
         if (token) {

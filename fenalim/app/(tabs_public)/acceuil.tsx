@@ -6,7 +6,7 @@ import { Alert, ActivityIndicator, StyleSheet, TouchableOpacity, View, Text, Lin
 import MapView, { Marker, Callout} from 'react-native-maps';
 import HautPage from '../hautPage';
 import proj4 from "proj4";
-import { API_ENDPOINTS } from '../config/api';
+import { API_ENDPOINTS } from '../../config/api';
 
 type PointEau = {
   id: number;

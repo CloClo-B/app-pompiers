@@ -7,7 +7,7 @@ import MapView, { Marker } from "react-native-maps";
 import { useRouter } from 'expo-router';
 import HautPage from "../hautPage";
 import proj4 from "proj4";
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS } from "../../config/api";
 
 type PointEau = {
   id: number;
@@ -192,7 +192,7 @@ export default function HomeScreen() {
                   
                   router.push({
                     pathname: '/signalement',
-                    params: {idPoint: selectedPEI.id.toString()},
+                    params: {idPoint: selectedPEI.numero_pei  .toString()},
                   });
                   
                 };

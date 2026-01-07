@@ -6,7 +6,7 @@ import Button from '@/components/ButtonLog';
 import axios from 'axios';
 import { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_ENDPOINTS } from './config/api';
+import { API_ENDPOINTS } from '@/config/api';
 
 
 export default function Connexion() {

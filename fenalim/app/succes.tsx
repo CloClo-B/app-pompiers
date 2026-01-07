@@ -1,10 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { naviguerPointEau, naviguerMission } from '../config/navigation';
-const reussi = require('@/assets/images/succes.png');
+import { naviguerPointEau, naviguerMission, naviguerAccueil } from '../config/navigation';
 import { getData } from "../config/recupRole"; 
 
+const reussi = require('@/assets/images/succes.png');
 export default function CreationSucces() {
   const [userRole, setUserRole] = useState<string | null>(null);
   
@@ -28,6 +28,9 @@ export default function CreationSucces() {
     }
     else if(page=="missions"){
       naviguerMission(userRole);
+    }
+    else if(page=="acceuil"){
+      naviguerAccueil(userRole);
     }
     else{
       console.log("nom de la route incorect");
@@ -84,8 +87,5 @@ const styles = StyleSheet.create({
     width: 250, 
     height: 55
 },
-
-
-
 
 });

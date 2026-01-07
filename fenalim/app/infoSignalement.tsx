@@ -5,9 +5,9 @@ import axios from "axios";
 import { router, useLocalSearchParams} from 'expo-router';
 import proj4 from "proj4";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getData } from "../config/recupRole"; 
-import { naviguerPointEau } from '../config/navigation';
-import { API_URL, API_ENDPOINTS } from './config/api';
+import { getData } from '@/config/recupRole'; 
+import { naviguerPointEau } from '@/config/navigation';
+import { API_ENDPOINTS } from '@//config/api';
 
 
 type Signale = {
@@ -67,7 +67,7 @@ export default function UserDetails() {
     }
     try {
       console.log("iddddd", id_s)
-      const response = await axios.get(API_ENDPOINTS.SIGNALEMENT_BY_ID(id_s), {
+      const response = await axios.get(API_ENDPOINTS.SIGNALEMENT_BY_ID_SIGNALEMENT(id_s), {
         headers: { Authorization: `Bearer ${token}` },
       });
       // affichage des données
@@ -147,7 +147,7 @@ export default function UserDetails() {
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Problème : </Text> {signalement?.probleme}</Text>
               {signalement?.photo && (
                 <Image
-                  source={{ uri: `${API_URL}${signalement.photo}` }}
+                  source={{ uri: API_ENDPOINTS.IMAGE(signalement.photo) }}
                   style={{ width: 300, height: 250, borderRadius: 10, marginTop: 10, marginBottom:10 }}
                   resizeMode="cover"
                 />
@@ -214,38 +214,16 @@ const styles = StyleSheet.create({
     padding: 20,     
     justifyContent: 'space-between'
   },
-
   titre: {
     textAlign: "center",
     fontSize: 26,
     fontWeight: "bold",
     marginBottom: 15
   },
-  infoBloc: {
-    gap: 13,
-  },
-  btnRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 15
-  },
-  btn: {
-    flex: 1
-  },
-  tout:{
-    alignSelf: 'center',
-    alignItems: "center",
-    marginTop: 20,
-  },
   boutton:{
     justifyContent: 'center',
     alignItems: 'center',    
     borderRadius: 30,
   },
-  titre2: {
-    textAlign: 'center',
-    color: '#1D3557',
-    fontSize: 25,
-    marginBottom: 30,
-  }
+
 });

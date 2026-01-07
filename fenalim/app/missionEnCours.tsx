@@ -4,7 +4,7 @@ import {useRouter } from 'expo-router';
 import axios from 'axios';
 import proj4 from "proj4";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL, API_ENDPOINTS } from './config/api';
+import { API_ENDPOINTS } from '@/config/api';
 
 
 type MissionAvecPoint = {
@@ -193,7 +193,7 @@ const fetchMissions = async (token: string) => {
 
     try {
     
-      const response = await axios.put(`${API_URL}/missions/update/${id_mission}`, {
+      const response = await axios.put(API_ENDPOINTS.MISSION_UPDATE(Number(id_mission)), {
         statut: "TERMINER",
         date_fin: new Date().toISOString(),
       },

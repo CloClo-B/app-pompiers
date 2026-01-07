@@ -32,6 +32,8 @@ export default function RootLayout() {
         <Stack.Screen name="infoSignalement" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="marquerResolu" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="infoMissionTerminer" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="signalement" options={{ headerShown: false, gestureEnabled: false }} />
+
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

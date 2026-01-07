@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
-import { router, useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_ENDPOINTS } from './config/api';
+import { API_ENDPOINTS } from '@/config/api';
 
 
 const roue = require('@/assets/images/parametres.png');
@@ -129,16 +129,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
-  header: { 
-    flexDirection: 'row', 
-    backgroundColor: '#3498db', 
-    padding: 8 
-  },
-  headerCell: { 
-    flex: 1, 
-    color: 'white', 
-    fontWeight: 'bold' 
-  },
   tableContainer: { 
     width: 345, 
     height: 365, 
@@ -160,12 +150,6 @@ const styles = StyleSheet.create({
     width: 25, 
     height: 25 
   },
-  imageDuProb: {
-    width: 60, 
-    height: 60,
-    marginRight: 25
-
-  },
   hautBleu:{
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
@@ -180,11 +164,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 17,
   },
-  titre2: {
-    textAlign: 'center',
-    color: '#1D3557',
-    fontSize: 25,
-    marginBottom: 30,
-  }
+
 
 });

@@ -4,7 +4,7 @@ import {StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native
 import DropDownPicker from 'react-native-dropdown-picker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_ENDPOINTS } from './config/api';
+import { API_ENDPOINTS } from '@/config/api';
 
 
 export default function CreerPoint() {
@@ -414,7 +414,6 @@ const styles = StyleSheet.create({
   },
 
   boutton:{
-
     justifyContent: 'center',
     alignItems: 'center',    
     borderRadius: 30,

@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_ENDPOINTS } from './config/api';
+import { API_ENDPOINTS } from '@/config/api';
 
 
 export default function CreerMission() {
@@ -161,10 +161,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     alignSelf: 'center',
   },
-  menuD: {
-    borderRadius: 30,
-    width: '90%',
-  },
   entree: {
     backgroundColor: '#ffffffff',
     width: 340,
@@ -191,24 +187,4 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     textAlignVertical:"top",
   },
-
-
-
 });
-
-    // {/* afficher la carte */}
-    //   <View style={styles.tout}>
-    //     <Text style={styles.text}>Localisation incendie</Text> 
-    //     <TouchableOpacity style={[styles.boutton, {backgroundColor: '#457B9D', width: 250, height: 45}]} onPress={() => console.log("afficher carte")}>
-    //       <Text style={{color:'#ffffff'}}>AFFICHER SUR LA CARTE</Text>
-    //     </TouchableOpacity>
-    // </View>
-
-
-    // {/* Choix du point d’eau */}
-    //   <View style={styles.tout}>
-    //     <Text style={styles.text}>Choix du point d’eau</Text> 
-    //     <TouchableOpacity style={[styles.boutton, {backgroundColor: '#457B9D', width: 250, height: 45}]} onPress={() => console.log("afficher carte")}>
-    //       <Text style={{color:'#ffffff'}}>AFFICHER SUR LA CARTE</Text>
-    //     </TouchableOpacity>
-    // </View>
