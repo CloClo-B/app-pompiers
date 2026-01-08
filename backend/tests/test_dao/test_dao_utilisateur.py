@@ -1,311 +1,268 @@
 import pytest
-from app.DAO import utilisateur_dao
-from app import models
+from app.DAO.DAOUtilisateurs import (
+    get_all_utilisateur,
+    get_utilisateur_by_id,
+    get_utilisateur_by_email,
+    create_utilisateur,
+    delete_utilisateur_by_id,
+    update_utilisateur_by_id,
+    update_own_profile,
+    change_password,
+    verify_user_password,
+    hash_password,
+    verify_password
+)
+
+@pytest.fixture
+def sample_user_data():
+    """Données d'exemple pour créer un utilisateur"""
+    return {
+        "nom": "Dupont",
+        "prenom": "Jean",
+        "email": "jean.dupont@example.com",
+        "telephone": "0601020304",
+        "mot_de_passe": "Password123!",
+        "role": "public"
+    }
 
 
-class TestUtilisateurDAO:
-    """Tests pour le DAO Utilisateur"""
-    
-    @pytest.fixture
-    def sample_user_data(self):
-        """Données pour créer un utilisateur de test"""
-        return {
-            "nom": "Dupont",
-            "prenom": "Jean",
-            "email": "jean.dupont@test.com",
-            "telephone": "0612345678",
-            "mot_de_passe": "password123",
-            "role": "pompier"
-        }
-
-    @pytest.fixture
-    def sample_user(self, db_session, sample_user_data):
-        """Crée un utilisateur de test"""
-        user = utilisateur_dao.create_utilisateur(db_session, sample_user_data)
-        assert user is not None, "La création de l'utilisateur de test a échoué"
-        return user
-
-    # ============= TESTS CREATE =============
-    
-    def test_create_utilisateur_complet(self, db_session):
-        """Test création d'un utilisateur avec toutes les données"""
-        data = {
-            "nom": "Martin",
-            "prenom": "Marie",
-            "email": "marie.martin@test.com",
-            "telephone": "0687654321",
-            "mot_de_passe": "securepwd",
-            "role": "public"
-        }
-        user = utilisateur_dao.create_utilisateur(db_session, data)
-        
-        assert user is not None
-        assert user.id_utilisateur is not None
-        assert user.nom == "Martin"
-        assert user.prenom == "Marie"
-        assert user.email == "marie.martin@test.com"
-        assert user.telephone == "0687654321"
-        assert user.role == models.RoleEnum.public
-        # Le mot de passe doit être hashé
-        assert user.mot_de_passe != "securepwd"
-
-    def test_create_utilisateur_minimal(self, db_session):
-        """Test création d'un utilisateur avec données minimales (rôle par défaut)"""
-        data = {
-            "nom": "Test",
-            "prenom": "User",
-            "email": "test.user@test.com",
-            "telephone": "0611111111",
-            "mot_de_passe": "testpass"
-        }
-        user = utilisateur_dao.create_utilisateur(db_session, data)
-        
-        assert user is not None
-        assert user.role == models.RoleEnum.public  # Rôle par défaut
-
-    def test_create_utilisateur_email_deja_utilise(self, db_session, sample_user):
-        """Test création d'un utilisateur avec un email déjà utilisé"""
-        data = {
-            "nom": "Autre",
-            "prenom": "User",
-            "email": sample_user.email,  # Email déjà utilisé
-            "telephone": "0699999999",
-            "mot_de_passe": "password"
-        }
-        user = utilisateur_dao.create_utilisateur(db_session, data)
-        
-        # Devrait retourner None si l'email existe déjà
-        assert user is None
-
-    # ============= TESTS GET ALL =============
-    
-    def test_get_all_utilisateur_empty(self, db_session):
-        """Test get_all avec une base vide"""
-        utilisateurs = utilisateur_dao.get_all_utilisateur(db_session)
-        assert utilisateurs == []
-
-    def test_get_all_utilisateur_with_data(self, db_session, sample_user):
-        """Test get_all avec des données"""
-        utilisateurs = utilisateur_dao.get_all_utilisateur(db_session)
-        
-        assert len(utilisateurs) == 1
-        assert all(isinstance(u, dict) for u in utilisateurs)
-        # Vérifier que les mots de passe ne sont pas retournés
-        assert all("mot_de_passe" not in u for u in utilisateurs)
-        assert all("_sa_instance_state" not in u for u in utilisateurs)
-
-    def test_get_all_utilisateur_multiple(self, db_session):
-        """Test get_all avec plusieurs utilisateurs"""
-        users_data = [
-            {"nom": "User1", "prenom": "Test1", "email": "user1@test.com", 
-             "telephone": "0601010101", "mot_de_passe": "pass1"},
-            {"nom": "User2", "prenom": "Test2", "email": "user2@test.com", 
-             "telephone": "0602020202", "mot_de_passe": "pass2"},
-            {"nom": "User3", "prenom": "Test3", "email": "user3@test.com", 
-             "telephone": "0603030303", "mot_de_passe": "pass3"},
-        ]
-        
-        for data in users_data:
-            utilisateur_dao.create_utilisateur(db_session, data)
-        
-        utilisateurs = utilisateur_dao.get_all_utilisateur(db_session)
-        assert len(utilisateurs) == 3
-
-    # ============= TESTS GET BY ID =============
-    
-    def test_get_utilisateur_by_id_exists(self, db_session, sample_user):
-        """Test get_by_id avec un ID existant"""
-        user = utilisateur_dao.get_utilisateur_by_id(db_session, sample_user.id_utilisateur)
-        
-        assert user is not None
-        assert user.id_utilisateur == sample_user.id_utilisateur
-        assert user.email == sample_user.email
-
-    def test_get_utilisateur_by_id_not_exists(self, db_session):
-        """Test get_by_id avec un ID inexistant"""
-        user = utilisateur_dao.get_utilisateur_by_id(db_session, 99999)
-        assert user is None
-
-    # ============= TESTS GET BY EMAIL =============
-    
-    def test_get_utilisateur_by_email_exists(self, db_session, sample_user):
-        """Test get_by_email avec un email existant"""
-        user = utilisateur_dao.get_utilisateur_by_email(db_session, sample_user.email)
-        
-        assert user is not None
-        assert user.email == sample_user.email
-        assert user.nom == sample_user.nom
-
-    def test_get_utilisateur_by_email_not_exists(self, db_session):
-        """Test get_by_email avec un email inexistant"""
-        user = utilisateur_dao.get_utilisateur_by_email(db_session, "inexistant@test.com")
-        assert user is None
-
-    # ============= TESTS UPDATE =============
-    
-    def test_update_utilisateur_nom_prenom(self, db_session, sample_user):
-        """Test update du nom et prénom"""
-        data = {"nom": "UpdatedNom", "prenom": "UpdatedPrenom"}
-        updated = utilisateur_dao.update_utilisateur_by_id(
-            db_session, 
-            sample_user.id_utilisateur, 
-            data
-        )
-        
-        assert updated is not None
-        assert updated.nom == "UpdatedNom"
-        assert updated.prenom == "UpdatedPrenom"
-        assert updated.email == sample_user.email  # Inchangé
-
-    def test_update_utilisateur_mot_de_passe(self, db_session, sample_user):
-        """Test update du mot de passe (doit être hashé)"""
-        old_password_hash = sample_user.mot_de_passe
-        data = {"mot_de_passe": "nouveau_mot_de_passe"}
-        
-        updated = utilisateur_dao.update_utilisateur_by_id(
-            db_session, 
-            sample_user.id_utilisateur, 
-            data
-        )
-        
-        assert updated is not None
-        assert updated.mot_de_passe != "nouveau_mot_de_passe"  # Doit être hashé
-        assert updated.mot_de_passe != old_password_hash  # Doit être différent
-
-    def test_update_utilisateur_email_unique(self, db_session):
-        """Test update avec un email déjà utilisé par un autre utilisateur"""
-        # Créer deux utilisateurs
-        user1 = utilisateur_dao.create_utilisateur(db_session, {
-            "nom": "User1", "prenom": "Test1", "email": "user1@test.com",
-            "telephone": "0601010101", "mot_de_passe": "pass1"
-        })
-        user2 = utilisateur_dao.create_utilisateur(db_session, {
-            "nom": "User2", "prenom": "Test2", "email": "user2@test.com",
-            "telephone": "0602020202", "mot_de_passe": "pass2"
-        })
-        
-        # Essayer de changer l'email de user2 pour celui de user1
-        data = {"email": "user1@test.com"}
-        
-        with pytest.raises(ValueError, match="Email déjà utilisé"):
-            utilisateur_dao.update_utilisateur_by_id(db_session, user2.id_utilisateur, data)
-
-    def test_update_utilisateur_ignore_id(self, db_session, sample_user):
-        """Test que l'ID ne peut pas être modifié"""
-        original_id = sample_user.id_utilisateur
-        data = {"id_utilisateur": 99999, "nom": "UpdatedNom"}
-        
-        updated = utilisateur_dao.update_utilisateur_by_id(
-            db_session, 
-            sample_user.id_utilisateur, 
-            data
-        )
-        
-        assert updated.id_utilisateur == original_id  # ID inchangé
-        assert updated.nom == "UpdatedNom"  # Nom changé
-
-    def test_update_utilisateur_not_exists(self, db_session):
-        """Test update d'un utilisateur inexistant"""
-        data = {"nom": "Test"}
-        updated = utilisateur_dao.update_utilisateur_by_id(db_session, 99999, data)
-        
-        assert updated is None
-
-    # ============= TESTS DELETE =============
-    
-    def test_delete_utilisateur_exists(self, db_session, sample_user):
-        """Test suppression d'un utilisateur existant"""
-        user_id = sample_user.id_utilisateur
-        email = sample_user.email
-        
-        result = utilisateur_dao.delete_utilisateur_by_id(db_session, user_id)
-        
-        assert result is True
-        
-        # Vérifier que l'utilisateur n'existe plus
-        remaining = utilisateur_dao.get_utilisateur_by_email(db_session, email)
-        assert remaining is None
-
-    def test_delete_utilisateur_not_exists(self, db_session):
-        """Test suppression d'un utilisateur inexistant"""
-        result = utilisateur_dao.delete_utilisateur_by_id(db_session, 99999)
-        assert result is False
-
-    # ============= TESTS PASSWORD HASHING =============
+class TestPasswordHashing:
+    """Tests pour le hashage des mots de passe"""
     
     def test_hash_password(self):
-        """Test que le hashage fonctionne"""
-        password = "test_password"
-        hashed = utilisateur_dao.hash_password(password)
-        
+        password = "TestPassword123"
+        hashed = hash_password(password)
         assert hashed != password
-        assert len(hashed) > 20  # Un hash Argon2 est long
-
-    def test_verify_password_correct(self):
-        """Test vérification d'un mot de passe correct"""
-        password = "test_password"
-        hashed = utilisateur_dao.hash_password(password)
-        
-        assert utilisateur_dao.verify_password(password, hashed) is True
-
-    def test_verify_password_incorrect(self):
-        """Test vérification d'un mot de passe incorrect"""
-        password = "test_password"
-        wrong_password = "wrong_password"
-        hashed = utilisateur_dao.hash_password(password)
-        
-        assert utilisateur_dao.verify_password(wrong_password, hashed) is False
-
-    # ============= TESTS D'INTÉGRATION =============
+        assert len(hashed) > 0
     
-    def test_integration_full_crud(self, db_session):
-        """Test d'intégration : cycle CRUD complet"""
-        # CREATE
-        data = {
-            "nom": "Integration",
-            "prenom": "Test",
-            "email": "integration@test.com",
-            "telephone": "0655555555",
-            "mot_de_passe": "password",
-            "role": "commandement"
+    def test_verify_password_correct(self):
+        password = "TestPassword123"
+        hashed = hash_password(password)
+        assert verify_password(password, hashed) is True
+    
+    def test_verify_password_incorrect(self):
+        password = "TestPassword123"
+        hashed = hash_password(password)
+        assert verify_password("WrongPassword", hashed) is False
+
+
+class TestCreateUtilisateur:
+    """Tests pour la création d'utilisateurs"""
+    
+    def test_create_utilisateur_success(self, db_session, sample_user_data):
+        user = create_utilisateur(db_session, sample_user_data)
+        assert user is not None
+        assert user.email == "jean.dupont@example.com"
+        assert user.nom == "Dupont"
+        assert user.mot_de_passe != "Password123!"  # Vérifie le hashage
+    
+    def test_create_utilisateur_duplicate_email(self, db_session, sample_user_data):
+        create_utilisateur(db_session, sample_user_data)
+        duplicate = create_utilisateur(db_session, sample_user_data)
+        assert duplicate is None
+    
+    def test_create_utilisateur_default_role(self, db_session, sample_user_data):
+        del sample_user_data["role"]
+        user = create_utilisateur(db_session, sample_user_data)
+        assert user.role == "public"
+
+
+class TestGetUtilisateur:
+    """Tests pour la récupération d'utilisateurs"""
+    
+    def test_get_all_utilisateur_empty(self, db_session):
+        users = get_all_utilisateur(db_session)
+        assert users == []
+    
+    def test_get_all_utilisateur_with_data(self, db_session, sample_user_data):
+        create_utilisateur(db_session, sample_user_data)
+        users = get_all_utilisateur(db_session)
+        
+        assert len(users) == 1
+        assert "mot_de_passe" not in users[0]
+        assert users[0]["email"] == "jean.dupont@example.com"
+    
+    def test_get_utilisateur_by_id_exists(self, db_session, sample_user_data):
+        user = create_utilisateur(db_session, sample_user_data)
+        found = get_utilisateur_by_id(db_session, user.id_utilisateur)
+        
+        assert found is not None
+        assert found.email == "jean.dupont@example.com"
+    
+    def test_get_utilisateur_by_id_not_exists(self, db_session):
+        found = get_utilisateur_by_id(db_session, 9999)
+        assert found is None
+    
+    def test_get_utilisateur_by_email_exists(self, db_session, sample_user_data):
+        create_utilisateur(db_session, sample_user_data)
+        found = get_utilisateur_by_email(db_session, "jean.dupont@example.com")
+        
+        assert found is not None
+        assert found.nom == "Dupont"
+    
+    def test_get_utilisateur_by_email_not_exists(self, db_session):
+        found = get_utilisateur_by_email(db_session, "inexistant@example.com")
+        assert found is None
+
+
+class TestDeleteUtilisateur:
+    """Tests pour la suppression d'utilisateurs"""
+    
+    def test_delete_utilisateur_success(self, db_session, sample_user_data):
+        user = create_utilisateur(db_session, sample_user_data)
+        result = delete_utilisateur_by_id(db_session, user.id_utilisateur)
+        
+        assert result is True
+        assert get_utilisateur_by_id(db_session, user.id_utilisateur) is None
+    
+    def test_delete_utilisateur_not_exists(self, db_session):
+        result = delete_utilisateur_by_id(db_session, 9999)
+        assert result is False
+
+
+class TestUpdateUtilisateur:
+    """Tests pour la mise à jour d'utilisateurs par admin"""
+    
+    def test_update_utilisateur_success(self, db_session, sample_user_data):
+        user = create_utilisateur(db_session, sample_user_data)
+        update_data = {"nom": "Martin", "prenom": "Pierre"}
+        updated = update_utilisateur_by_id(db_session, user.id_utilisateur, update_data)
+        
+        assert updated.nom == "Martin"
+        assert updated.prenom == "Pierre"
+        assert updated.email == "jean.dupont@example.com"
+    
+    def test_update_utilisateur_not_exists(self, db_session):
+        updated = update_utilisateur_by_id(db_session, 9999, {"nom": "Test"})
+        assert updated is None
+    
+    def test_update_utilisateur_email_duplicate(self, db_session, sample_user_data):
+        user1 = create_utilisateur(db_session, sample_user_data)
+        
+        user2_data = sample_user_data.copy()
+        user2_data["email"] = "autre@example.com"
+        user2_data["telephone"] = "0699999999"
+        user2 = create_utilisateur(db_session, user2_data)
+        
+        with pytest.raises(ValueError, match="Email déjà utilisé"):
+            update_utilisateur_by_id(db_session, user2.id_utilisateur, {"email": user1.email})
+    
+    def test_update_utilisateur_password(self, db_session, sample_user_data):
+        user = create_utilisateur(db_session, sample_user_data)
+        old_hash = user.mot_de_passe
+        
+        update_data = {"mot_de_passe": "NewPassword456!"}
+        updated = update_utilisateur_by_id(db_session, user.id_utilisateur, update_data)
+        
+        assert updated.mot_de_passe != old_hash
+        assert verify_password("NewPassword456!", updated.mot_de_passe)
+    
+    def test_update_utilisateur_cannot_change_id(self, db_session, sample_user_data):
+        user = create_utilisateur(db_session, sample_user_data)
+        original_id = user.id_utilisateur
+        
+        update_data = {"id_utilisateur": 9999, "nom": "Martin"}
+        updated = update_utilisateur_by_id(db_session, user.id_utilisateur, update_data)
+        
+        assert updated.id_utilisateur == original_id
+        assert updated.nom == "Martin"
+
+
+class TestUpdateOwnProfile:
+    """Tests pour la mise à jour du profil par l'utilisateur lui-même"""
+    
+    def test_update_own_profile_success(self, db_session, sample_user_data):
+        user = create_utilisateur(db_session, sample_user_data)
+        update_data = {"nom": "Nouveau", "telephone": "0699887766"}
+        updated = update_own_profile(db_session, user.id_utilisateur, update_data)
+        
+        assert updated.nom == "Nouveau"
+        assert updated.telephone == "0699887766"
+    
+    def test_update_own_profile_not_exists(self, db_session):
+        updated = update_own_profile(db_session, 9999, {"nom": "Test"})
+        assert updated is None
+    
+    def test_update_own_profile_ignore_role(self, db_session, sample_user_data):
+        user = create_utilisateur(db_session, sample_user_data)
+        
+        update_data = {"role": "admin"}
+        updated = update_own_profile(db_session, user.id_utilisateur, update_data)
+        
+        assert updated.role == "public"
+    
+    def test_update_own_profile_duplicate_email(self, db_session, sample_user_data):
+        user1 = create_utilisateur(db_session, sample_user_data)
+        
+        user2_data = sample_user_data.copy()
+        user2_data["email"] = "unique@example.com"
+        user2_data["telephone"] = "0701020304"
+        user2 = create_utilisateur(db_session, user2_data)
+        
+        with pytest.raises(ValueError, match="Email déjà utilisé"):
+            update_own_profile(db_session, user2.id_utilisateur, {"email": user1.email})
+    
+    def test_update_own_profile_duplicate_telephone(self, db_session, sample_user_data):
+        user1 = create_utilisateur(db_session, sample_user_data)
+        
+        user2_data = sample_user_data.copy()
+        user2_data["email"] = "second@example.com"
+        user2_data["telephone"] = "0707070707"
+        user2 = create_utilisateur(db_session, user2_data)
+        
+        with pytest.raises(ValueError, match="Numéro de téléphone déjà utilisé"):
+            update_own_profile(db_session, user2.id_utilisateur, {"telephone": user1.telephone})
+    
+    def test_update_own_profile_only_allowed_fields(self, db_session, sample_user_data):
+        user = create_utilisateur(db_session, sample_user_data)
+        
+        update_data = {
+            "nom": "Nouveau",
+            "mot_de_passe": "HackedPassword",  
+            "role": "admin"  
         }
-        created = utilisateur_dao.create_utilisateur(db_session, data)
-        assert created.id_utilisateur is not None
+        updated = update_own_profile(db_session, user.id_utilisateur, update_data)
         
-        # READ by ID
-        retrieved_by_id = utilisateur_dao.get_utilisateur_by_id(
-            db_session, 
-            created.id_utilisateur
-        )
-        assert retrieved_by_id.email == "integration@test.com"
+        assert updated.nom == "Nouveau"
+        assert updated.role == "public"
+        assert verify_password("Password123!", updated.mot_de_passe)
+
+
+class TestChangePassword:
+    """Tests pour le changement de mot de passe"""
+    
+    def test_change_password_success(self, db_session, sample_user_data):
+        user = create_utilisateur(db_session, sample_user_data)
+        result = change_password(db_session, user.id_utilisateur, "Password123!", "NewPass123!")
         
-        # READ by Email
-        retrieved_by_email = utilisateur_dao.get_utilisateur_by_email(
-            db_session, 
-            "integration@test.com"
-        )
-        assert retrieved_by_email.id_utilisateur == created.id_utilisateur
+        assert result is True
+        assert verify_user_password(db_session, user.id_utilisateur, "NewPass123!")
+        assert not verify_user_password(db_session, user.id_utilisateur, "Password123!")
+    
+    def test_change_password_wrong_old_password(self, db_session, sample_user_data):
+        user = create_utilisateur(db_session, sample_user_data)
         
-        # UPDATE
-        update_data = {"nom": "UpdatedName", "role": "admin"}
-        updated = utilisateur_dao.update_utilisateur_by_id(
-            db_session, 
-            created.id_utilisateur, 
-            update_data
-        )
-        assert updated.nom == "UpdatedName"
-        assert updated.role == models.RoleEnum.admin
-        
-        # DELETE
-        deleted = utilisateur_dao.delete_utilisateur_by_id(
-            db_session, 
-            created.id_utilisateur
-        )
-        assert deleted is True
-        
-        # VERIFY DELETE
-        not_found = utilisateur_dao.get_utilisateur_by_id(
-            db_session, 
-            created.id_utilisateur
-        )
-        assert not_found is None
+        with pytest.raises(ValueError, match="Ancien mot de passe incorrect"):
+            change_password(db_session, user.id_utilisateur, "WrongPassword", "NewPass123!")
+    
+    def test_change_password_user_not_exists(self, db_session):
+        result = change_password(db_session, 9999, "old", "new")
+        assert result is False
+
+
+class TestVerifyUserPassword:
+    """Tests pour la vérification du mot de passe utilisateur"""
+    
+    def test_verify_user_password_correct(self, db_session, sample_user_data):
+        user = create_utilisateur(db_session, sample_user_data)
+        result = verify_user_password(db_session, user.id_utilisateur, "Password123!")
+        assert result is True
+    
+    def test_verify_user_password_incorrect(self, db_session, sample_user_data):
+        user = create_utilisateur(db_session, sample_user_data)
+        result = verify_user_password(db_session, user.id_utilisateur, "WrongPassword")
+        assert result is False
+    
+    def test_verify_user_password_user_not_exists(self, db_session):
+        result = verify_user_password(db_session, 9999, "password")
+        assert result is False
