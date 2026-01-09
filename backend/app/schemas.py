@@ -49,7 +49,7 @@ class UtilisateurBase(BaseModel):
     prenom: str
     email: EmailStr
     telephone: Optional[str] = None
-    role: Optional[str] = "public"
+    role: Optional[str] = "admin"
 
 
 class UtilisateurCreate(UtilisateurBase):
@@ -70,10 +70,29 @@ class UtilisateurUpdate(BaseModel):
     mot_de_passe: Optional[str] = None
 
 
-class UtilisateurOut(UtilisateurBase):
+class UtilisateurOut(BaseModel):
+    id_utilisateur: int
+    nom: str
+    prenom: str
+    email: EmailStr
+    telephone: Optional[str] = None
+    role: Optional[str] = "admin"
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AuthResponse(BaseModel):
+    id_utilisateur: int
+    token: str
+    role: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LogoutPayload(BaseModel):
     id_utilisateur: int
 
-    model_config = ConfigDict(from_attributes=True)
+class LoginPayload(BaseModel):
+    email: EmailStr
+    mot_de_passe: str
 
 
 # ============= MISSION ===============
@@ -87,8 +106,11 @@ class MissionBase(BaseModel):
 
 
 class MissionCreate(MissionBase):
-    commentaire: Optional[str] = None
-    itineraire: Optional[Any] = None
+    nom_mission: str
+    id_point: int
+    id_utilisateur: int
+    commentaire: Optional[str]
+    itineraire: Optional[Any]
 
 
 class MissionUpdate(BaseModel):
@@ -98,7 +120,7 @@ class MissionUpdate(BaseModel):
     statut: Optional[str] = None
     commentaire: Optional[str] = None
     itineraire: Optional[Any] = None
-
+    date_fin: Optional[datetime]
 
 class MissionOut(BaseModel):
     id_mission: int
@@ -109,6 +131,7 @@ class MissionOut(BaseModel):
     statut: str
     commentaire: Optional[str]
     itineraire: Optional[Any]
+    date_fin: Optional[datetime]
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
@@ -140,10 +163,50 @@ class HistoriqueOut(BaseModel):
 # =============== SIGNALER ==================
 
 class SignalerBase(BaseModel):
+    id:int
     id_point: int
     probleme: str
     photo: Optional[str]
+    id_utilisateur: int
+    date_creation: datetime
+    
 
 
-class SignalerCreate(SignalerBase):
+class SignalerCreate(BaseModel):
+    id_point: int
+    probleme: str
+    photo: Optional[str]
+    id_utilisateur: int
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserProfileOut(BaseModel):
+    id_utilisateur: int
+    nom: str
+    prenom: str
+    email: EmailStr
+    telephone: str
+    role: str
+    date_creation: datetime
+    derniere_connexion: Optional[datetime] = None
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserProfileUpdate(BaseModel):
+    nom: Optional[str] = Field(None, min_length=2, max_length=40)
+    prenom: Optional[str] = Field(None, min_length=2, max_length=40)
+    email: Optional[EmailStr] = None
+    telephone: Optional[str] = Field(None, pattern=r'^\d{10}$') 
+
+
+class PasswordChangeRequest(BaseModel):
+    old_password: str
+    new_password: str = Field(min_length=12)
+    confirm_new_password: str = Field(min_length=12)
+    
+    def validate_passwords(self):
+        if self.new_password != self.confirm_new_password:
+            raise ValueError("Le nouveau mot de passe et sa confirmation sont différents ")
+        if self.old_password == self.new_password:
+            raise ValueError("Le nouveau mot de passe doit être différent de l'ancien")

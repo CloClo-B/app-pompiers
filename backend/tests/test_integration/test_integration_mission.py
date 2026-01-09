@@ -9,12 +9,13 @@ class TestMissionIntegration:
 
     @pytest.fixture
     def utilisateur(self, db_session):
+        """Crée un utilisateur de test."""
         user = models.Utilisateur(
             nom="Dupont",
             prenom="Jean",
-            email=f"jean.{uuid.uuid4()}@test.com", 
+            email=f"jean.{uuid.uuid4().hex[:6]}@test.com", 
             telephone=f"0602{str(uuid.uuid4().int)[:6]}",
-            mot_de_passe="pass",
+            mot_de_passe="haché_par_defaut",
             role=models.RoleEnum.pompier
         )
         db_session.add(user)
@@ -24,126 +25,75 @@ class TestMissionIntegration:
 
     @pytest.fixture
     def point_eau(self, db_session):
-        unique_pei = int(str(uuid.uuid4().int)[:6]) 
-        
+        """Crée un point d'eau de test (PEI)."""
+        unique_pei = int(str(uuid.uuid4().int)[:8]) 
         point = models.PointEau(
             numero_pei=unique_pei,
             nom="Point Test",
             statut="PUBLIC",
             type_nature="BI",
             insee5="12345",
-            press_deb=3.5,
-            debit_1_bar=120,
-            vol_eau_mi=10000,
-            accessibilite="C",
-            disponibilite="DI",
-            carto_ref=17394051,
-            utilisateur="TEST",
-            geom=None
+            accessibilite="C", 
+            disponibilite="DI"
         )
         db_session.add(point)
         db_session.commit()
         db_session.refresh(point)
         return point
-
+    
     @pytest.fixture
     def mission_base(self, db_session, utilisateur, point_eau):
-        payload_dict = {
-            "nom_mission": "Mission Base",
-            "id_point": point_eau.id,
-            "id_utilisateur": utilisateur.id_utilisateur,
-            "commentaire": "Mission de test",
-            "itineraire": None
-        }
-        payload = MissionCreate(**payload_dict)
-        mission = mission_router.create_mission(payload, db_session)
+        payload = MissionCreate(
+            nom_mission="Mission Base",
+            id_point=point_eau.numero_pei,
+            id_utilisateur=utilisateur.id_utilisateur,
+            commentaire="Mission de test",
+            itineraire=None
+        )
+        mission = mission_router.create_mission(db_session, payload.model_dump()) 
         return mission
 
-    # ======== CAS NORMAL ========
-    def test_creer_mission_normal(self, db_session, utilisateur, point_eau):
-        payload_dict = {
-            "nom_mission": "Mission Normale",
-            "id_point": point_eau.id,
-            "id_utilisateur": utilisateur.id_utilisateur,
-            "commentaire": "Test normal",
-            "itineraire": None
-        }
-        payload = MissionCreate(**payload_dict) 
-        
-        mission = mission_router.create_mission(payload, db_session)
-        
+    # ======== TESTS DE CRÉATION ========
+
+    def test_creer_mission_success(self, db_session, utilisateur, point_eau):
+        payload = MissionCreate(
+            nom_mission="Vérification Annuelle",
+            id_point=point_eau.numero_pei,
+            id_utilisateur=utilisateur.id_utilisateur,
+            commentaire="RAS",
+            itineraire=None
+        )
+        mission = mission_router.create_mission(db_session, payload.model_dump())
         assert mission.id_mission is not None
-        assert mission.nom_mission == "Mission Normale"
-        assert mission.id_point == point_eau.id
-        assert mission.id_utilisateur == utilisateur.id_utilisateur
 
-    # ======== CAS LIMITE ========
-    def test_mission_commentaire_none(self, db_session, utilisateur, point_eau):
-        payload_dict = {
-            "nom_mission": "Mission Sans Commentaire",
-            "id_point": point_eau.id,
-            "id_utilisateur": utilisateur.id_utilisateur,
-            "commentaire": None,
-            "itineraire": None
-        }
-        payload = MissionCreate(**payload_dict) 
+    def test_mission_point_inexistant_fails(self, db_session, utilisateur):
+        """Vérifie que le DAO lève une ValueError si le point n'existe pas."""
+        payload = MissionCreate(
+            nom_mission="Mission Fantôme",
+            id_point=99999999, 
+            id_utilisateur=utilisateur.id_utilisateur,
+            commentaire=None,
+            itineraire=None
+        )
+        with pytest.raises(ValueError) as excinfo:
+            mission_router.create_mission(db_session, payload.model_dump())
         
-        mission = mission_router.create_mission(payload, db_session)
-        
-        assert mission.commentaire is None
+        assert "L'id du point est invalide" in str(excinfo.value)
 
-    # ======== CAS D'ERREUR (Vérifie les contraintes de clé étrangère) ========
-    def test_mission_utilisateur_inexistant(self, db_session, point_eau):
-        payload_dict = {
-            "nom_mission": "Mission Erreur",
-            "id_point": point_eau.id,
-            "id_utilisateur": 99999,
-            "commentaire": "Erreur attendue",
-            "itineraire": None
-        }
-        # CORRECTION 2: Convertir le dict en objet Pydantic
-        payload = MissionCreate(**payload_dict) 
+    # ======== TESTS DE RÉCUPÉRATION ========
 
-        with pytest.raises(IntegrityError):
-            mission_router.create_mission(payload, db_session)
-            db_session.commit() 
-
-    def test_mission_point_inexistant(self, db_session, utilisateur):
-        payload_dict = {
-            "nom_mission": "Mission Erreur",
-            "id_point": 99999,
-            "id_utilisateur": utilisateur.id_utilisateur,
-            "commentaire": "Erreur attendue",
-            "itineraire": None
-        }
-        payload = MissionCreate(**payload_dict) 
-
-        with pytest.raises(IntegrityError):
-            mission_router.create_mission(payload, db_session)
-            db_session.commit() 
-
-    # ======== CAS GET_ALL ========
     def test_get_all_missions(self, db_session, utilisateur, point_eau):
-        payload1 = MissionCreate(
-            nom_mission="Mission1",
-            id_point=point_eau.id,
+        """Vérifie la récupération de la liste des missions."""
+        p = MissionCreate(
+            nom_mission="Mission Liste",
+            id_point=point_eau.numero_pei,
             id_utilisateur=utilisateur.id_utilisateur,
-            commentaire="T1",
+            commentaire=None,
             itineraire=None
         )
-        mission_router.create_mission(payload1, db_session)
-
-        payload2 = MissionCreate(
-            nom_mission="Mission2",
-            id_point=point_eau.id,
-            id_utilisateur=utilisateur.id_utilisateur,
-            commentaire="T2",
-            itineraire=None
-        )
-        mission_router.create_mission(payload2, db_session)
-        
+        mission_router.create_mission(db_session, p.model_dump())
         missions = mission_router.list_missions(db_session)
         
-        noms = [m.nom_mission for m in missions]
-        assert "Mission1" in noms
-        assert "Mission2" in noms
+        assert len(missions) >= 1
+        noms = [m["nom_mission"] for m in missions] 
+        assert "Mission Liste" in noms

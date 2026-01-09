@@ -11,6 +11,9 @@ from app.DAO.DAOPointsEau import (
     get_point_eau_by_numero_pei,
     delete_point_eau_by_numero_pei
 )
+from ..models import Utilisateur
+from .dependencies import rolesChecker
+
 
 router = APIRouter(prefix="/points-eau", tags=["Points d'eau"])
 
@@ -33,17 +36,17 @@ def get_point(numero_pei: int, db: Session = Depends(get_db)):
     point = get_point_eau_by_numero_pei(db, numero_pei)
     
     if not point:
-        raise HTTPException(status_code=404, detail="Not Found")
+        raise HTTPException(status_code=404, detail=f"le numéro: {numero_pei} est incorect")
     
     return point
 
 # ================= CREATE =================
 @router.post("/", response_model=PointEauBase)
-def create_point(payload: PointEauCreate, db: Session = Depends(get_db)):
+def create_point(payload: PointEauCreate, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
     try:
         nouveau_point = create_point_eau(db, payload.model_dump())
     except ValueError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
     
     # Calculer latitude / longitude depuis geom
     latitude = db.scalar(func.ST_Y(nouveau_point.geom))
@@ -71,10 +74,10 @@ def create_point(payload: PointEauCreate, db: Session = Depends(get_db)):
 
 # ================= DELETE =================
 @router.delete("/{numero_pei}")
-def delete_point(numero_pei: int, db: Session = Depends(get_db)):
+def delete_point(numero_pei: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
     success = delete_point_eau_by_numero_pei(db, numero_pei)
     
     if not success:
-        raise HTTPException(status_code=404, detail="Not Found")
+        raise HTTPException(status_code=404, detail=f"Numéro pei: {numero_pei} introuvable")
     
     return {"detail": f"Point d'eau {numero_pei} supprimé avec succès"}

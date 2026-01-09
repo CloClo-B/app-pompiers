@@ -3,17 +3,40 @@ import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, T
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import HautPage from './hautPage';
+import { getData } from '@/config/recupRole'; 
+import { naviguerAccueil} from '@/config/navigation';
+import { API_ENDPOINTS } from '@/config/api';
+import { useLocalSearchParams } from 'expo-router';
 
+
+// petit encadrer pour choix photo
 const ajouterPhoto = require('@/assets/images/ajouter_photo.png');
 
-
-
-
+// Page pour signaler un points d'eau
 export default function Signalement() {
   const router = useRouter();
-  
+  const { idPoint } = useLocalSearchParams<{ idPoint: string }>();
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (idPoint) {
+      setIDPoint(idPoint);
+    }
+  }, [idPoint]);
+
+
+  useEffect(() => {
+  const chargerRole = async () => {
+    const role = await getData();
+    setUserRole(role);
+  };
+    chargerRole();
+  }, []);
+
+
+
   // variable pour ensuite envoyer à l'api
   
   const [IDPoint, setIDPoint] = useState(''); 
@@ -23,7 +46,6 @@ export default function Signalement() {
 //  ouvrir la galerie
   const [image, setImage] = useState<string | null>(null);
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
@@ -56,7 +78,6 @@ const prendrePhoto = async () => {
 
 
 // choisir entre camera ou galerie
-
 const handlePickImage = () => {
         Alert.alert(
         "Ajouter une image",
@@ -76,36 +97,58 @@ const handlePickImage = () => {
     };
 
   // communication avec l'api  /missions/
-  // valentin : 172.20.10.2 | 192.168.1.184 | 10.201.126.118
   const creerSignalement = async () => {
 
     // Avant l'appel API, pour vérifier les valeurs
-  console.log("Vérification des valeurs à envoyer\n");
-  console.log("IDPoint:", IDPoint);
-  console.log("probleme:", probleme);
-  console.log("photo", photo);
+    console.log("Vérification des valeurs à envoyer\n");
+    console.log("IDPoint:", IDPoint);
+    console.log("probleme:", probleme);
+    console.log("photo", photo);
 
 
-    try {
-      const response = await axios.post('http://10.201.126.118:8000/signaler/', {
-        id_point: 561210541,        
-        probleme: probleme,
-        photo :"vide acutuellement ",
-
-
-      });
-      
-      router.push({
-          pathname: '/creationSucces',
-          params: { title: 'Signalement créé avec succès', creerMission: 'creerMission', chemainPage: '/point_eau' }
+    if(probleme == null || !probleme.trim() || probleme.trim().length<10 || probleme.trim().length> 100){
+      console.log("Erreur le nom est incorrect");
+      alert("La description du problème est incorrect minimum 10 caractère maximum 100");
+      return;
+    }
+    else if(image == null){
+      console.log("Erreur pas d'image");
+      alert("Image requise");
+      return;
+    }
+    else{        
+      try {
+        const formData = new FormData();
+        formData.append("id_point", IDPoint);
+        formData.append("probleme", probleme);
+        formData.append("photo", {
+          uri: image,
+          name: "pointsignaler.jpg",
+          type: "image/jpeg",
+        } as any);
+        formData.append("id_utilisateur", "1");
+        
+        const response = await axios.post(API_ENDPOINTS.SIGNALEMENTS, formData, {
+          headers: { "Content-Type": "multipart/form-data" }
         });
-      } catch (error) {
-          console.error(error);
-          alert('Erreur lors de la création du signalement');
+        router.push({
+            pathname: '/succes',
+            params: { title: 'Signalement créé avec succès',  page:"acceuil"  }
+          });
+      } 
+      catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          // erreur renvoyée par l’API
+          console.log(error.response?.status);
+          console.log(error.response?.data);
+          alert(error.response?.data?.detail ?? "Erreur lors du signalement");
+        } else {
+          // autre erreur
+          alert("Erreur lors du signalement");
+        }
+      }
     }
   };
-
-
 
 
   return (
@@ -124,14 +167,13 @@ const handlePickImage = () => {
         <View style={styles.info}>
 
             {/* hydrant selectionner */}
-            <Text style= {styles.choixhydrant} >Hydrant #235</Text>
-
+            <Text style={styles.choixhydrant}> Hydrant #{IDPoint}</Text>
 
             {/* message signalement */}
             <View style={styles.total}>
               <Text style={styles.text}>Descripton du problème</Text>
               <View style={styles.entreeCryon}>
-                  <TextInput value={probleme} onChangeText={setProbleme} style={styles.entree} maxLength={250} multiline={true} placeholder="Ecrivez ici"></TextInput>
+                  <TextInput value={probleme} onChangeText={setProbleme} style={styles.entree} maxLength={100} multiline={true} placeholder="Ecrivez ici"></TextInput>
               </View>
             </View>
 
@@ -145,7 +187,7 @@ const handlePickImage = () => {
             {/* choix validation annulation */}
             <View style={styles.validation}>
 
-                <TouchableOpacity style={styles.boutton} onPress={() => router.navigate('/(tabs)/acceuil')}>
+                <TouchableOpacity style={styles.boutton} onPress={() => {if (userRole) naviguerAccueil(userRole); else alert("Rôle utilisateur introuvable"); }}>
                 <Text style={{color:'#ffffff'}}>ANNULER</Text>
                 </TouchableOpacity>
 
@@ -164,6 +206,7 @@ const handlePickImage = () => {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
 
   image: {
@@ -189,7 +232,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap:'10%',    
   },
-
 
   total:{
     backgroundColor:'#ffffff',
@@ -239,3 +281,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
 });
+
+

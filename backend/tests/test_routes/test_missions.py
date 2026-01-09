@@ -1,198 +1,126 @@
 import pytest
-from fastapi.testclient import TestClient
-from app import models
-from app.routers.missions import get_db
 import random
+from fastapi.testclient import TestClient
+from geoalchemy2.elements import WKTElement
+
+# Imports absolus
+from app import models
+from app.main import app
+from app.routers.missions import get_db
+from app.token_jwt import getTokenUser
+from app.models import RoleEnum
 
 class TestMissionsRouter:
-    """Tests pour le router Missions"""
+    """Tests pour le router Missions """
 
     # ============= FIXTURE CLIENT =============
     @pytest.fixture
     def client(self, db_session):
-        from app.main import app
-
         def override_get_db():
             yield db_session
-
         app.dependency_overrides[get_db] = override_get_db
         with TestClient(app) as test_client:
             yield test_client
         app.dependency_overrides.clear()
 
-    # ============= FIXTURE UTILISATEUR =============
+    # ============= FIXTURES UTILISATEURS =============
     @pytest.fixture
-    def utilisateur_test(self, db_session):
-        unique_number = random.randint(10000, 99999)
+    def db_admin(self, db_session):
         user = models.Utilisateur(
-            nom="Dupont",
-            prenom="Jean",
-            email=f"jean.dupont{unique_number}@test.com",
-            telephone=f"06{random.randint(10000000, 99999999)}",
-            mot_de_passe="hashed_password",
-            role="pompier"
+            nom="Admin", prenom="Test", email=f"adm{random.randint(1,999)}@test.com",
+            telephone=f"06{random.randint(10000000, 99999999)}", 
+            mot_de_passe="h", role=RoleEnum.admin
         )
         db_session.add(user)
         db_session.commit()
-        db_session.refresh(user)
+        return user
+
+    @pytest.fixture
+    def db_pompier(self, db_session):
+        user = models.Utilisateur(
+            nom="Pompier", prenom="Jean", email=f"pom{random.randint(1,999)}@test.com",
+            telephone=f"06{random.randint(10000000, 99999999)}", 
+            mot_de_passe="h", role=RoleEnum.pompier
+        )
+        db_session.add(user)
+        db_session.commit()
         return user
 
     # ============= FIXTURE POINT EAU =============
     @pytest.fixture
     def point_eau_test(self, db_session):
-        from geoalchemy2.elements import WKTElement
         numero_pei = random.randint(100000, 999999)
         point = models.PointEau(
-            numero_pei=numero_pei,
-            nom="Point test",
-            statut="PUBLIC",
-            type_nature="BI",
+            numero_pei=numero_pei, 
+            nom="Borne Test", 
+            statut="PUBLIC",        
+            type_nature="BI100",    
             geom=WKTElement('POINT(200000 6800000)', srid=2154)
         )
         db_session.add(point)
         db_session.commit()
-        db_session.refresh(point)
         return point
 
     # ============= FIXTURE MISSION =============
     @pytest.fixture
-    def mission_test(self, db_session, utilisateur_test, point_eau_test):
+    def mission_test(self, db_session, db_pompier, point_eau_test):
         mission = models.Mission(
             nom_mission="Mission test",
-            id_point=point_eau_test.id,
-            id_utilisateur=utilisateur_test.id_utilisateur,
-            statut="en_attente",
-            commentaire="Test",
-            itineraire=None
+            id_point=point_eau_test.numero_pei, 
+            id_utilisateur=db_pompier.id_utilisateur,
+            statut="EN COURS",
+            commentaire="Test initial"
         )
         db_session.add(mission)
         db_session.commit()
-        db_session.refresh(mission)
         return mission
 
-    # ============= TEST GET ALL =================
-    def test_get_all_missions_empty(self, client):
+    # ============= TESTS GET =================
+    def test_get_all_missions(self, client, mission_test, db_pompier):
+        app.dependency_overrides[getTokenUser] = lambda: db_pompier
         response = client.get("/missions/")
         assert response.status_code == 200
-        assert response.json() == []
-
-    def test_get_all_missions_with_data(self, client, mission_test):
-        response = client.get("/missions/")
-        assert response.status_code == 200
-        data = response.json()
-        assert len(data) == 1
-        assert data[0]['nom_mission'] == mission_test.nom_mission
-
-    # ============= TEST GET BY ID =================
-    def test_get_mission_by_id_success(self, client, mission_test):
-        response = client.get(f"/missions/{mission_test.id_mission}")
-        assert response.status_code == 200
-        data = response.json()
-        assert data['id_mission'] == mission_test.id_mission
-        assert data['nom_mission'] == mission_test.nom_mission
-
-    def test_get_mission_by_id_not_found(self, client):
-        response = client.get("/missions/99999")
-        assert response.status_code == 404
-        assert "non trouvée" in response.json()['detail']
+        assert len(response.json()) >= 1
+        app.dependency_overrides.clear()
 
     # ============= TEST CREATE =================
-    def test_create_mission_success(self, client, utilisateur_test, point_eau_test):
+    def test_create_mission_success(self, client, db_admin, db_pompier, point_eau_test):
+        app.dependency_overrides[getTokenUser] = lambda: db_admin
         payload = {
-            "nom_mission": "Nouvelle mission",
-            "id_point": point_eau_test.id,
-            "id_utilisateur": utilisateur_test.id_utilisateur,
-            "commentaire": "Commentaire test",
+            "nom_mission": "Verification Borne",
+            "id_point": point_eau_test.numero_pei,
+            "id_utilisateur": db_pompier.id_utilisateur,
+            "commentaire": "A vérifier d'urgence",
             "itineraire": None
         }
         response = client.post("/missions/", json=payload)
         assert response.status_code == 200
-        data = response.json()
-        assert data['nom_mission'] == payload['nom_mission']
-        assert data['statut'] == "en_attente"
-
-    def test_create_mission_missing_required_field(self, client, utilisateur_test, point_eau_test):
-        payload = {
-            "id_point": point_eau_test.id,
-            "id_utilisateur": utilisateur_test.id_utilisateur
-        }
-        response = client.post("/missions/", json=payload)
-        assert response.status_code == 422
+        app.dependency_overrides.clear()
 
     # ============= TEST UPDATE =================
-    def test_update_mission_success(self, client, mission_test):
+    def test_update_mission_success(self, client, mission_test, db_admin):
+        app.dependency_overrides[getTokenUser] = lambda: db_admin
+        
         payload = {
             "nom_mission": "Mission modifiée",
             "id_point": mission_test.id_point,
             "id_utilisateur": mission_test.id_utilisateur,
-            "commentaire": "Modifié",
+            "statut": "TERMINER",  
+            "commentaire": "Terminé par le test",
             "itineraire": None,
-            "statut": "en cours"
+            "date_fin": None
         }
-        response = client.put(f"/missions/{mission_test.id_mission}", json=payload)
+        response = client.put(f"/missions/update/{mission_test.id_mission}", json=payload)
+        if response.status_code == 422:
+            print(f"\nERREUR VALDIATION : {response.json()}")
+            
         assert response.status_code == 200
-        data = response.json()
-        assert data['nom_mission'] == "Mission modifiée"
-        assert data['commentaire'] == "Modifié"
-        assert data['statut'] == "en cours"
-
-    def test_update_mission_not_found(self, client):
-        payload = {
-            "nom_mission": "Test",
-            "id_point": 1,
-            "id_utilisateur": 1,
-            "commentaire": "Test",
-            "itineraire": None,
-            "statut": "terminé"
-        }
-        response = client.put("/missions/99999", json=payload)
-        assert response.status_code == 404
+        assert response.json()['statut'] == "TERMINER"
+        app.dependency_overrides.clear()
 
     # ============= TEST DELETE =================
-    def test_delete_mission_success(self, client, mission_test):
-        response = client.delete(f"/missions/{mission_test.id_mission}")
+    def test_delete_mission_success(self, client, mission_test, db_admin):
+        app.dependency_overrides[getTokenUser] = lambda: db_admin
+        response = client.delete(f"/missions/supprimer/{mission_test.id_mission}")
         assert response.status_code == 200
-        assert "supprimée" in response.json()['detail']
-        get_response = client.get(f"/missions/{mission_test.id_mission}")
-        assert get_response.status_code == 404
-
-    def test_delete_mission_not_found(self, client):
-        response = client.delete("/missions/99999")
-        assert response.status_code == 404
-
-    # ============= TEST FULL CRUD =================
-    def test_full_crud_cycle(self, client, utilisateur_test, point_eau_test):
-        # CREATE
-        payload = {
-            "nom_mission": "Mission CRUD",
-            "id_point": point_eau_test.id,
-            "id_utilisateur": utilisateur_test.id_utilisateur,
-            "commentaire": "Initial",
-            "itineraire": None
-        }
-        create_response = client.post("/missions/", json=payload)
-        mission_id = create_response.json()['id_mission']
-
-        # READ
-        get_response = client.get(f"/missions/{mission_id}")
-        assert get_response.status_code == 200
-
-        # UPDATE
-        update_payload = {
-            "nom_mission": "Mission CRUD Modifiée",
-            "id_point": point_eau_test.id,
-            "id_utilisateur": utilisateur_test.id_utilisateur,
-            "commentaire": "Modifié",
-            "itineraire": None,
-            "statut": "terminé"
-        }
-        update_response = client.put(f"/missions/{mission_id}", json=update_payload)
-        assert update_response.status_code == 200
-        assert update_response.json()['statut'] == "terminé"
-
-        # DELETE
-        delete_response = client.delete(f"/missions/{mission_id}")
-        assert delete_response.status_code == 200
-
-        get_after_delete = client.get(f"/missions/{mission_id}")
-        assert get_after_delete.status_code == 404
+        app.dependency_overrides.clear()

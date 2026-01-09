@@ -20,11 +20,20 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false, gestureEnabled: false}} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false, gestureEnabled: false}} />
+        <Stack.Screen name="(tabs_public)" options={{ headerShown: false, gestureEnabled: false}} />
+        <Stack.Screen name="(tabs_pompier)" options={{ headerShown: false, gestureEnabled: false}} />
+        <Stack.Screen name="(tabs_commandement)" options={{ headerShown: false, gestureEnabled: false}} />
+        <Stack.Screen name="(tabs_admin)" options={{ headerShown: false, gestureEnabled: false}} />
         <Stack.Screen name="connexion" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="inscription" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="creation_point_succes" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="creationSucces" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="succes" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="infoUtilisateur" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="infoSignalement" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="marquerResolu" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="infoMissionTerminer" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="signalement" options={{ headerShown: false, gestureEnabled: false }} />
+
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

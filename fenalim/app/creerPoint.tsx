@@ -1,15 +1,30 @@
-import { router } from 'expo-router';
-import React, { createRef, useState } from 'react';
-import { AccessibilityInfo, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import React, {useEffect, useState } from 'react';
+import {StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_ENDPOINTS } from '@/config/api';
 
-
-
+// Page création de Point d'eau
 export default function CreerPoint() {
-  
-  
-  
+  const router = useRouter();
+  const [token, setToken] = useState<string | null>(null);
+
+  // récupérer le token 
+  useEffect(() => {
+    getData();
+  }, []);
+  const getData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('@token')
+      if(value !== null) {
+        setToken(value);
+      }
+    } catch(e) {
+      console.log("erreur token creation point eau");
+    }
+  }
   
   // variable pour ensuite envoyer à l'api
 
@@ -28,11 +43,6 @@ export default function CreerPoint() {
   const [latitude, setLatitude] = useState('');
   const [insee5, setInsee5] = useState('');
   const [refCarto, setRefCarto] = useState('');
-
-  
-  
-  
-  
   
 
   // liste pour les type de point d'eau
@@ -99,9 +109,9 @@ export default function CreerPoint() {
     const typeValides = ['PUBLIC', 'PRIVE'];
     return typeValides.includes(type);
   }
- 
+  
 
-
+  
   // communication avec l'api  /points-eau/
   // valentin : 172.20.10.2 | 192.168.1.184
   const creerPointAPI = async () => {
@@ -122,61 +132,80 @@ export default function CreerPoint() {
   console.log("longitude:", parseFloat(longitude));
   console.log("latitude:", parseFloat(latitude));
   console.log("utilisateur:", "");
-
+  
+  if (!token) {
+    alert("Token manquant, impossible de créer le point d'eau");
+    return;
+  }
+  else{
+    console.log(token);
+  }
 
   // vérfication des valeurs correct avant envoyer à l'api + affichage message de l'erreur
   if(valueType == null || verifTypePoint(valueType) == false){
     console.log("Erreur le type de point est incorrect");
     alert("Le type de point est incorrect");
+    return;
   }
   else if(valueDispo == null || verifDispo(valueDispo) == false){
     console.log("Erreur la disponibilité du point est incorrect");
     alert("La disponibilité du point est incorrect");
+    return;  
   }
   else if(valueAcces == null || verifAcces(valueAcces) == false){
     console.log("Erreur l'accèe de point est incorrect");
     alert("Le type d'accèe du point est incorrect");
+    return; 
   }
   else if(valueStatut == null || verifTypeStatut(valueStatut) == false){
     console.log("Erreur le statut du point est incorrect");
     alert("Le statut du est incorrect");
+    return;  
   }
   else if(numeroPEI == null || !numeroPEI.trim() || Number.isInteger(Number(numeroPEI)) == false){
     console.log("Erreur le numéro pei est incorrect");
     alert("Le numéro pei est incorect");
+    return;  
   }
   else if(debit == null || !debit.trim() || isNaN(Number(debit.replace(',', '.'))) || (parseFloat(debit.replace(',', '.')) <=0)){
     console.log("Erreur le débit est incorrect");
     alert("Le débit est incorect");
+    return;  
   }
   else if(pression == null || !pression.trim() || isNaN(Number(pression.replace(',', '.'))) || (parseFloat(pression.replace(',', '.')) <=0)){
     console.log("Erreur la préssion est incorrect");
     alert("La préssion est incorect");
+    return;  
   }
   else if(volumeMin == null || !volumeMin.trim() || isNaN(Number(volumeMin.replace(',', '.'))) || (parseFloat(volumeMin.replace(',', '.')) <=0)){
     console.log("Erreur le volume minimum est incorrect");
     alert("Le volume minimum est incorect");
+    return;  
   }
   else if(insee5 == null || !insee5.trim() || insee5.length>10 || Number.isInteger(Number(insee5)) == false || parseInt(insee5) <=0 ){
     console.log("Erreur le code insee5 est incorrect");
     alert("Le code insee5 est incorect");
+    return;  
   }
   else if(refCarto == null || !refCarto.trim() || Number.isInteger(Number(refCarto)) == false || (parseInt(refCarto) <=0)){
     console.log("Erreur la référence carthographique est incorrect");
     alert("La référence carthographique est incorect");
+    return;  
   }
   else if(longitude == null || !longitude.trim() || isNaN(Number(longitude.replace(',', '.'))) || (parseFloat(longitude.replace(',', '.')) <-180) || (parseFloat(longitude.replace(',', '.'))) > 180){
     console.log("Erreur la longitude est incorrect");
     alert("La longitude est incorect");
+    return;  
   }
   else if(latitude == null || !latitude.trim() || isNaN(Number(latitude.replace(',', '.')))  || (parseFloat(latitude.replace(',', '.')) <-90) || (parseFloat(latitude.replace(',', '.')) > 90)){
     console.log("Erreur la latitude est incorrect");
     alert("La latitude est incorect");
+    return;  
   }
 
     else{
       try {
-        const response = await axios.post('http://10.201.126.118:8000/points-eau/', {
+        const response = await axios.post(API_ENDPOINTS.POINTS_EAU, {
           numero_pei: parseInt(numeroPEI),
           nom: '',
           statut: valueStatut,
@@ -191,23 +220,33 @@ export default function CreerPoint() {
           longitude: parseFloat(longitude.replace(',', '.')),
           latitude: parseFloat(latitude.replace(',', '.')),
           utilisateur: '', //ne pas oublié par la suite c'est pour savoir qui a ajouter le point 
-        });
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
         
         router.push({
-            pathname: '/creationSucces',
-            params: { title: 'Point d’eau créé avec succès', nomPage: 'creer', chemainPage: '/point_eau' }
+            pathname: '/succes',
+            params: { title: 'Point d’eau créé avec succès', page:"point_eau" }
           });
-        } catch (error) {
-            console.error(error);
-            alert('Erreur lors de la création du point d’eau');
+        }
+      catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          // erreur renvoyée par l’API
+          console.log(error.response?.status);
+          console.log(error.response?.data);
+          alert(error.response?.data?.detail ?? "Erreur lors de la création du point d'eau");
+        } else {
+          // autre erreur
+          alert("Erreur lors de la création du point d'eau");
+        }
       }
 
     }
   };
-
-
-
-
 
   
   return (
@@ -370,7 +409,6 @@ const styles = StyleSheet.create({
   },
 
   boutton:{
-
     justifyContent: 'center',
     alignItems: 'center',    
     borderRadius: 30,

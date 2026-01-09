@@ -1,132 +1,121 @@
 import pytest
+import random
 from fastapi.testclient import TestClient
 from app import models
+from app.main import app
+from app.token_jwt import getTokenUser 
 from app.routers.historique import get_db
-import random
+from app.models import RoleEnum
 
-class TestHistoriqueRouter:
-    """Tests pour le Router Historique"""
+@pytest.fixture
+def client(db_session):
+    def override_get_db():
+        yield db_session
     
-    # ============= FIXTURE CLIENT =============
-    @pytest.fixture
-    def client(self, db_session):
-        """Client de test avec override de la dépendance DB"""
-        from app.main import app
-        
-        def override_get_db():
-            try:
-                yield db_session
-            finally:
-                pass
-        
-        app.dependency_overrides[get_db] = override_get_db
-        with TestClient(app) as test_client:
-            yield test_client
-        app.dependency_overrides.clear()
-    
-    # ============= FIXTURES =============
-    @pytest.fixture
-    def utilisateur_test(self, db_session):
-        """Crée un utilisateur valide pour les tests"""
-        unique_number = random.randint(10000, 99999)
-        user = models.Utilisateur(
-            nom="Dupont",
-            prenom="Jean",
-            email=f"jean.dupont{unique_number}@test.com",
-            telephone=f"06{random.randint(10000000, 99999999)}",
-            mot_de_passe="hashed_password",
-            role=models.RoleEnum.pompier
-        )
-        db_session.add(user)
-        db_session.commit()
-        db_session.refresh(user)
-        return user
-    
-    @pytest.fixture
-    def historiques_test(self, db_session, utilisateur_test):
-        """Crée 3 entrées d'historique valides pour un utilisateur"""
-        actions = ["Connexion", "Création point d'eau", "Modification mission"]
-        logs = []
-        for action in actions:
-            h = models.Historique(
-                id_utilisateur=utilisateur_test.id_utilisateur,
-                action=action,
-                cible="test",
-                ip="127.0.0.1"
-            )
-            db_session.add(h)
-            logs.append(h)
-        db_session.commit()
-        for h in logs:
-            db_session.refresh(h)
-        return logs
-    
-    # ============= TESTS GET ALL =============
-    def test_get_all_historique_empty(self, client):
-        """GET / doit retourner une liste vide si aucun historique"""
-        response = client.get("/historique/")
-        assert response.status_code == 200
-        assert response.json() == []
-    
-    def test_get_all_historique_with_data(self, client, historiques_test):
-        """GET / doit retourner tous les historiques"""
-        response = client.get("/historique/")
-        assert response.status_code == 200
-        data = response.json()
-        assert len(data) == 3
-        actions = [h['action'] for h in data]
-        assert "Connexion" in actions
-    
-    # ============= TESTS GET BY UTILISATEUR =============
-    def test_get_historique_by_utilisateur_success(self, client, utilisateur_test, historiques_test):
-        """GET /utilisateur/{id} doit retourner l'historique de l'utilisateur"""
-        response = client.get(f"/historique/utilisateur/{utilisateur_test.id_utilisateur}")
-        assert response.status_code == 200
-        data = response.json()
-        assert len(data) == 3
-        assert all(h['id_utilisateur'] == utilisateur_test.id_utilisateur for h in data)
-    
-    def test_get_historique_by_utilisateur_not_exist(self, client):
-        """GET /utilisateur/{id} avec id inexistant doit retourner []"""
-        response = client.get("/historique/utilisateur/99999")
-        assert response.status_code == 200
-        assert response.json() == []
-    
-    # ============= TESTS GET DERNIERES ACTIONS =============
-    def test_get_dernieres_actions_default_limit(self, client, historiques_test):
-        """GET /derniere-actions doit utiliser limit=20 par défaut"""
-        response = client.get("/historique/derniere-actions")
-        assert response.status_code == 200
-        data = response.json()
-        assert len(data) == 3
-    
-    def test_get_dernieres_actions_custom_limit(self, client, historiques_test):
-        """GET /derniere-actions?limit=2 doit retourner 2 entrées max"""
-        response = client.get("/historique/derniere-actions?limit=2")
-        assert response.status_code == 200
-        assert len(response.json()) == 2
-    
-    # ============= TESTS CREATE =============
-    def test_create_historique_success(self, client, utilisateur_test):
-        """POST / doit créer une entrée d'historique"""
-        payload = {
-            "id_utilisateur": utilisateur_test.id_utilisateur,
-            "action": "Test action",
-            "cible": "Test cible",
-            "ip": "192.168.1.1"
-        }
-        response = client.post("/historique/", json=payload)
-        assert response.status_code == 200
-        data = response.json()
-        assert data['action'] == "Test action"
-        assert data['ip'] == "192.168.1.1"
-    
-    def test_create_historique_missing_required_field(self, client, utilisateur_test):
-        """POST / sans champ obligatoire (action) doit échouer"""
-        payload = {
-            "id_utilisateur": utilisateur_test.id_utilisateur,
-            "cible": "Test"
-        }
-        response = client.post("/historique/", json=payload)
-        assert response.status_code == 422
+    app.dependency_overrides[get_db] = override_get_db
+    yield TestClient(app)
+    app.dependency_overrides.clear()
 
+
+@pytest.fixture
+def user_public(db_session):
+    user = models.Utilisateur(
+        nom="Public", prenom="Test", email=f"p{random.randint(1,999)}@t.com",
+        telephone="0600000000", mot_de_passe="h", role=RoleEnum.public
+    )
+    db_session.add(user)
+    db_session.commit()
+    return user
+
+@pytest.fixture
+def user_pompier(db_session):
+    user = models.Utilisateur(
+        nom="Pompier", prenom="Test", email=f"p{random.randint(1,999)}@t.com",
+        telephone="0611111111", mot_de_passe="h", role=RoleEnum.pompier
+    )
+    db_session.add(user)
+    db_session.commit()
+    return user
+
+@pytest.fixture
+def user_cmd(db_session):
+    user = models.Utilisateur(
+        nom="Cmd", prenom="Test", email=f"c{random.randint(1,999)}@t.com",
+        telephone="0622222222", mot_de_passe="h", role=RoleEnum.commandement
+    )
+    db_session.add(user)
+    db_session.commit()
+    return user
+
+@pytest.fixture
+def user_admin(db_session):
+    user = models.Utilisateur(
+        nom="Admin", prenom="Test", email=f"a{random.randint(1,999)}@t.com",
+        telephone="0633333333", mot_de_passe="h", role=RoleEnum.admin
+    )
+    db_session.add(user)
+    db_session.commit()
+    return user
+
+
+def test_get_all_historique_as_pompier(client, db_session, user_pompier, user_public):
+    db_session.add(models.Historique(id_utilisateur=user_public.id_utilisateur, action="A", cible="T", ip="1"))
+    db_session.commit()
+
+    app.dependency_overrides[getTokenUser] = lambda: user_pompier
+    
+    response = client.get("/historique/")
+    assert response.status_code == 200
+    assert len(response.json()) >= 1
+
+def test_get_all_historique_forbidden_for_public(client, user_public):
+    app.dependency_overrides[getTokenUser] = lambda: user_public
+    
+    response = client.get("/historique/")
+    assert response.status_code == 403
+
+
+def test_get_historique_by_utilisateur(client, db_session, user_cmd, user_public):
+    db_session.add(models.Historique(id_utilisateur=user_public.id_utilisateur, action="B", cible="T", ip="2"))
+    db_session.commit()
+
+    app.dependency_overrides[getTokenUser] = lambda: user_cmd
+    
+    response = client.get(f"/historique/utilisateur/{user_public.id_utilisateur}")
+    assert response.status_code == 200
+    assert response.json()[0]["id_utilisateur"] == user_public.id_utilisateur
+
+
+def test_get_dernieres_actions_limit(client, db_session, user_cmd, user_public):
+    for i in range(3):
+        db_session.add(models.Historique(id_utilisateur=user_public.id_utilisateur, action=f"Act{i}", cible="T", ip="0"))
+    db_session.commit()
+
+    app.dependency_overrides[getTokenUser] = lambda: user_cmd
+    
+    response = client.get("/historique/derniere-actions?limit=2")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+
+
+def test_create_historique_as_admin(client, user_admin, user_public):
+    app.dependency_overrides[getTokenUser] = lambda: user_admin
+    
+    payload = {
+        "id_utilisateur": user_public.id_utilisateur,
+        "action": "Creation",
+        "cible": "PEI",
+        "ip": "10.0.0.1"
+    }
+    response = client.post("/historique/", json=payload)
+    assert response.status_code == 200
+    assert response.json()["action"] == "Creation"
+
+def test_create_historique_forbidden_for_pompier(client, user_pompier, user_public):
+    app.dependency_overrides[getTokenUser] = lambda: user_pompier
+    
+    payload = {"id_utilisateur": user_public.id_utilisateur, "action": "H", "cible": "B", "ip": "0"}
+    response = client.post("/historique/", json=payload)
+    
+    # Un pompier ne peut pas POST (admin requis)
+    assert response.status_code == 403

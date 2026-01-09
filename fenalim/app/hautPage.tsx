@@ -1,8 +1,10 @@
 import { Image } from 'expo-image';
 import { StyleSheet, Text, View } from 'react-native';
 
+// Logo du SDIS
 const imgSDIS = require('@/assets/images/logo_sdis_56-detoure.png');
 
+// Haut des Pages de l'appplication (titre)
 export default function hautPage({ title }: { title: string }) {
   return (
 
@@ -18,6 +20,7 @@ export default function hautPage({ title }: { title: string }) {
 );
 }
 
+// Style
 const styles = StyleSheet.create({
   container: {
     backgroundColor:'#1D3557',    

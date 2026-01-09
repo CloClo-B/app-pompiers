@@ -1,14 +1,13 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import HautPage from '../hautPage';
 
-import CreerMission from '../creerMission';
 import HistoriqueMission from '../historiqueMission';
 import MissionEnCours from '../missionEnCours';
 
 
-
+// Affichage des missions
 export default function HomeScreen() {
   const { page: pageR } = useLocalSearchParams<{ page?: string }>();
 
@@ -32,49 +31,36 @@ export default function HomeScreen() {
 
   {/* choix type demande */}
   <View style={styles.typeD}>
-
-      <TouchableOpacity style={[styles.bouttonG, styles.boutton, choix === "creer" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("creer"); setChoix("creer");}}>
-      <Text style={choix === "creer" ? styles.txtActif : styles.txtInactif}>Créer une mission</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={[styles.boutton, choix === "enCours" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("enCours"); setChoix("enCours");}}>
-      <Text style={choix === "enCours" ? styles.txtActif : styles.txtInactif}>En cours</Text>
+      <TouchableOpacity style={[styles.bouttonG, styles.boutton , choix === "enCours" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("enCours"); setChoix("enCours");}}>
+        <Text style={choix === "enCours" ? styles.txtActif : styles.txtInactif}>En cours</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={[styles.bouttonD, styles.boutton, choix === "historique" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("historique"); setChoix("historique");}}>
-      <Text style={choix === "historique" ? styles.txtActif : styles.txtInactif}>Historique</Text>
+        <Text style={choix === "historique" ? styles.txtActif : styles.txtInactif}>Historique</Text>
       </TouchableOpacity>
+  </View>
    
 
    {/* affichage */}
-  </View>
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-    >
 
-
-      <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
-      <View>
-          {page === "creer" && <CreerMission />}
+      <View style={[styles.contenue]} >
           {page === "enCours" && <MissionEnCours />}
           {page === "historique" && <HistoriqueMission />}
       </View>
         
-      </ScrollView>
-    </KeyboardAvoidingView>
 
     </>
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   contenue: {
-    marginTop: 20,
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
+
 
   typeD:{ 
     flexDirection: 'row',
@@ -96,7 +82,6 @@ const styles = StyleSheet.create({
   },
 
   bouttonD:{
-
     borderTopRightRadius: 30,
     borderBottomRightRadius: 30,
   },

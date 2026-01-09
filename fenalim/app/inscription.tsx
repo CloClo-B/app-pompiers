@@ -5,9 +5,12 @@ import { KeyboardAvoidingView,Platform, ScrollView, StyleSheet, Text, TextInput,
 import Button from '@/components/ButtonLog';
 import axios from 'axios';
 import { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_ENDPOINTS } from '@/config/api';
 
+// Gère l'inscription des nouveaux utilisateurs
 export default function Connexion() {
-  
+
   // variable pour ensuite envoyer à l'api
   // text input
   const [nom, setNom] = useState(''); 
@@ -22,8 +25,6 @@ export default function Connexion() {
     return regex.test(email.trim());
   }
 
-  // communication avec l'api  /utilisateurs/
-  // valentin : 172.20.10.2 | 192.168.1.184
   const creerUtilisateur = async () => {
 
     // Avant l'appel API, pour vérifier les valeurs
@@ -40,30 +41,36 @@ export default function Connexion() {
     if(nom == null || !nom.trim()){
       console.log("Erreur le nom est incorrect");
       alert("Le nom est incorrect");
+      return;
     }
     else if(prenom == null || !prenom.trim()){
       console.log("Erreur le prénom est incorrect");
       alert("Le prénom est incorrect");
+      return;
     }
     else if(email == null || !email.trim() || !verifEmail(email)){
       console.log("Erreur le mail est incorrect");
       alert("Le mail est incorrect");
+      return;
     }
     else if(!/^\d{10}$/.test(telephone) || !telephone.trim()){
       console.log("Erreur le numéro de téléphone est incorrect");
       alert("Le numéro de téléphone est incorrect");
+      return;
     }
     else if(motDePasse.length < 12 || !motDePasse.trim()){
       console.log("Erreur a longeur du mot de passe est incorect il faut minimum 12 caracères");
       alert("La longeur du mot de passe est incorect il faut minimum 12 caracères");
+      return;
     }
     else if(motDePasse.trim() != ConfirmmotDePasse.trim() ){
       console.log("Erreur les mots de passe sont différents");
       alert("Les mots de passe sont différents");
+      return;
     }
     else{
       try {
-        const response = await axios.post('http://10.201.126.118:8000/utilisateurs/', {
+        const response = await axios.post(API_ENDPOINTS.REGISTER, {
           nom: nom,        
           prenom: prenom,
           telephone : telephone,
@@ -71,11 +78,41 @@ export default function Connexion() {
           mot_de_passe: motDePasse,
           confirm_password: ConfirmmotDePasse, 
         });
+        // recup token
+        console.log("Token du compte", email, ":", response.data.token);
+
+        const role = response.data.role;  //recuperation du role de l'utilisateur
+        console.log(role);
+
         
-        router.navigate('/(tabs)/acceuil')
-        } catch (error) {
-            console.error(error);
-            alert("Erreur lors de la création de l'utilisateur");
+        try {
+            await AsyncStorage.setItem('@token', response.data.token)
+            await AsyncStorage.setItem('@role', response.data.role)
+
+          } catch (e) {
+            console.log("erreur token")
+          }
+        // affichage en focntion du role
+        if (role === 'public') {
+          router.replace('/(tabs_public)/acceuil');
+        } else if (role === 'pompier') {
+          router.replace('/(tabs_pompier)/acceuil_pompier');
+        } else if (role === 'commandement') {
+          router.replace('/(tabs_commandement)/acceuil_commandement');
+        } else if (role === 'admin') {
+          router.replace('/(tabs_admin)/acceuil_admin');
+        }
+      } 
+      catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          // erreur renvoyée par l’API
+          console.log(error.response?.status);
+          console.log(error.response?.data);
+          alert(error.response?.data?.detail ?? "Erreur lors de l'inscription");
+        } else {
+          // autre erreur
+          alert("Erreur lors de l'inscription");
+        }
       }
     };
   }
@@ -90,7 +127,6 @@ export default function Connexion() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
-
       <ScrollView>
           <LinearGradient colors={['#E63946', '#1D3557']} style={styles.container}>
 
@@ -110,22 +146,22 @@ export default function Connexion() {
 
                   <View style={styles.aligne}>
                     <Text style={styles.title_ID_MDP}>Numéro de téléphone</Text>
-                    <TextInput value={telephone} onChangeText={setTelephone} style={styles.saisiChamp}/>
+                    <TextInput keyboardType='phone-pad' value={telephone} onChangeText={setTelephone} style={styles.saisiChamp}/>
                   </View>
 
                   <View style={styles.aligne}>
                     <Text style={styles.title_ID_MDP}>Email</Text>
-                    <TextInput value={email} onChangeText={setEmail} style={styles.saisiChamp}/>
+                    <TextInput keyboardType='email-address' value={email} onChangeText={setEmail} style={styles.saisiChamp}/>
                   </View>
 
                   <View style={styles.aligne}>
                     <Text style={styles.title_ID_MDP}>Mot de passe</Text>
-                    <TextInput value={motDePasse} onChangeText={setMDP} style={styles.saisiChamp}/>
+                    <TextInput value={motDePasse} secureTextEntry onChangeText={setMDP} style={styles.saisiChamp}/>
                   </View>
 
                   <View style={styles.aligne}>
                       <Text style={styles.title_ID_MDP}>Confirmer le mot de passe</Text>
-                    <TextInput value={ConfirmmotDePasse} onChangeText={setConfirmMDP} style={styles.saisiChamp}/>
+                    <TextInput value={ConfirmmotDePasse} secureTextEntry onChangeText={setConfirmMDP} style={styles.saisiChamp}/>
                   </View>
 
                   <View style={{ marginTop: 50}}>
@@ -143,6 +179,7 @@ export default function Connexion() {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   container: {
     flex: 1,
