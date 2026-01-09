@@ -355,7 +355,7 @@ export default function UserDetails() {
             {deleting ? (
               <ActivityIndicator color="#ffffff" size="small" />
             ) : (
-              <Text style={styles.deleteButtonText}>🗑️ SUPPRIMER L'UTILISATEUR</Text>
+              <Text style={styles.deleteButtonText}>SUPPRIMER L'UTILISATEUR</Text>
             )}
           </TouchableOpacity>
         </View>

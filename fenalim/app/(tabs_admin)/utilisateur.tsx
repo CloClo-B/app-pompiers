@@ -6,8 +6,9 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS } from '../../config/api';
 
-
 const roue = require('@/assets/images/parametres.png');
+
+// Modèle de données pour un Utilisateur
 type User = {
   id: string;
   nom: string;
@@ -42,6 +43,7 @@ export default function HomeScreen() {
   
   const router = useRouter();
   
+  // Définit comment afficher chaque utilisateur dans la liste
   const renderItem = ({ item }: { item: User }) => (
     <View style={styles.row}>
       <Text style={styles.cell}>{item.nom}</Text>
@@ -53,7 +55,7 @@ export default function HomeScreen() {
     </View>
   );
   
-
+  // Récupère liste des users
   const fetchUtilisateurs = async (token: string) => {
     if (!token) {
       alert("Token manquant, impossible d'afficher les missions en cours");
@@ -73,7 +75,8 @@ export default function HomeScreen() {
         setChargement(false);
         return;
       }
-      
+    
+    // Mis en forme des Données des Users
     const lesUtilisateurs: User[] = UtilisateurRaw.map((u: any) => ({
       id: String(u.id_utilisateur),
       nom: u.nom,
@@ -82,8 +85,6 @@ export default function HomeScreen() {
       email: u.email,
       telephone: u.telephone,
     }));
-    
-    
     
     setUtilisateur(lesUtilisateurs);
   } catch (error) {
@@ -95,9 +96,7 @@ export default function HomeScreen() {
   };
   
   return (
-    
     <>
-
     <View>
       <HautPage title="Utilisateurs" />
     </View>
@@ -108,6 +107,7 @@ export default function HomeScreen() {
       <Text style={styles.titre2}>Liste des utilisateurs de l'application</Text>
     </View>
 
+      {/* En-téte du tableau */}
       <View style={styles.hautBleu}>
         <Text style={styles.textTittre}>Nom</Text>
         <Text style={styles.textTittre}>Prénom</Text>
@@ -115,8 +115,7 @@ export default function HomeScreen() {
         <Text style={styles.textTittre}>info</Text>
       </View>
 
-      
-
+      {/* Liste déroulante*/}
       <View style={styles.tableContainer}>
         <FlatList
           data={utilisateur}

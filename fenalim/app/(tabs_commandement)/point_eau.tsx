@@ -5,6 +5,7 @@ import {View } from 'react-native';
 import HautPage from '../hautPage';
 import PointSignale from '../pointSignale';
 
+// Affiche la liste des points d'eau Signaler
 export default function HomeScreen() {
   const { page: pageR } = useLocalSearchParams<{ page?: string }>();
 

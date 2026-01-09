@@ -8,7 +8,7 @@ import HistoriqueMission from '../historiqueMission';
 import MissionEnCours from '../missionEnCours';
 
 
-
+// Gestion des Missions, affiche les différentes pages
 export default function HomeScreen() {
   const { page: pageR } = useLocalSearchParams<{ page?: string }>();
 
@@ -78,6 +78,7 @@ export default function HomeScreen() {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   contenue: {
     marginTop: 20,

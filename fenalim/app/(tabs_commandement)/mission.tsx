@@ -8,7 +8,7 @@ import HistoriqueMission from '../historiqueMission';
 import MissionEnCours from '../missionEnCours';
 
 
-
+// Gestion des Missions, affiche les différentes pages
 export default function HomeScreen() {
   const { page: pageR } = useLocalSearchParams<{ page?: string }>();
 
@@ -34,7 +34,7 @@ export default function HomeScreen() {
   <View style={styles.typeD}>
 
       <TouchableOpacity style={[styles.bouttonG, styles.boutton, choix === "creer" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("creer"); setChoix("creer");}}>
-      <Text style={choix === "creer" ? styles.txtActif : styles.txtInactif}>Créer une mission</Text>
+      <Text style={choix === "creer" ? styles.txtActif : styles.txtInactif}>Créer mission</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={[styles.boutton, choix === "enCours" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("enCours"); setChoix("enCours");}}>
@@ -45,30 +45,40 @@ export default function HomeScreen() {
       <Text style={choix === "historique" ? styles.txtActif : styles.txtInactif}>Historique</Text>
       </TouchableOpacity>
    
-
-   {/* affichage */}
   </View>
+
+    {/* affichage */}
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      keyboardVerticalOffset={0}
     >
 
+      {page === "creer" && (
+        <ScrollView>
+          <CreerMission />
+        </ScrollView>
+      )}
 
-      <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
-      <View>
-          {page === "creer" && <CreerMission />}
-          {page === "enCours" && <MissionEnCours />}
-          {page === "historique" && <HistoriqueMission />}
-      </View>
-        
-      </ScrollView>
+      {page === "enCours" && (
+        <View style={{ flex: 1 }}>
+          <MissionEnCours />
+        </View>
+      )}
+
+      {page === "historique" && (
+        <View style={{ flex: 1 }}>
+          <HistoriqueMission />
+        </View>
+      )}
+
     </KeyboardAvoidingView>
 
     </>
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   contenue: {
     marginTop: 20,
