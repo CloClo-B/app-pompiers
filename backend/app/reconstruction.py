@@ -4,7 +4,7 @@ import re
 input_path = "/app/app/HYDRANTS_56.json"
 output_path = "/app/app/HYDRANTS_56_clean.geojson"
 
-# Lecture brute
+# Lecture
 with open(input_path, "r", encoding="utf-8") as f:
     raw = f.read()
 
@@ -17,8 +17,8 @@ for p in parts:
     if not p:
         continue
 
-    # S'assurer que l'objet se termine bien par '}'
-    # Trouver la dernière "}" valide
+    # S'assurer que le fichier se termine bien par '}'
+    # Trouver la dernière "}" 
     last_brace = p.rfind("}")
     if last_brace == -1:
         continue
@@ -29,7 +29,7 @@ for p in parts:
         obj = json.loads(obj_str)
         features.append(obj)
     except json.JSONDecodeError:
-        # On ignore les segments incomplets
+        # ignore les segments incomplets
         continue
 
 # Construction GeoJSON

@@ -11,6 +11,7 @@ from geoalchemy2.elements import WKTElement
 from sqlalchemy.exc import IntegrityError
 
 
+# Récupère tous les points d'eau
 def get_all_points_eau(db: Session) -> List[Dict[str, Any]]:
     points = db.query(
         PointEau.id,
@@ -55,7 +56,7 @@ def get_all_points_eau(db: Session) -> List[Dict[str, Any]]:
         for p in points
     ]
 
-
+# Récupère un point d'eau par ID
 def get_point_eau_by_id(db: Session, point_id: int) -> Dict[str, Any]:
     point = db.query(
         PointEau.id,
@@ -99,7 +100,7 @@ def get_point_eau_by_id(db: Session, point_id: int) -> Dict[str, Any]:
         }
     return None
 
-
+# Crée un nouveau point d'eau
 def create_point_eau(db: Session, point_data: Dict[str, Any]):
     existing = db.query(PointEau).filter(PointEau.numero_pei == point_data["numero_pei"]).first()
     if existing:
@@ -147,13 +148,13 @@ def delete_point_eau_by_id(db: Session, point_id: int) -> bool:
         return True
     return False
 
-
+# Met à jour un point d'eau par ID
 def update_point_eau_by_id(db: Session, point_id: int, point_data: Dict[str, Any]):
     db_point = db.query(PointEau).filter(PointEau.id == point_id).first()
     if not db_point:
         return None
     
-    # Mettre à jour les champs simples
+    # Mettre à jour les champs 
     for key, value in point_data.items():
         if key in ['id', 'geom', 'date_crea', 'latitude', 'longitude']:
             continue
@@ -174,6 +175,7 @@ def update_point_eau_by_id(db: Session, point_id: int, point_data: Dict[str, Any
     db.refresh(db_point)
     return db_point
 
+# Récupère un point d'eau par numéro PEI
 def get_point_eau_by_numero_pei(db: Session, numero_pei: int):
     point = db.query(
         PointEau,
@@ -205,6 +207,7 @@ def get_point_eau_by_numero_pei(db: Session, numero_pei: int):
         "longitude": lon,
     }
 
+# Supprime un point d'eau par numéro PEI
 def delete_point_eau_by_numero_pei(db: Session, numero_pei: int) -> bool:
     point = db.query(PointEau).filter(PointEau.numero_pei == numero_pei).first()
     if not point:

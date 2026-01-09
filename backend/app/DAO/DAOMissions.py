@@ -1,3 +1,6 @@
+"""
+DAO pour la gestion des mission
+"""
 from app import models 
 from sqlalchemy.orm import Session
 from typing import Dict, Any
@@ -5,10 +8,7 @@ from datetime import datetime, date, timedelta
 from sqlalchemy.exc import IntegrityError
 
 
-
-
-# =============== MISSION ==================
-
+# Récupère toutes les missions
 def get_all_mission(db:Session):
     missions = db.query(models.Mission).all()
     out = []
@@ -18,17 +18,20 @@ def get_all_mission(db:Session):
         out.append(data)
     return out
 
+# Récupère une mission par ID
 def get_mission_by_id(db: Session, id_mission:int):
     return db.query(models.Mission).filter(models.Mission.id_mission == id_mission).first()
 
+# Récupère les missions d'une date donnée
 def get_mission_by_date(db: Session, laDate : date):
     debutDeLaJournee = datetime(laDate.year, laDate.month, laDate.day)
     finDeLaJournee = debutDeLaJournee + timedelta(days=1)
     missions = db.query(models.Mission).filter(models.Mission.date_creation >= debutDeLaJournee, models.Mission.date_creation < finDeLaJournee).all()
     return missions
 
+
+# Crée une nouvelle mission
 def create_mission(db: Session, mission_data: Dict[str, Any]):
-    """Crée une nouvelle mission"""
     # Vérification point et utilisateur
     if not db.query(models.PointEau).filter(models.PointEau.numero_pei == mission_data["id_point"]).first():
         raise ValueError("L'id du point est invalide")
@@ -53,6 +56,7 @@ def create_mission(db: Session, mission_data: Dict[str, Any]):
     return db_mission
 
 
+# Supprime une mission par ID
 def delete_mission_by_id(db:Session, id_mission: int):
     db_mission = db.query(models.Mission).filter(models.Mission.id_mission == id_mission).first()
     if db_mission : 
@@ -62,6 +66,7 @@ def delete_mission_by_id(db:Session, id_mission: int):
     return False
 
 
+# Mettre à jour une mission par ID
 def update_mission_by_id(db:Session, id_mission: int, mission_data : Dict[str, Any]):
     db_mission = db.query(models.Mission).filter(models.Mission.id_mission == id_mission).first()
     if not db_mission : 
