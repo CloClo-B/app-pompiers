@@ -1,8 +1,12 @@
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional, Any
 from datetime import datetime
+# Schémas Pydantic utilisés pour la validation la création et la sortie des données de l’API
 
-# =============== POINT D'EAU ================
+
+
+# POINT D'EAU 
+# Schéma de base pour la lecture d’un point d’eau
 class PointEauBase(BaseModel):
     id: int
     numero_pei: int
@@ -24,6 +28,8 @@ class PointEauBase(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
 
+
+# Schéma utilisé lors de la création d’un point d’eau
 class PointEauCreate(BaseModel):
     numero_pei: int
     nom: Optional[str] = None
@@ -42,8 +48,8 @@ class PointEauCreate(BaseModel):
     date_crea: datetime = Field(default_factory=datetime.now)
     date_maj: Optional[datetime] = None
 
-# ============ UTILISATEUR ===============
-
+# UTILISATEUR
+# Schéma de base pour un utilisateur
 class UtilisateurBase(BaseModel):
     nom: str
     prenom: str
@@ -51,16 +57,16 @@ class UtilisateurBase(BaseModel):
     telephone: Optional[str] = None
     role: Optional[str] = "admin"
 
-
+# Schéma utilisé lors de la création d’un utilisateur
 class UtilisateurCreate(UtilisateurBase):
     mot_de_passe: str = Field(min_length=12)
     confirm_password: str = Field(min_length=12)
-
+    # Vérifie la correspondance des mots de passe
     def validate_password(self):
         if self.mot_de_passe != self.confirm_password:
             raise ValueError("Le mot de passe et sa confirmation ne correspondent pas")
 
-
+# Schéma pour la mise à jour d’un utilisateur
 class UtilisateurUpdate(BaseModel):
     nom: Optional[str] = None
     prenom: Optional[str] = None
@@ -69,7 +75,7 @@ class UtilisateurUpdate(BaseModel):
     role: Optional[str] = None
     mot_de_passe: Optional[str] = None
 
-
+# Schéma de sortie utilisateur (sans le mot de passe)
 class UtilisateurOut(BaseModel):
     id_utilisateur: int
     nom: str
@@ -79,24 +85,25 @@ class UtilisateurOut(BaseModel):
     role: Optional[str] = "admin"
     model_config = ConfigDict(from_attributes=True)
 
-
+# Réponse retournée après authentification
 class AuthResponse(BaseModel):
     id_utilisateur: int
     token: str
     role: str
     model_config = ConfigDict(from_attributes=True)
 
-
+# Payload de déconnexion
 class LogoutPayload(BaseModel):
     id_utilisateur: int
 
+# Payload de connexion
 class LoginPayload(BaseModel):
     email: EmailStr
     mot_de_passe: str
 
 
-# ============= MISSION ===============
-
+# MISSION
+# Schéma de base pour une mission
 class MissionBase(BaseModel):
     nom_mission: str
     id_point: int
@@ -104,7 +111,7 @@ class MissionBase(BaseModel):
     commentaire: Optional[str]
     itineraire: Optional[Any]
 
-
+# Schéma de création d’une mission
 class MissionCreate(MissionBase):
     nom_mission: str
     id_point: int
@@ -112,7 +119,7 @@ class MissionCreate(MissionBase):
     commentaire: Optional[str]
     itineraire: Optional[Any]
 
-
+# Schéma de mise à jour d’une mission
 class MissionUpdate(BaseModel):
     nom_mission: Optional[str] = None
     id_point: Optional[int] = None
@@ -122,6 +129,7 @@ class MissionUpdate(BaseModel):
     itineraire: Optional[Any] = None
     date_fin: Optional[datetime]
 
+# Schéma de sortie d’une mission
 class MissionOut(BaseModel):
     id_mission: int
     nom_mission: str
@@ -136,19 +144,19 @@ class MissionOut(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 
-# =============== HISTORIQUE ==================
-
+# HISTORIQUE
+# Schéma de base pour l’historique des actions (pas encore fonctionnel)
 class HistoriqueBase(BaseModel):
     id_utilisateur: Optional[int]
     action: str
     cible: Optional[str]
     ip: Optional[str]
 
-
+# Schéma de création d’une entrée d’historique
 class HistoriqueCreate(HistoriqueBase):
     pass
 
-
+# Schéma de sortie de l’historique
 class HistoriqueOut(BaseModel):
     id_log: int
     id_utilisateur: Optional[int]
@@ -160,8 +168,8 @@ class HistoriqueOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-# =============== SIGNALER ==================
-
+# SIGNALER
+# Schéma de base pour un signalement
 class SignalerBase(BaseModel):
     id:int
     id_point: int
@@ -170,8 +178,7 @@ class SignalerBase(BaseModel):
     id_utilisateur: int
     date_creation: datetime
     
-
-
+# Schéma de création d’un signalement
 class SignalerCreate(BaseModel):
     id_point: int
     probleme: str
@@ -179,7 +186,7 @@ class SignalerCreate(BaseModel):
     id_utilisateur: int
     model_config = ConfigDict(from_attributes=True)
 
-
+# Schéma de sortie du profil utilisateur
 class UserProfileOut(BaseModel):
     id_utilisateur: int
     nom: str
@@ -192,19 +199,19 @@ class UserProfileOut(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
 
-
+# Schéma de mise à jour du profil utilisateur
 class UserProfileUpdate(BaseModel):
     nom: Optional[str] = Field(None, min_length=2, max_length=40)
     prenom: Optional[str] = Field(None, min_length=2, max_length=40)
     email: Optional[EmailStr] = None
     telephone: Optional[str] = Field(None, pattern=r'^\d{10}$') 
 
-
+# Schéma de changement de mot de passe
 class PasswordChangeRequest(BaseModel):
     old_password: str
     new_password: str = Field(min_length=12)
     confirm_new_password: str = Field(min_length=12)
-    
+    # Vérifie la cohérence des mots de passe
     def validate_passwords(self):
         if self.new_password != self.confirm_new_password:
             raise ValueError("Le nouveau mot de passe et sa confirmation sont différents ")

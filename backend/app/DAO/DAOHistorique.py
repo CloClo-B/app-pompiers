@@ -6,30 +6,31 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import Dict, Any, List
 
-
+# Récupère tous les historiques
 def get_all_historique(db: Session) -> List[Dict[str, Any]]:
     query = text("SELECT * FROM historiques ORDER BY date_action DESC")
     result = db.execute(query).fetchall()
     return [dict(row._mapping) for row in result]
 
 
+# Récupère un historique par ID
 def get_historique_by_id(db: Session, id_log: int):
     return db.query(models.Historique).filter(models.Historique.id_log == id_log).first()
 
-
+# Récupère les historiques d'un utilisateur
 def get_historique_by_utilisateur(db: Session, id_utilisateur: int):
     return db.query(models.Historique).filter(
         models.Historique.id_utilisateur == id_utilisateur
     ).order_by(models.Historique.date_action.desc()).all()
 
-
+# Récupère les dernières actions
 def get_derniere_action(db: Session, limit: int = 20):
     # BUG FIX: utiliser order_by au lieu de filter
     return db.query(models.Historique).order_by(
         models.Historique.date_action.desc()
     ).limit(limit).all()
 
-
+# Crée un nouvel historique
 def create_historique(db: Session, historique_data: Dict[str, Any]):
     db_historique = models.Historique(
         id_utilisateur=historique_data.get("id_utilisateur"),

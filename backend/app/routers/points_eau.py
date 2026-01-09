@@ -1,3 +1,4 @@
+# Router FastAPI pour la gestion des points d’eau avec gestion des coordonnées géographiques
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -14,9 +15,10 @@ from app.DAO.DAOPointsEau import (
 from ..models import Utilisateur
 from .dependencies import rolesChecker
 
-
+# Définition de la route pour les signalements
 router = APIRouter(prefix="/points-eau", tags=["Points d'eau"])
 
+# Dépendance pour obtenir une session de base de données
 def get_db():
     db = SessionLocal()
     try:
@@ -24,13 +26,13 @@ def get_db():
     finally:
         db.close()
 
-# ================= GET ALL =================
+# récuperer tout les points d'eau
 @router.get("/", response_model=list[PointEauBase])
 def list_points(db: Session = Depends(get_db)):
     points = get_all_points_eau(db)
     return points
 
-# ================= GET BY NUMERO_PEI =================
+# Récupère un point d'eau selon son numéro PEI
 @router.get("/{numero_pei}", response_model=PointEauBase)
 def get_point(numero_pei: int, db: Session = Depends(get_db)):
     point = get_point_eau_by_numero_pei(db, numero_pei)
@@ -40,7 +42,7 @@ def get_point(numero_pei: int, db: Session = Depends(get_db)):
     
     return point
 
-# ================= CREATE =================
+# Crée un nouveau point d'eau
 @router.post("/", response_model=PointEauBase)
 def create_point(payload: PointEauCreate, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
     try:
@@ -72,7 +74,7 @@ def create_point(payload: PointEauCreate, db: Session = Depends(get_db), user_ch
         "longitude": longitude,
     }
 
-# ================= DELETE =================
+# Supprime un point d'eau selon son numéro PEI.
 @router.delete("/{numero_pei}")
 def delete_point(numero_pei: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
     success = delete_point_eau_by_numero_pei(db, numero_pei)

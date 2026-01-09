@@ -18,7 +18,7 @@ engine = create_engine(
 )
 
 # Crée une classe de session
-# Pour chaque requête, une session sera utilisée
+# Pour chaque requête une session sera utilisée
 # autocommit: les modifications doivent être validées manuellement
 # autoflush: évite les flushs
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, future=True)
