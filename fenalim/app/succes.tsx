@@ -5,10 +5,12 @@ import { naviguerPointEau, naviguerMission, naviguerAccueil } from '../config/na
 import { getData } from "../config/recupRole"; 
 
 const reussi = require('@/assets/images/succes.png');
+
+// Page des Succes de création (point_eau, missions)
 export default function CreationSucces() {
   const [userRole, setUserRole] = useState<string | null>(null);
   
-  // récupérer le role 
+  // récupérer le role
   useEffect(() => {
   const chargerRole = async () => {
     const role = await getData();
@@ -21,6 +23,7 @@ export default function CreationSucces() {
   const title = params.title;
   const page = params.page;
 
+  // Redirection de page
   const choixType = () => {
   if (userRole){
     if(page=="point_eau"){
@@ -58,6 +61,7 @@ export default function CreationSucces() {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   tout:{
     alignSelf: 'center',

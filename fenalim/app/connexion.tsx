@@ -9,12 +9,13 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS } from '@/config/api';
 
-
+// Gère la connexion des utilisateurs
 export default function Connexion() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [motDePasse, setMDP] = useState('');
 
+  // Vérif adresse mail
   const verifEmail = (email: string) => {
     const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return regex.test(email.trim());
@@ -91,20 +92,24 @@ export default function Connexion() {
                     <Text style={[styles.title,{marginTop: 30}]}>Connexion</Text>
                 </View>
 
+                {/* Champ E-mail */}
                 <View style={styles.aligne}>
                   <Text style={styles.title_ID_MDP}>E-mail</Text>
                   <TextInput keyboardType='email-address' value={email} onChangeText={setEmail} style={styles.saisiChamp}/>
                 </View>
 
+                {/* Champ Mot de passe */}
                 <View style={styles.aligne}>
                     <Text style={styles.title_ID_MDP}>Mot de passe</Text>
                   <TextInput value={motDePasse} secureTextEntry onChangeText={setMDP} style={styles.saisiChamp}/>
                 </View>
 
+                {/* Bouton de validation */}
                 <View style={{ marginTop: 50}}>
                     <Button label='Connexion' onPress={verifUtilisateurExiste} backColor="#30D936"/>
                 </View>
-
+                
+                {/* Liens vers Mot de passe oublié / Inscription */}
                 <View>
                     <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Mot de passe oublié' onPress={() => {console.log('en cours')}}/>
                     <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Créer un compte' onPress={() => router.navigate('/inscription')}/>
@@ -115,6 +120,7 @@ export default function Connexion() {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   container: {
     flex: 1,

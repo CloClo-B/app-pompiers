@@ -6,7 +6,7 @@ import proj4 from "proj4";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS } from '@/config/api';
 
-
+// Donnée de la Mission
 type MissionAvecPoint = {
   id_mission: string;
   id_point: string;
@@ -18,6 +18,7 @@ type MissionAvecPoint = {
   longitude: number;
 };
 
+// Affichage des Missions qui sont en cours
 export default function MissionEnCours() {
   const [chargement, setChargement] = useState(false);
   const [missions, setMissions] = useState<MissionAvecPoint[]>([]);
@@ -240,6 +241,7 @@ const fetchMissions = async (token: string) => {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 

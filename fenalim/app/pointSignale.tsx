@@ -8,7 +8,7 @@ import { API_ENDPOINTS } from '@/config/api';
 
 const roue = require('@/assets/images/parametres.png');
 
-
+// Donnée du Signalement
 type Signale = {
   id_s: string;
   id: string;
@@ -16,7 +16,7 @@ type Signale = {
   date: string;
 };
 
-
+// Affichage des Signalement des points d'eau
 export default function PointSignale() {
   
   const [signaler, setSignale] = useState<Signale[]>([]);
@@ -82,9 +82,6 @@ export default function PointSignale() {
   };
 
 
-  
-  
-
   // affichage en tableau
   const renderItem = ({ item }: { item: Signale }) => (
     <View style={styles.row}>
@@ -122,6 +119,7 @@ export default function PointSignale() {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 

@@ -14,7 +14,7 @@ import { useLocalSearchParams } from 'expo-router';
 // petit encadrer pour choix photo
 const ajouterPhoto = require('@/assets/images/ajouter_photo.png');
 
-
+// Page pour signaler un points d'eau
 export default function Signalement() {
   const router = useRouter();
   const { idPoint } = useLocalSearchParams<{ idPoint: string }>();
@@ -206,6 +206,7 @@ const handlePickImage = () => {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
 
   image: {

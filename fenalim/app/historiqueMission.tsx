@@ -5,7 +5,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS } from '@/config/api';
 
-
+// Donnée de la Mission
 const info = require('@/assets/images/information.png');
 type MissionAvecPoint = {
   id_mission: string;
@@ -15,6 +15,7 @@ type MissionAvecPoint = {
 
 };
 
+// Affichage des Historique de Missions qui on été terminer
 export default function historiqueMission() {
 
   const [mission, seetMission] = useState<MissionAvecPoint[]>([]);
@@ -87,7 +88,7 @@ export default function historiqueMission() {
 
 
 
-  
+  // Affiche sous forme de tableau
   const renderItem = ({ item }: { item: MissionAvecPoint }) => (
     <View >
       <TouchableHighlight onLongPress={() => appuieLongSupp(item.nom_mission, item.id_mission)}  underlayColor="white">
@@ -105,7 +106,7 @@ export default function historiqueMission() {
   );
   
 
-
+  // Récupère les données des Missions
   const fetchMissions = async (token: string) => {
     if (!token) {
       alert("Token manquant, impossible d'afficher l'historique des mission");
@@ -150,6 +151,7 @@ export default function historiqueMission() {
     }
   };
 
+  // Supprimer une mission
   const supprimerMission = async (id_mission : string) => {
     // Avant l'appel API, pour vérifier les valeurs
     console.log("Vérification de l'id à envoyer pour supprimer\n");
@@ -200,6 +202,7 @@ export default function historiqueMission() {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
