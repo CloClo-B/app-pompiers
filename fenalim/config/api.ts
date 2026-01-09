@@ -1,9 +1,10 @@
-// Fichier de centralisation des URL pour les fichiers frontend
+// Fichier de centralisation des URL pour l'application (frontend)
 
 // IP A CHANGER
-export const API_URL = 'http://192.168.1.184:8000';
+export const API_URL = 'http://172.20.10.2:8000';
 
 
+// Liste de tous les points d'accès utilisés par l'application pour accéder a l'API
 export const API_ENDPOINTS = {
   LOGIN: `${API_URL}/utilisateurs/login`,
   REGISTER: `${API_URL}/utilisateurs/`,

@@ -1,5 +1,8 @@
 import { router } from 'expo-router';
 
+// Ces fonctions servent à rediriger automatiquement l'utilisateur vers la bonne page en fonction de son role (admin, pompier, commandement, admin)
+
+// Envoie vers les points d'eau
 export const naviguerPointEau = (role: string) => {
   switch(role) {
     case 'admin':
@@ -17,6 +20,7 @@ export const naviguerPointEau = (role: string) => {
   }
 };
 
+// Envoie vers les missions
 export const naviguerMission = (role: string) => {
   switch(role) {
     case 'admin':
@@ -31,6 +35,7 @@ export const naviguerMission = (role: string) => {
   }
 };
 
+// Envoie vers la page d'accueil
 export const naviguerAccueil = (role: string) => {
   switch(role) {
     case 'admin':
