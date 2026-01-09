@@ -18,6 +18,7 @@ def verify_password(password: str, hashed: str) -> bool:
     return pwd_context.verify(password, hashed)
 
 
+# Récupère tous les utilisateurs sans le mot de passe
 def get_all_utilisateur(db: Session) -> List[Dict[str, Any]]:
     utilisateurs = db.query(models.Utilisateur).all()
     output = []
@@ -28,17 +29,18 @@ def get_all_utilisateur(db: Session) -> List[Dict[str, Any]]:
         output.append(data)
     return output
 
-
+# Récupère un utilisateur via son ID
 def get_utilisateur_by_id(db: Session, id_utilisateur: int):
     return db.query(models.Utilisateur).filter(
         models.Utilisateur.id_utilisateur == id_utilisateur
     ).first()
 
-
+# Récupère un utilisateur via son email
 def get_utilisateur_by_email(db: Session, email: str):
     return db.query(models.Utilisateur).filter(models.Utilisateur.email == email).first()
 
 
+# Crée un utilisateur et hash le mot de passe
 def create_utilisateur(db: Session, user_data: Dict[str, Any]):
     # Vérifier si l'email existe déjà
     existe = get_utilisateur_by_email(db, user_data["email"])
@@ -61,7 +63,7 @@ def create_utilisateur(db: Session, user_data: Dict[str, Any]):
     db.refresh(db_user)
     return db_user
 
-
+# Supprime un utilisateur par ID
 def delete_utilisateur_by_id(db: Session, id_utilisateur: int) -> bool:
     db_user = db.query(models.Utilisateur).filter(
         models.Utilisateur.id_utilisateur == id_utilisateur
@@ -72,7 +74,7 @@ def delete_utilisateur_by_id(db: Session, id_utilisateur: int) -> bool:
         return True
     return False
 
-
+# Met à jour un utilisateur par ID
 def update_utilisateur_by_id(db: Session, id_utilisateur: int, user_data: Dict[str, Any]):
     db_user = db.query(models.Utilisateur).filter(
         models.Utilisateur.id_utilisateur == id_utilisateur
@@ -101,7 +103,7 @@ def update_utilisateur_by_id(db: Session, id_utilisateur: int, user_data: Dict[s
     db.refresh(db_user)
     return db_user
 
-
+# Met à jour son propre profil
 def update_own_profile(db: Session, id_utilisateur: int, user_data: Dict[str, Any]):
     db_user = db.query(models.Utilisateur).filter(
         models.Utilisateur.id_utilisateur == id_utilisateur
@@ -141,7 +143,7 @@ def update_own_profile(db: Session, id_utilisateur: int, user_data: Dict[str, An
     db.refresh(db_user)
     return db_user
 
-
+# Change le mot de passe après vérification
 def change_password(db: Session, id_utilisateur: int, old_password: str, new_password: str) -> bool:
     db_user = db.query(models.Utilisateur).filter(
         models.Utilisateur.id_utilisateur == id_utilisateur
@@ -159,7 +161,7 @@ def change_password(db: Session, id_utilisateur: int, old_password: str, new_pas
     db.commit()
     return True
 
-
+# Vérifie le mot de passe d’un utilisateur
 def verify_user_password(db: Session, id_utilisateur: int, password: str) -> bool:
     db_user = db.query(models.Utilisateur).filter(
         models.Utilisateur.id_utilisateur == id_utilisateur

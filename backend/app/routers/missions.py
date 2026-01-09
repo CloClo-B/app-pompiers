@@ -1,3 +1,4 @@
+# Router FastAPI pour la gestion des missions
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
@@ -10,15 +11,15 @@ from app.DAO.DAOMissions import (
     create_mission,
     delete_mission_by_id,
     get_all_mission,
-    get_mission_by_date,
     get_mission_by_id,
     update_mission_by_id
 )
 from .dependencies import rolesChecker
 
-
+# Définition de la route pour les missions
 router = APIRouter(prefix="/missions", tags=["Missions"])
 
+# Dépendance pour obtenir une session de base de données
 def get_db():
     db = SessionLocal()
     try:
@@ -27,7 +28,7 @@ def get_db():
         db.close()
 
 
-# ================= CREATE =================
+# Crée une nouvelle mission uniqument pour les commandent et administrateur
 @router.post("/", response_model=MissionCreate)  
 def create_mission_route(payload: MissionCreate, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("commandement","admin"))):
     try:
@@ -44,14 +45,14 @@ def create_mission_route(payload: MissionCreate, db: Session = Depends(get_db), 
     }
 
 
-# ================= GET ALL =================
+# Récupère toutes les missions interdit aux public
 @router.get("/", response_model=List[MissionOut])  
 def list_missions(db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("pompier", "commandement","admin"))):
     mission = get_all_mission(db)
     return mission
 
 
-# ================= GET BY ID =================
+# Récupère une mission selon son ID interdit au public
 @router.get("/{mission_id}", response_model=MissionOut) 
 def get_mission(mission_id: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("pompier", "commandement","admin"))):
     mission = get_mission_by_id(db, mission_id)
@@ -60,7 +61,7 @@ def get_mission(mission_id: int, db: Session = Depends(get_db), user_check: Util
     return mission
 
 
-# ================= UPDATE =================
+# Mettre à jour une mission uniqument pour les commandent et administrateur
 @router.put("/update/{id_mission}", response_model=MissionOut)
 def update_mission(id_mission: int, payload: MissionUpdate, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("commandement","admin"))):
     try:
@@ -70,7 +71,7 @@ def update_mission(id_mission: int, payload: MissionUpdate, db: Session = Depend
     
     return mission
 
-# ================= DELETE =================
+# Supprime une mission uniqument pour les commandent et administrateur
 @router.delete("/supprimer/{mission_id}", response_model=dict)
 def delete_mission(mission_id: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("commandement","admin"))):
     success = delete_mission_by_id(db, mission_id)
