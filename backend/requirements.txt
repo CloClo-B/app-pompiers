@@ -9,3 +9,8 @@ email-validator
 passlib[bcrypt]
 python-jose[cryptography]
 pyproj
+pytest
+pytest-asyncio
+httpx
+pytest-cov
+argon2-cffi

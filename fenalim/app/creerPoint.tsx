@@ -17,9 +17,10 @@ export default function CreerPoint() {
   const [valueType, setValueType] = useState(null);
   const [valueDispo, setValueDispo] = useState(null);
   const [valueAcces, setValueAcces] = useState(null);
+  const [valueStatut, setValueStatut] = useState(null);
   // text input
+  
   const [numeroPEI, setNumeroPEI] = useState('');
-
   const [debit, setDebit] = useState('');
   const [pression, setPression] = useState('');
   const [volumeMin, setVolumeMin] = useState('');
@@ -63,16 +64,15 @@ export default function CreerPoint() {
     { label : 'C' , value : 'C' }, 
     { label : 'NC' , value : 'NC' }, 
     { label : 'NON' , value : 'NON' }, 
-
   ]);
 
   // liste pour les différents statut
   const [openStatut, setOpenStatut] = useState(false);
-  const [valueStatut, setValueStatut] = useState(null);
   const [etatStatut, setItemsStatut] = useState ([ 
     { label : 'Public' , value : 'PUBLIC' }, 
     { label : 'Privé' , value : 'PRIVE' }, 
   ]);
+
   // une seul ouverture a la fois sinon erreur 
   const onOpenType = () => { setOpenDispo(false); setOpenAcces(false); setOpenStatut(false); };
   const onOpenDispo = () => { setOpenType(false); setOpenAcces(false); setOpenStatut(false); };
@@ -80,6 +80,25 @@ export default function CreerPoint() {
   const onOpenStatut = () => { setOpenType(false); setOpenDispo(false); setOpenAcces(false); };
   
   
+  // méthode verifiaction champs correct avant d'envoyer à l'api
+  const verifTypePoint = (type: string) => {
+    const typesValides = ['BI','BI100','PENA','PI100','PI110','PI150','PI65','PI70','PI80','RESERVE EAU INCENDIE'];
+    return typesValides.includes(type);
+  }
+  const verifDispo = (dispo: string) => {
+    const dispoValides = ['DI', 'IN'];
+    return dispoValides.includes(dispo);
+  }
+
+  const verifAcces = (acces: string) => {
+    const accesValides = ['C', 'NC', 'NON'];
+    return accesValides.includes(acces);
+  }
+ 
+  const verifTypeStatut = (type: string) => {
+    const typeValides = ['PUBLIC', 'PRIVE'];
+    return typeValides.includes(type);
+  }
  
 
 
@@ -104,31 +123,85 @@ export default function CreerPoint() {
   console.log("latitude:", parseFloat(latitude));
   console.log("utilisateur:", "");
 
-    try {
-      const response = await axios.post('http://10.201.126.118:8000/points-eau/', {
-        numero_pei: parseInt(numeroPEI),
-        nom: '',
-        statut: valueStatut,
-        type_nature: valueType,
-        insee5: insee5, 
-        accessibilite: valueAcces,
-        disponibilite: valueDispo,
-        carto_ref: parseInt(refCarto)  ? parseInt(refCarto) : null ,
-        press_deb: parseFloat(pression),
-        debit_1_bar: parseFloat(debit),
-        vol_eau_mi: parseFloat(volumeMin),
-        longitude: parseFloat(longitude),
-        latitude: parseFloat(latitude),
-        utilisateur: '', //ne pas oublié par la suite c'est pour savoir qui a ajouter le point 
-      });
-      
-      router.push({
-          pathname: '/creationSucces',
-          params: { title: 'Point d’eau créé avec succès', nomPage: 'creer', chemainPage: '/point_eau' }
+
+  // vérfication des valeurs correct avant envoyer à l'api + affichage message de l'erreur
+  if(valueType == null || verifTypePoint(valueType) == false){
+    console.log("Erreur le type de point est incorrect");
+    alert("Le type de point est incorrect");
+  }
+  else if(valueDispo == null || verifDispo(valueDispo) == false){
+    console.log("Erreur la disponibilité du point est incorrect");
+    alert("La disponibilité du point est incorrect");
+  }
+  else if(valueAcces == null || verifAcces(valueAcces) == false){
+    console.log("Erreur l'accèe de point est incorrect");
+    alert("Le type d'accèe du point est incorrect");
+  }
+  else if(valueStatut == null || verifTypeStatut(valueStatut) == false){
+    console.log("Erreur le statut du point est incorrect");
+    alert("Le statut du est incorrect");
+  }
+  else if(numeroPEI == null || !numeroPEI.trim() || Number.isInteger(Number(numeroPEI)) == false){
+    console.log("Erreur le numéro pei est incorrect");
+    alert("Le numéro pei est incorect");
+  }
+  else if(debit == null || !debit.trim() || isNaN(Number(debit.replace(',', '.'))) || (parseFloat(debit.replace(',', '.')) <=0)){
+    console.log("Erreur le débit est incorrect");
+    alert("Le débit est incorect");
+  }
+  else if(pression == null || !pression.trim() || isNaN(Number(pression.replace(',', '.'))) || (parseFloat(pression.replace(',', '.')) <=0)){
+    console.log("Erreur la préssion est incorrect");
+    alert("La préssion est incorect");
+  }
+  else if(volumeMin == null || !volumeMin.trim() || isNaN(Number(volumeMin.replace(',', '.'))) || (parseFloat(volumeMin.replace(',', '.')) <=0)){
+    console.log("Erreur le volume minimum est incorrect");
+    alert("Le volume minimum est incorect");
+  }
+  else if(insee5 == null || !insee5.trim() || insee5.length>10 || Number.isInteger(Number(insee5)) == false || parseInt(insee5) <=0 ){
+    console.log("Erreur le code insee5 est incorrect");
+    alert("Le code insee5 est incorect");
+  }
+  else if(refCarto == null || !refCarto.trim() || Number.isInteger(Number(refCarto)) == false || (parseInt(refCarto) <=0)){
+    console.log("Erreur la référence carthographique est incorrect");
+    alert("La référence carthographique est incorect");
+  }
+  else if(longitude == null || !longitude.trim() || isNaN(Number(longitude.replace(',', '.'))) || (parseFloat(longitude.replace(',', '.')) <-180) || (parseFloat(longitude.replace(',', '.'))) > 180){
+    console.log("Erreur la longitude est incorrect");
+    alert("La longitude est incorect");
+  }
+  else if(latitude == null || !latitude.trim() || isNaN(Number(latitude.replace(',', '.')))  || (parseFloat(latitude.replace(',', '.')) <-90) || (parseFloat(latitude.replace(',', '.')) > 90)){
+    console.log("Erreur la latitude est incorrect");
+    alert("La latitude est incorect");
+  }
+
+    else{
+      try {
+        const response = await axios.post('http://10.201.126.118:8000/points-eau/', {
+          numero_pei: parseInt(numeroPEI),
+          nom: '',
+          statut: valueStatut,
+          type_nature: valueType,
+          insee5: insee5, 
+          accessibilite: valueAcces,
+          disponibilite: valueDispo,
+          carto_ref: parseInt(refCarto)  ? parseInt(refCarto) : null ,
+          press_deb: parseFloat(pression.replace(',', '.')),
+          debit_1_bar: parseFloat(debit.replace(',', '.')),
+          vol_eau_mi: parseFloat(volumeMin.replace(',', '.')),
+          longitude: parseFloat(longitude.replace(',', '.')),
+          latitude: parseFloat(latitude.replace(',', '.')),
+          utilisateur: '', //ne pas oublié par la suite c'est pour savoir qui a ajouter le point 
         });
-      } catch (error) {
-          console.error(error);
-          alert('Erreur lors de la création du point d’eau');
+        
+        router.push({
+            pathname: '/creationSucces',
+            params: { title: 'Point d’eau créé avec succès', nomPage: 'creer', chemainPage: '/point_eau' }
+          });
+        } catch (error) {
+            console.error(error);
+            alert('Erreur lors de la création du point d’eau');
+      }
+
     }
   };
 
@@ -217,20 +290,20 @@ export default function CreerPoint() {
     {/* debit */}
     <View style={[styles.tout, {marginTop:20}]}>
       <Text style={styles.text}>Débit en L/min</Text> 
-      <TextInput value={debit} onChangeText={setDebit} keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
+      <TextInput value={debit} onChangeText={setDebit} keyboardType='decimal-pad' style={styles.entree} placeholder=""></TextInput>
     </View> 
 
 
     {/* préssion */}
     <View style={[styles.tout, {marginTop:20}]}>
       <Text style={styles.text}>préssion</Text> 
-      <TextInput value={pression} onChangeText={setPression} keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
+      <TextInput value={pression} onChangeText={setPression} keyboardType='decimal-pad' style={styles.entree} placeholder=""></TextInput>
     </View> 
 
     {/* volume eau */}
     <View style={[styles.tout, {marginTop:20}]}>
       <Text style={styles.text}>Volume eau minimum en L</Text> 
-      <TextInput value={volumeMin} onChangeText={setVolumeMin} keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
+      <TextInput value={volumeMin} onChangeText={setVolumeMin} keyboardType='decimal-pad' style={styles.entree} placeholder=""></TextInput>
     </View> 
 
    {/* insee5 */}

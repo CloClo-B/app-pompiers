@@ -1,0 +1,19 @@
+cat > backend/.dockerignore << 'EOF'
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+.venv
+tests.zip
+EOF

@@ -37,4 +37,4 @@ def recent_actions(limit: int = 20, db: Session = Depends(get_db)):
 # ================= CREATE =================
 @router.post("/", response_model=HistoriqueBase)
 def create_entry(payload: HistoriqueCreate, db: Session = Depends(get_db)):
-    return create_historique(db, payload.dict())
+    return create_historique(db, payload.model_dump())
