@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from typing import Dict, Any, List
 from app.models import Signaler, Utilisateur, PointEau
 
+# Récupère tous les signalements
 
 def get_all_signale(db: Session) -> List[Dict[str, Any]]:
     signalements = db.query(
@@ -29,7 +30,7 @@ def get_all_signale(db: Session) -> List[Dict[str, Any]]:
         for s in signalements
     ]
 
-
+# Récupère tous les signalements via l'id du point d'eau
 def get_signale_by_id_point(db: Session, id_point: int) -> List[Dict[str, Any]]:
     signalements = db.query(
         Signaler.id,
@@ -54,7 +55,7 @@ def get_signale_by_id_point(db: Session, id_point: int) -> List[Dict[str, Any]]:
     ]
 
 
-
+# Crée un nouveau signalement
 def create_signale(db: Session, signale_data: Dict[str, Any]): 
     # verification infos
     if not db.query(PointEau).filter(PointEau.numero_pei == signale_data["id_point"]).first():
@@ -75,7 +76,7 @@ def create_signale(db: Session, signale_data: Dict[str, Any]):
     db.refresh(new_signale)
     return new_signale
 
-
+# Supprime tous les signalements d'un point d'eau et les images associées
 def delete_signale_by_id_point(db: Session, id_point: int) -> bool:
     signalements = db.query(Signaler).filter(Signaler.id_point == id_point).all()
     photo = []
@@ -101,14 +102,14 @@ def delete_signale_by_id_point(db: Session, id_point: int) -> bool:
     
     return False
 
-
+# Met à jour un signalement par ID point
 def update_signale(db: Session, id_point: int, signale_data: Dict[str, Any]):
     db_signale = db.query(Signaler).filter(Signaler.id_point == id_point).first()
     if not db_signale:
         return None
     
     for key, value in signale_data.items():
-        if key == 'id_point':  # Ne pas modifier l'ID
+        if key == 'id_point':  # Ne pas modifier l'ID 
             continue
         if hasattr(db_signale, key):
             setattr(db_signale, key, value)
