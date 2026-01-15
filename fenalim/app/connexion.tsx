@@ -1,0 +1,156 @@
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+
+import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+
+import Button from '@/components/ButtonLog';
+import { useState } from 'react';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_ENDPOINTS } from '@/config/api';
+
+// Gère la connexion des utilisateurs
+export default function Connexion() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [motDePasse, setMDP] = useState('');
+
+  // Vérif adresse mail
+  const verifEmail = (email: string) => {
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return regex.test(email.trim());
+  }
+  const verifUtilisateurExiste = async () => {
+
+    // Avant l'appel API, pour vérifier les valeurs
+    console.log("Vérification des valeurs à envoyer\n");
+    console.log("email: ", email);
+    console.log("mdp: ", motDePasse);
+
+
+    // vérfication des valeurs correct avant envoyer à l'api + affichage message de l'erreur
+    if(email == null || !email.trim() || !verifEmail(email)){
+      console.log("Erreur le mail est incorrect");
+      alert("Le mail est incorrect");
+      return;
+    }
+    else if(motDePasse == null || !motDePasse.trim()){
+      console.log("Erreur le mot de passe n'est pas remplie");
+      alert("Le champ mot de passe n'est pas completer");
+      return;
+    }
+
+    else{
+      try {
+        const response = await axios.post(API_ENDPOINTS.LOGIN, {
+          email: email,        
+          mot_de_passe: motDePasse,
+        });
+
+        // recup token
+        console.log("Token du compte", email, ":", response.data.token);
+
+        const role = response.data.role;  //recuperation du role de l'utilisateur
+        console.log(role);
+        try {
+            await AsyncStorage.setItem('@token', response.data.token)
+            await AsyncStorage.setItem('@role', response.data.role)
+        } catch (e) {
+          console.log("erreur token")
+        }
+        // affichage en focntion du role
+        if (role === 'public') {
+          router.replace('/(tabs_public)/acceuil');
+        } else if (role === 'pompier') {
+          router.replace('/(tabs_pompier)/acceuil_pompier');
+        } else if (role === 'commandement') {
+          router.replace('/(tabs_commandement)/acceuil_commandement');
+        } else if (role === 'admin') {
+          router.replace('/(tabs_admin)/acceuil_admin');
+        }
+
+        }
+      catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          // erreur renvoyée par l’API
+          console.log(error.response?.status);
+          console.log(error.response?.data);
+          alert(error.response?.data?.detail ?? "Erreur lors de la connexion");
+        } else {
+          // autre erreur
+          alert("Erreur lors de la connexion");
+        }
+      }
+    };
+  }
+
+  return (
+    <ScrollView>
+        <LinearGradient colors={['#E63946', '#1D3557']} style={styles.container}>
+
+                <View>
+                    <Text style={[styles.title,{marginTop: 30}]}>Connexion</Text>
+                </View>
+
+                {/* Champ E-mail */}
+                <View style={styles.aligne}>
+                  <Text style={styles.title_ID_MDP}>E-mail</Text>
+                  <TextInput keyboardType='email-address' value={email} onChangeText={setEmail} style={styles.saisiChamp}/>
+                </View>
+
+                {/* Champ Mot de passe */}
+                <View style={styles.aligne}>
+                    <Text style={styles.title_ID_MDP}>Mot de passe</Text>
+                  <TextInput value={motDePasse} secureTextEntry onChangeText={setMDP} style={styles.saisiChamp}/>
+                </View>
+
+                {/* Bouton de validation */}
+                <View style={{ marginTop: 50}}>
+                    <Button label='Connexion' onPress={verifUtilisateurExiste} backColor="#30D936"/>
+                </View>
+                
+                {/* Liens vers Mot de passe oublié / Inscription */}
+                <View>
+                    <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Mot de passe oublié' onPress={() => {console.log('en cours')}}/>
+                    <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Créer un compte' onPress={() => router.navigate('/inscription')}/>
+                </View>
+                
+        </LinearGradient>
+    </ScrollView>
+  );
+}
+
+// Style
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    paddingTop: 40,
+  },
+  title: {
+    color: '#fff',
+    fontSize: 40,
+    fontWeight: 'bold',
+    marginBottom: 70,
+  },
+  title_ID_MDP: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    alignSelf: 'flex-start',
+  },
+  aligne: {
+    width: '80%', 
+    maxWidth: 300, 
+    alignSelf: 'center', 
+    marginTop: 20,
+  },
+  saisiChamp: {
+    width: '100%',
+    height: 40, 
+    color: '#000000ff',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+  }
+});
