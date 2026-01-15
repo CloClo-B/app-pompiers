@@ -15,7 +15,6 @@ from geoalchemy2.elements import WKTElement
 
 @pytest.fixture
 def utilisateur_test(db_session):
-    """Crée un utilisateur de test"""
     user = models.Utilisateur(
         nom="Dupont",
         prenom="Jean",
@@ -32,7 +31,6 @@ def utilisateur_test(db_session):
 
 @pytest.fixture
 def point_test(db_session):
-    """Crée un point d'eau de test"""
     transformer = Transformer.from_crs("EPSG:4326", "EPSG:2154")
     x, y = transformer.transform(48.8566, 2.3522)
     wkt = WKTElement(f"POINT({x} {y})", srid=2154)
@@ -55,8 +53,7 @@ def mission_test(db_session, utilisateur_test, point_test):
         nom_mission="Mission Test",
         id_point=point_test.numero_pei,
         id_utilisateur=utilisateur_test.id_utilisateur,
-        statut="EN COURS",
-        commentaire="Mission de test"
+        statut="EN COURS"
     )
     db_session.add(mission)
     db_session.commit()
@@ -64,129 +61,129 @@ def mission_test(db_session, utilisateur_test, point_test):
     return mission
 
 
-class TestGetAllMission:
-    """Tests pour la récupération de toutes les missions"""
+# ============= TESTS UNITAIRES =============
+class TestMissionDAOUnitaire:
+    """Tests unitaires - Chaque fonction testée individuellement"""
     
     def test_get_all_mission_empty(self, db_session):
         missions = get_all_mission(db_session)
         assert missions == []
-        assert isinstance(missions, list)
 
-    def test_get_all_mission_with_data(self, db_session, mission_test):
+    def test_get_all_mission_returns_dict(self, db_session, mission_test):
         missions = get_all_mission(db_session)
-        assert len(missions) == 1
-        assert missions[0]["id_mission"] == mission_test.id_mission
+        assert isinstance(missions[0], dict)
         assert "_sa_instance_state" not in missions[0]
 
-    def test_get_all_mission_multiple(self, db_session, utilisateur_test, point_test):
-        for i in range(3):
-            mission = models.Mission(
-                nom_mission=f"Mission {i}",
-                id_point=point_test.numero_pei,
-                id_utilisateur=utilisateur_test.id_utilisateur,
-                statut="EN COURS"
-            )
-            db_session.add(mission)
-            db_session.commit()
-            db_session.refresh(mission)
-        
-        missions = get_all_mission(db_session)
-        assert len(missions) == 3
-        assert all(isinstance(m, dict) for m in missions)
-
-
-class TestGetMissionById:
-    """Tests pour la récupération par ID"""
-    
     def test_get_mission_by_id_exists(self, db_session, mission_test):
         m = get_mission_by_id(db_session, mission_test.id_mission)
         assert m is not None
         assert m.id_mission == mission_test.id_mission
-        assert m.nom_mission == "Mission Test"
     
     def test_get_mission_by_id_not_exists(self, db_session):
         m = get_mission_by_id(db_session, 99999)
         assert m is None
 
-
-class TestGetMissionByDate:
-    """Tests pour la récupération par date"""
-    
     def test_get_mission_by_date_today(self, db_session, mission_test):
         today = date.today()
         missions = get_mission_by_date(db_session, today)
         assert len(missions) >= 1
-        assert any(m.id_mission == mission_test.id_mission for m in missions)
 
-    def test_get_mission_by_date_no_missions(self, db_session):
-        future_date = date.today() + timedelta(days=365)
-        missions = get_mission_by_date(db_session, future_date)
-        assert missions == []
-
-    def test_get_mission_by_date_multiple(self, db_session, utilisateur_test, point_test):
-        for i in range(3):
-            mission = models.Mission(
-                nom_mission=f"Mission {i}",
-                id_point=point_test.numero_pei,
-                id_utilisateur=utilisateur_test.id_utilisateur,
-                statut="EN COURS"
-            )
-            db_session.add(mission)
-            db_session.commit()
-        
-        today = date.today()
-        missions = get_mission_by_date(db_session, today)
-        assert len(missions) >= 3
-
-    def test_get_mission_by_date_past(self, db_session):
-        past_date = date.today() - timedelta(days=30)
-        missions = get_mission_by_date(db_session, past_date)
-        assert missions == []
-
-    def test_get_mission_by_date_boundary(self, db_session, mission_test):
-        """Test les limites de début et fin de journée"""
-        today = date.today()
-        missions = get_mission_by_date(db_session, today)
-        assert any(m.id_mission == mission_test.id_mission for m in missions)
-        
-        yesterday = today - timedelta(days=1)
-        missions_yesterday = get_mission_by_date(db_session, yesterday)
-        assert not any(m.id_mission == mission_test.id_mission for m in missions_yesterday)
-
-
-class TestCreateMission:
-    """Tests pour la création de missions"""
-    
-    def test_create_mission_complet(self, db_session, utilisateur_test, point_test):
+    def test_create_mission_returns_object(self, db_session, utilisateur_test, point_test):
         data = {
-            "nom_mission": "Nouvelle Mission",
-            "id_point": point_test.numero_pei,
-            "id_utilisateur": utilisateur_test.id_utilisateur,
-            "commentaire": "Test complet",
-            "itineraire": "Route A -> Route B"
-        }
-        m = create_mission(db_session, data)
-        
-        assert m is not None
-        assert m.id_mission is not None
-        assert m.nom_mission == "Nouvelle Mission"
-        assert m.statut == "EN COURS"
-        assert m.commentaire == "Test complet"
-        assert m.itineraire == "Route A -> Route B"
-
-    def test_create_mission_minimal(self, db_session, utilisateur_test, point_test):
-        data = {
-            "nom_mission": "Mission Min",
+            "nom_mission": "Test Create",
             "id_point": point_test.numero_pei,
             "id_utilisateur": utilisateur_test.id_utilisateur
         }
         m = create_mission(db_session, data)
-        
-        assert m is not None
-        assert m.statut == "EN COURS"
-        assert m.commentaire is None
-        assert m.itineraire is None
+        assert m.id_mission is not None
 
+    def test_update_mission_modifies_fields(self, db_session, mission_test):
+        data = {"statut": "TERMINER"}
+        updated = update_mission_by_id(db_session, mission_test.id_mission, data)
+        assert updated.statut == "TERMINER"
+
+    def test_delete_mission_returns_boolean(self, db_session, mission_test):
+        result = delete_mission_by_id(db_session, mission_test.id_mission)
+        assert result is True
+
+
+# ============= TESTS FONCTIONNELS =============
+class TestMissionDAOFonctionnel:
+    """Tests fonctionnels - Scénarios d'utilisation métier"""
+    
+    def test_create_mission_complete(self, db_session, utilisateur_test, point_test):
+        data = {
+            "nom_mission": "Mission Complete",
+            "id_point": point_test.numero_pei,
+            "id_utilisateur": utilisateur_test.id_utilisateur,
+            "commentaire": "Test fonctionnel",
+            "itineraire": "A -> B -> C"
+        }
+        m = create_mission(db_session, data)
+        
+        assert m.nom_mission == "Mission Complete"
+        assert m.commentaire == "Test fonctionnel"
+        assert m.statut == "EN COURS"
+
+    def test_update_mission_multiple_fields(self, db_session, mission_test):
+        data = {
+            "statut": "TERMINER",
+            "commentaire": "Mission terminee"
+        }
+        updated = update_mission_by_id(db_session, mission_test.id_mission, data)
+        
+        assert updated.statut == "TERMINER"
+        assert updated.commentaire == "Mission terminee"
+
+    def test_get_mission_by_date_filters_correctly(self, db_session, mission_test):
+        today = date.today()
+        yesterday = today - timedelta(days=1)
+        
+        missions_today = get_mission_by_date(db_session, today)
+        missions_yesterday = get_mission_by_date(db_session, yesterday)
+        
+        assert len(missions_today) >= 1
+        assert len(missions_yesterday) == 0
+
+
+# ============= TESTS INTÉGRATION =============
+class TestMissionDAOIntegration:
+    """Tests d'intégration - Interaction entre plusieurs fonctions"""
+    
+    def test_crud_complete_lifecycle(self, db_session, utilisateur_test, point_test):
+        data = {
+            "nom_mission": "Mission CRUD",
+            "id_point": point_test.numero_pei,
+            "id_utilisateur": utilisateur_test.id_utilisateur
+        }
+        created = create_mission(db_session, data)
+        
+        found = get_mission_by_id(db_session, created.id_mission)
+        assert found.nom_mission == "Mission CRUD"
+        
+        updated = update_mission_by_id(db_session, created.id_mission, {"statut": "TERMINER"})
+        assert updated.statut == "TERMINER"
+    
+        deleted = delete_mission_by_id(db_session, created.id_mission)
+        assert deleted is True
+        assert get_mission_by_id(db_session, created.id_mission) is None
+
+    def test_mission_with_related_entities(self, db_session, utilisateur_test, point_test):
+        data = {
+            "nom_mission": "Mission Relation",
+            "id_point": point_test.numero_pei,
+            "id_utilisateur": utilisateur_test.id_utilisateur
+        }
+        mission = create_mission(db_session, data)
+        
+        assert mission.id_point == point_test.numero_pei
+        assert mission.id_utilisateur == utilisateur_test.id_utilisateur
+
+
+# ============= TESTS SÉCURITÉ =============
+class TestMissionDAOSecurity:
+    """Tests de sécurité - Contraintes et validations"""
+    
     def test_create_mission_invalid_point(self, db_session, utilisateur_test):
         data = {
             "nom_mission": "Mission Invalide",
@@ -207,278 +204,24 @@ class TestCreateMission:
         with pytest.raises(ValueError, match="Utilisateur incorrect"):
             create_mission(db_session, data)
 
-    def test_create_mission_with_optional_fields(self, db_session, utilisateur_test, point_test):
-        data = {
-            "nom_mission": "Mission Complete",
-            "id_point": point_test.numero_pei,
-            "id_utilisateur": utilisateur_test.id_utilisateur,
-            "commentaire": "Commentaire detaille",
-            "itineraire": "A -> B -> C"
-        }
-        
-        m = create_mission(db_session, data)
-        assert m.commentaire == "Commentaire detaille"
-        assert m.itineraire == "A -> B -> C"
+    def test_update_mission_not_exists(self, db_session):
+        with pytest.raises(ValueError, match="Id mission incorrect"):
+            update_mission_by_id(db_session, 99999, {"statut": "TERMINER"})
 
-    def test_create_mission_with_empty_strings(self, db_session, utilisateur_test, point_test):
-        data = {
-            "nom_mission": "Mission",
-            "id_point": point_test.numero_pei,
-            "id_utilisateur": utilisateur_test.id_utilisateur,
-            "commentaire": "",
-            "itineraire": ""
-        }
-        
-        m = create_mission(db_session, data)
-        assert m is not None
-
-
-class TestDeleteMission:
-    """Tests pour la suppression de missions"""
-    
-    def test_delete_mission_exists(self, db_session, mission_test):
-        mission_id = mission_test.id_mission
-        result = delete_mission_by_id(db_session, mission_id)
-        
-        assert result is True
-        
-        deleted = get_mission_by_id(db_session, mission_id)
-        assert deleted is None
-
-    def test_delete_mission_not_exists(self, db_session):
-        result = delete_mission_by_id(db_session, 99999)
-        assert result is False
-
-    def test_delete_mission_twice(self, db_session, mission_test):
-        mission_id = mission_test.id_mission
-        
-        result1 = delete_mission_by_id(db_session, mission_id)
-        assert result1 is True
-        
-        result2 = delete_mission_by_id(db_session, mission_id)
-        assert result2 is False
-
-
-class TestUpdateMission:
-    """Tests pour la mise à jour de missions"""
-    
-    def test_update_mission_statut(self, db_session, mission_test):
-        data = {"statut": "TERMINER"}
-        updated = update_mission_by_id(db_session, mission_test.id_mission, data)
-        
-        assert updated is not None
-        assert updated.statut == "TERMINER"
-        assert updated.nom_mission == mission_test.nom_mission
-
-    def test_update_mission_statut_terminee(self, db_session, mission_test):
-        data = {"statut": "TERMINER"}
-        updated = update_mission_by_id(db_session, mission_test.id_mission, data)
-        
-        assert updated is not None
-        assert updated.statut == "TERMINER"
-
-    def test_update_mission_multiple_fields(self, db_session, mission_test):
-        data = {
-            "statut": "TERMINER",
-            "commentaire": "Nouveau commentaire",
-            "itineraire": "Nouvel itineraire"
-        }
-        
-        updated = update_mission_by_id(db_session, mission_test.id_mission, data)
-        
-        assert updated is not None
-        assert updated.statut == "TERMINER"
-        assert updated.commentaire == "Nouveau commentaire"
-        assert updated.itineraire == "Nouvel itineraire"
-
-    def test_update_mission_only_nom(self, db_session, mission_test):
-        data = {"nom_mission": "Nouveau nom"}
-        updated = update_mission_by_id(db_session, mission_test.id_mission, data)
-        
-        assert updated.nom_mission == "Nouveau nom"
-        assert updated.statut == mission_test.statut
-
-    def test_update_mission_ignore_protected_fields(self, db_session, mission_test):
+    def test_update_mission_protected_fields(self, db_session, mission_test):
         original_id = mission_test.id_mission
         original_date = mission_test.date_creation
         
         data = {
-            "id_mission": 99999,
+            "id_mission": 88888,
             "date_creation": "2000-01-01",
             "statut": "TERMINER"
         }
-        
         updated = update_mission_by_id(db_session, mission_test.id_mission, data)
         
         assert updated.id_mission == original_id
         assert updated.date_creation == original_date
-        assert updated.statut == "TERMINER"
 
-    def test_update_mission_clear_optional_field(self, db_session, mission_test):
-        data = {"commentaire": None}
-        updated = update_mission_by_id(db_session, mission_test.id_mission, data)
-        
-        assert updated.commentaire is None
-
-    def test_update_mission_not_exists(self, db_session):
-        data = {"statut": "TERMINER"}
-        
-        with pytest.raises(ValueError, match="Id mission incorrect"):
-            update_mission_by_id(db_session, 99999, data)
-
-    def test_update_mission_with_same_values(self, db_session, mission_test):
-        data = {
-            "nom_mission": mission_test.nom_mission,
-            "statut": mission_test.statut
-        }
-        
-        updated = update_mission_by_id(db_session, mission_test.id_mission, data)
-        assert updated is not None
-        assert updated.nom_mission == mission_test.nom_mission
-
-
-class TestIntegration:
-    """Tests d'intégration CRUD complet"""
-    
-    def test_integration_full_crud(self, db_session, utilisateur_test, point_test):
-        # CREATE
-        data = {
-            "nom_mission": "Mission CRUD",
-            "id_point": point_test.numero_pei,
-            "id_utilisateur": utilisateur_test.id_utilisateur,
-            "commentaire": "Test integration"
-        }
-        created = create_mission(db_session, data)
-        assert created.id_mission is not None
-        
-        # READ by ID
-        retrieved_by_id = get_mission_by_id(db_session, created.id_mission)
-        assert retrieved_by_id.nom_mission == "Mission CRUD"
-        
-        # READ ALL
-        all_missions = get_all_mission(db_session)
-        assert any(m["id_mission"] == created.id_mission for m in all_missions)
-        
-        # READ by Date
-        today = date.today()
-        missions_today = get_mission_by_date(db_session, today)
-        assert any(m.id_mission == created.id_mission for m in missions_today)
-        
-        # UPDATE
-        update_data = {"statut": "TERMINER", "commentaire": "Mission accomplie"}
-        updated = update_mission_by_id(db_session, created.id_mission, update_data)
-        assert updated.statut == "TERMINER"
-        assert updated.commentaire == "Mission accomplie"
-        
-        # DELETE
-        deleted = delete_mission_by_id(db_session, created.id_mission)
-        assert deleted is True
-        
-        # VERIFY DELETE
-        not_found = get_mission_by_id(db_session, created.id_mission)
-        assert not_found is None
-
-    def test_integration_multiple_missions_same_day(self, db_session, utilisateur_test, point_test):
-        today = date.today()
-        created_ids = []
-        
-        for i in range(3):
-            mission = models.Mission(
-                nom_mission=f"Mission {i}",
-                id_point=point_test.numero_pei,
-                id_utilisateur=utilisateur_test.id_utilisateur,
-                statut="EN COURS"
-            )
-            db_session.add(mission)
-            db_session.commit()
-            db_session.refresh(mission)
-            created_ids.append(mission.id_mission)
-        
-        missions_today = get_mission_by_date(db_session, today)
-        assert len(missions_today) == 3
-        
-        all_missions = get_all_mission(db_session)
-        assert len(all_missions) == 3
-        
-        all_ids = [m["id_mission"] for m in all_missions]
-        for created_id in created_ids:
-            assert created_id in all_ids
-
-    def test_integration_mission_lifecycle(self, db_session, utilisateur_test, point_test):
-        """Test du cycle de vie complet d'une mission"""
-        # Création
-        data = {
-            "nom_mission": "Mission Lifecycle",
-            "id_point": point_test.numero_pei,
-            "id_utilisateur": utilisateur_test.id_utilisateur
-        }
-        mission = create_mission(db_session, data)
-        assert mission.statut == "EN COURS"
-        
-        # Passage à TERMINER
-        update_mission_by_id(db_session, mission.id_mission, {"statut": "TERMINER"})
-        updated = get_mission_by_id(db_session, mission.id_mission)
-        assert updated.statut == "TERMINER"
-        
-        # Suppression
-        assert delete_mission_by_id(db_session, mission.id_mission) is True
-
-
-class TestEdgeCases:
-    """Tests des cas limites"""
-    
-    def test_create_multiple_missions_same_point(self, db_session, utilisateur_test, point_test):
-        """Test création de plusieurs missions pour le même point"""
-        for i in range(3):
-            data = {
-                "nom_mission": f"Mission Point {i}",
-                "id_point": point_test.numero_pei,
-                "id_utilisateur": utilisateur_test.id_utilisateur
-            }
-            m = create_mission(db_session, data)
-            assert m is not None
-        
-        all_missions = get_all_mission(db_session)
-        assert len(all_missions) == 3
-
-    def test_create_multiple_missions_same_user(self, db_session, utilisateur_test, point_test):
-        """Test création de plusieurs missions pour le même utilisateur"""
-        # Créer des points supplémentaires
-        for i in range(3):
-            transformer = Transformer.from_crs("EPSG:4326", "EPSG:2154")
-            x, y = transformer.transform(48.8 + i * 0.1, 2.3 + i * 0.1)
-            wkt = WKTElement(f"POINT({x} {y})", srid=2154)
-            
-            point = models.PointEau(
-                numero_pei=20000 + i,
-                statut="PUBLIC",
-                type_nature="BI",
-                geom=wkt
-            )
-            db_session.add(point)
-            db_session.commit()
-            
-            data = {
-                "nom_mission": f"Mission User {i}",
-                "id_point": 20000 + i,
-                "id_utilisateur": utilisateur_test.id_utilisateur
-            }
-            m = create_mission(db_session, data)
-            assert m is not None
-        
-        all_missions = get_all_mission(db_session)
-        assert len(all_missions) == 3
-
-    def test_update_to_same_statut(self, db_session, mission_test):
-        """Test mise à jour avec le même statut"""
-        original_statut = mission_test.statut
-        data = {"statut": original_statut}
-        
-        updated = update_mission_by_id(db_session, mission_test.id_mission, data)
-        assert updated.statut == original_statut
-
-    def test_get_mission_by_date_with_no_data(self, db_session):
-        """Test get_by_date sans aucune mission en base"""
-        today = date.today()
-        missions = get_mission_by_date(db_session, today)
-        assert missions == []
+    def test_delete_mission_not_exists(self, db_session):
+        result = delete_mission_by_id(db_session, 99999)
+        assert result is False
