@@ -299,6 +299,7 @@ class TestIntegration:
     """Tests d'intégration CRUD complet"""
     
     def test_integration_full_crud(self, db_session):
+        # CREATE
         data = {
             "numero_pei": 88888,
             "nom": "Point Integration",

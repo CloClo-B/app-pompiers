@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db_test:
+    image: postgis/postgis:16-3.4
+    container_name: fenalim_db_test
+    environment:
+      POSTGRES_USER: fenalim_test
+      POSTGRES_PASSWORD: fenalim_test123
+      POSTGRES_DB: fenalim_db_test
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fenalim_test -d fenalim_db_test"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fenalim_test_net
+
+  api_test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.test
+    container_name: fenalim_api_test
+    environment:
+      DATABASE_URL: postgresql://fenalim_test:fenalim_test123@db_test:5432/fenalim_db_test
+      TESTING: "true"
+    depends_on:
+      db_test:
+        condition: service_healthy
+    networks:
+      - fenalim_test_net
+    # RETIRE LE VOLUME POUR LES TESTS
+    # volumes:
+    #   - ./backend:/app:cached
+    working_dir: /app
+    command: sh -c "sleep 3 && pytest tests/ -v --tb=short"
+
+networks:
+  fenalim_test_net:
+    driver: bridge
