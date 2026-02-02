@@ -55,7 +55,7 @@ class Utilisateur(Base):
     nom = Column(String(40), nullable=False)
     prenom = Column(String(40), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
-    telephone = Column(String(10), unique=True, nullable=False)
+    telephone = Column(String(255), unique=True, nullable=False)
     mot_de_passe = Column(String(255), nullable=False)
     role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.public)
     date_creation = Column(DateTime, server_default=func.now())

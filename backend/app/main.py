@@ -40,3 +40,4 @@ app.mount("/images", StaticFiles(directory="images"), name="images")
 def health():
     """Permet de vérifier que l'API fonctionne."""
     return {"status": "ok"}
+

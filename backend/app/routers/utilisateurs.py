@@ -1,21 +1,18 @@
 # Routes FastAPI pour la gestion des utilisateurs (authentification, profil, administration)
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime
 from passlib.context import CryptContext
 from ..database import SessionLocal
 from ..models import Utilisateur
 from ..schemas import UtilisateurCreate, UtilisateurOut, UtilisateurUpdate, LoginPayload, AuthResponse, LogoutPayload, UserProfileOut, UserProfileUpdate, PasswordChangeRequest
 from ..token_jwt import createToken, getTokenUser
 from .dependencies import rolesChecker
-from ..DAO.DAOUtilisateurs import (update_own_profile, change_password as dao_change_password, verify_user_password)
-
+from ..DAO.DAOUtilisateurs import (update_own_profile, change_password as dao_change_password, create_utilisateur, verifier_connexion, dechiffrerTelEtMail)
 
 # Définition de la route utilisateurs
 router = APIRouter(prefix="/utilisateurs", tags=["Utilisateurs"])
 
-# Contexte de hash des mots de passe
-pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 # Dépendance pour récupérer une session base de données
 def get_db():
@@ -25,20 +22,25 @@ def get_db():
     finally:
         db.close()
 
-# mot de passe
-# Hash d’un mot de passe en clair
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
-# Vérification d’un mot de passe par rapport à son hash
-def verify_password(password: str, hashed: str) -> bool:
-    return pwd_context.verify(password, hashed)
-
-
-
 # GESTION DU COMPTE PERSONNEL
 # Récupération du profil de l’utilisateur connecté
 @router.get("/me", response_model=UserProfileOut)
 def get_my_profile(current_user: Utilisateur = Depends(getTokenUser)):
+    # Déchiffrage des infos
+    email = dechiffrerTelEtMail(current_user.email)
+    telephone = dechiffrerTelEtMail(current_user.telephone)
+
+    return {
+        "id_utilisateur": current_user.id_utilisateur,
+        "nom": current_user.nom,
+        "prenom": current_user.prenom,
+        "email": email,
+        "telephone": telephone,
+        "role": current_user.role,
+        "date_creation": current_user.date_creation,
+        "derniere_connexion": current_user.derniere_connexion
+    }
+
     return current_user
 
 # Mise à jour du profil de l’utilisateur connecté
@@ -62,7 +64,20 @@ def update_my_profile(
         if not updated_user:
             raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
         
-        return updated_user
+        # Déchiffrage pour la réponse
+        email = dechiffrerTelEtMail(updated_user.email)
+        telephone = dechiffrerTelEtMail(updated_user.telephone)
+
+        return {
+            "id_utilisateur": updated_user.id_utilisateur,
+            "nom": updated_user.nom,
+            "prenom": updated_user.prenom,
+            "email": email,
+            "telephone": telephone,
+            "role": updated_user.role,
+            "date_creation": updated_user.date_creation,
+            "derniere_connexion": updated_user.derniere_connexion
+        }
     
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -147,56 +162,45 @@ def create_user(payload: UtilisateurCreate, db: Session = Depends(get_db)):
     # Vérification des mots de passe
     if payload.mot_de_passe != payload.confirm_password:
         raise HTTPException(status_code=400, detail="Les mots de passe ne correspondent pas.")
-    # Vérification que l’email est unique
-    if db.query(Utilisateur).filter(Utilisateur.email == payload.email).first():
-        raise HTTPException(status_code=400, detail="Compte déjà éxistant Email déjà utilisé.")
-    # Vérification que le numéro de téléphone est unique
-
-    if db.query(Utilisateur).filter(Utilisateur.telephone == payload.telephone).first():
-        raise HTTPException(status_code=400, detail="Compte déjà éxistant numéro de téléphone déjà utilisé.")
     
-    # Création de l’utilisateur
-    new_user = Utilisateur(
-        nom=payload.nom,
-        prenom=payload.prenom,
-        telephone=payload.telephone,
-        email=payload.email,
-        mot_de_passe=hash_password(payload.mot_de_passe),
-        role=payload.role,
-    )
-
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    
-    # Génération du token pour l'utilisateur 
-    data = {"sub": new_user.id_utilisateur, "role": new_user.role}
-    tokenUser = createToken(data)
-    return AuthResponse(id_utilisateur=new_user.id_utilisateur, token=tokenUser, role=new_user.role)
+    # Donées pour le DAO
+    new_user = {
+        "nom": payload.nom,
+        "prenom": payload.prenom,
+        "email": payload.email,
+        "telephone": payload.telephone,
+        "mot_de_passe": payload.mot_de_passe,
+    }
+    # Création du compte
+    try:
+        # Génération du token pour l'utilisateur   
+        created_user = create_utilisateur(db, new_user)  
+        data = {"sub": created_user.id_utilisateur, "role": created_user.role}
+        tokenUser = createToken(data)
+        return AuthResponse(id_utilisateur=created_user.id_utilisateur, token=tokenUser, role=created_user.role)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 # Connexion
 # Vérification des identifiants utilisateur et connexion
 @router.post("/login", response_model=AuthResponse)
 def verif_login(payload: LoginPayload, db: Session = Depends(get_db)):
-
-    user = db.query(Utilisateur).filter(Utilisateur.email == payload.email).first()
-
-    # verification qu'un des information
-    if not user:
-        raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
-
-    if not verify_password(payload.mot_de_passe, user.mot_de_passe):
-        raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
+    
+    # récupération de l'utilisateur
+    try:
+        user = verifier_connexion(db, payload.email, payload.mot_de_passe)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     
     # Mise à jour de la date de dernière connexion
     user.derniere_connexion = datetime.now()
     db.commit()
-    
-    # Générer token JWT
+
+    # Génération du token pour l'utilisateur   
     data = {"sub": user.id_utilisateur, "role": user.role}
     tokenUser = createToken(data)
     return AuthResponse(id_utilisateur=user.id_utilisateur, token=tokenUser, role=user.role)
-
+    
 
 
 # ADMINISTRATION
@@ -211,8 +215,20 @@ def get_user(user_id: int, db: Session = Depends(get_db), user_check: Utilisateu
     user = db.query(Utilisateur).filter(Utilisateur.id_utilisateur == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail=f"Utilisateur {user_id} non trouvé")
-    return user
-
+    
+    
+    # Déchiffrage
+    email = dechiffrerTelEtMail(user.email)
+    telephone = dechiffrerTelEtMail(user.telephone)
+    return {
+        "id_utilisateur": user.id_utilisateur,
+        "nom": user.nom,
+        "prenom": user.prenom,
+        "email": email,
+        "telephone": telephone,
+        "role": user.role,
+    }
+    
 # Mise à jour d’un utilisateur autorisé pour admin uniquement
 @router.put("/{user_id}", response_model=UtilisateurOut)
 def update_user(user_id: int, payload: UtilisateurUpdate, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):

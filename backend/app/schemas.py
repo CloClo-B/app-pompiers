@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, Any
 from datetime import datetime
 # Schémas Pydantic utilisés pour la validation la création et la sortie des données de l’API
@@ -53,9 +53,8 @@ class PointEauCreate(BaseModel):
 class UtilisateurBase(BaseModel):
     nom: str
     prenom: str
-    email: EmailStr
-    telephone: Optional[str] = None
-    role: Optional[str] = "public"
+    email: str
+    telephone: str
 
 # Schéma utilisé lors de la création d’un utilisateur
 class UtilisateurCreate(UtilisateurBase):
@@ -70,7 +69,7 @@ class UtilisateurCreate(UtilisateurBase):
 class UtilisateurUpdate(BaseModel):
     nom: Optional[str] = None
     prenom: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     telephone: Optional[str] = None
     role: Optional[str] = None
     mot_de_passe: Optional[str] = None
@@ -80,9 +79,9 @@ class UtilisateurOut(BaseModel):
     id_utilisateur: int
     nom: str
     prenom: str
-    email: EmailStr
-    telephone: Optional[str] = None
-    role: Optional[str] = "admin"
+    email: str
+    telephone: str
+    role: str
     model_config = ConfigDict(from_attributes=True)
 
 # Réponse retournée après authentification
@@ -98,7 +97,7 @@ class LogoutPayload(BaseModel):
 
 # Payload de connexion
 class LoginPayload(BaseModel):
-    email: EmailStr
+    email: str
     mot_de_passe: str
 
 
@@ -191,7 +190,7 @@ class UserProfileOut(BaseModel):
     id_utilisateur: int
     nom: str
     prenom: str
-    email: EmailStr
+    email: str
     telephone: str
     role: str
     date_creation: datetime
@@ -203,7 +202,7 @@ class UserProfileOut(BaseModel):
 class UserProfileUpdate(BaseModel):
     nom: Optional[str] = Field(None, min_length=2, max_length=40)
     prenom: Optional[str] = Field(None, min_length=2, max_length=40)
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     telephone: Optional[str] = Field(None, pattern=r'^\d{10}$') 
 
 # Schéma de changement de mot de passe
