@@ -15,7 +15,7 @@ type Mission = {
   nom_mission: string;
   commentaire: string;
   address:string;
-  id_utilisateur: string;
+  mail_utilisateur: string;
   date_creation: string;
   date_fin: string;
 };
@@ -101,7 +101,7 @@ export default function MissionDetails() {
         nom_mission: responseMission.data.nom_mission,
         commentaire: responseMission.data.commentaire,
         address: responseMission.data.itineraire,
-        id_utilisateur: String(responseMission.data.id_utilisateur),
+        mail_utilisateur: String(responseMission.data.mail_utilisateur),
         date_creation: String(responseMission.data.date_creation),
         date_fin: String(responseMission.data.date_fin)
       });
@@ -170,7 +170,7 @@ export default function MissionDetails() {
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Date de début : </Text> {mission?.date_creation ? new Date(mission.date_creation).toLocaleDateString() : ''}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Date de fin : </Text> {mission?.date_fin ? new Date(mission.date_fin).toLocaleDateString() : ''}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Durée : </Text>{mission?.date_fin ? calculerDuree(mission.date_creation, mission.date_fin): ''}</Text>
-              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>ID de l'utilisateur qui à créer la mission : </Text> {mission?.id_utilisateur}</Text>
+              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Email créateur de la mission : </Text> {mission?.mail_utilisateur}</Text>
             </View>
 
             

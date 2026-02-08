@@ -177,7 +177,7 @@ def create_user(payload: UtilisateurCreate, db: Session = Depends(get_db)):
         created_user = create_utilisateur(db, new_user)  
         data = {"sub": created_user.id_utilisateur, "role": created_user.role}
         tokenUser = createToken(data)
-        return AuthResponse(id_utilisateur=created_user.id_utilisateur, token=tokenUser, role=created_user.role)
+        return AuthResponse(token=tokenUser, role=created_user.role)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -199,7 +199,7 @@ def verif_login(payload: LoginPayload, db: Session = Depends(get_db)):
     # Génération du token pour l'utilisateur   
     data = {"sub": user.id_utilisateur, "role": user.role}
     tokenUser = createToken(data)
-    return AuthResponse(id_utilisateur=user.id_utilisateur, token=tokenUser, role=user.role)
+    return AuthResponse(token=tokenUser, role=user.role)
     
 
 

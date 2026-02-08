@@ -14,12 +14,8 @@ type Signale = {
   id_point: string;
   probleme: string;
   photo: string;
-  id_utilisateur: string;
+  mail_utilisateur: string;
   date_creation: string;
-};
-type lePoint = {
-  latitude: number;
-  longitude: number;
 };
 
 // Permet de consulter les détails d'un signalement et de le résoudre
@@ -77,9 +73,10 @@ export default function UserDetails() {
         id_point: response.data.id_point,
         probleme: response.data.probleme,
         photo: response.data.photo,
-        id_utilisateur: String(response.data.id_utilisateur),
+        mail_utilisateur: String(response.data.mail_utilisateur),
         date_creation: String(response.data.date_creation),
       });
+
   } catch (error) {
     console.error("Erreur lors du chargement du signalement :", error);
     Alert.alert("Erreur", "Impossible de récupérer le signalement.");
@@ -131,21 +128,20 @@ export default function UserDetails() {
             <View style={{ gap: 10 }}>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>ID signalement : </Text>{signalement?.id}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>ID du point signaler : </Text> {signalement?.id_point}</Text>
-              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Date du signalement : </Text>  {signalement?.date_creation ? new Date(signalement.date_creation).toLocaleDateString() : ''}</Text>
-              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Heure du signalement : </Text>  {signalement?.date_creation ? new Date(signalement.date_creation).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</Text>
-              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Signaler par : </Text> {signalement?.id_utilisateur}</Text>
+              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Date du signalement : </Text> {signalement?.date_creation ? new Date(signalement.date_creation).toLocaleDateString() : ''}</Text>
+              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Heure du signalement : </Text> {signalement?.date_creation ? new Date(signalement.date_creation).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</Text>
+              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Signaler par : </Text> {signalement?.mail_utilisateur}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Problème : </Text> {signalement?.probleme}</Text>
               {signalement?.photo && (
                 <Image
                   source={{ uri: API_ENDPOINTS.IMAGE(signalement.photo) }}
-                  style={{ width: 300, height: 200, borderRadius: 10, marginTop: 10, marginBottom:10 }}
+                  style={{ width: 300, height: 250, borderRadius: 10, marginTop: 10, marginBottom:10 }}
                   resizeMode="cover"
                 />
               )}
             </View>
 
 
-            {/* possibilité d'ajouter photo de preuve par la suite */}
             
             {/* BOUTONS */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>

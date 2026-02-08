@@ -46,7 +46,6 @@ export default function CreerMission() {
     console.log("Vérification des valeurs à envoyer\n");
     console.log("nomMission:", nomMission);
     console.log("IDPoint:", IDPoint);
-    console.log("idUtilisateur temporaire", "1")
     console.log("commentaire:", commentaire);
     console.log("itinéraire:", itineraire);
     if(nomMission == null || !nomMission.trim()){
@@ -74,7 +73,6 @@ export default function CreerMission() {
         const response = await axios.post(API_ENDPOINTS.MISSIONS, {
           nom_mission: nomMission,        
           id_point: parseInt(IDPoint),
-          id_utilisateur : 1,  // a changer par la suite celui ci est un utilisateur créer sur ma bdd
           commentaire: commentaire, 
           itineraire: itineraire,
   

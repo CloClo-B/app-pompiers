@@ -62,7 +62,7 @@ def create_signale(db: Session, signale_data: Dict[str, Any]):
         raise ValueError("id_point est invalide")
     
     if not db.query(Utilisateur).filter(Utilisateur.id_utilisateur == signale_data["id_utilisateur"]).first():
-        raise ValueError("id_utilisateur est incorrect")
+        raise ValueError("id_utilisateur est introuvable")
     
     # creation signalement
     new_signale = Signaler(

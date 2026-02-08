@@ -86,7 +86,6 @@ class UtilisateurOut(BaseModel):
 
 # Réponse retournée après authentification
 class AuthResponse(BaseModel):
-    id_utilisateur: int
     token: str
     role: str
     model_config = ConfigDict(from_attributes=True)
@@ -110,13 +109,20 @@ class MissionBase(BaseModel):
     commentaire: Optional[str]
     itineraire: Optional[Any]
 
-# Schéma de création d’une mission
 class MissionCreate(MissionBase):
     nom_mission: str
     id_point: int
     id_utilisateur: int
     commentaire: Optional[str]
     itineraire: Optional[Any]
+
+
+class MissionCreateClient(BaseModel):
+    nom_mission: str
+    id_point: int
+    commentaire: Optional[str]
+    itineraire: Optional[Any]
+
 
 # Schéma de mise à jour d’une mission
 class MissionUpdate(BaseModel):
@@ -133,7 +139,7 @@ class MissionOut(BaseModel):
     id_mission: int
     nom_mission: str
     id_point: int
-    id_utilisateur: int
+    mail_utilisateur: Optional[str] = None
     date_creation: datetime
     statut: str
     commentaire: Optional[str]
@@ -173,7 +179,7 @@ class SignalerBase(BaseModel):
     id:int
     id_point: int
     probleme: str
-    photo: Optional[str]
+    photo: str
     id_utilisateur: int
     date_creation: datetime
     
@@ -181,9 +187,22 @@ class SignalerBase(BaseModel):
 class SignalerCreate(BaseModel):
     id_point: int
     probleme: str
-    photo: Optional[str]
+    photo: str
     id_utilisateur: int
     model_config = ConfigDict(from_attributes=True)
+
+class SignalerOut(BaseModel):
+    id:int
+    id_point: int
+    probleme: str
+    photo: str
+    mail_utilisateur: str
+    date_creation: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+
+
 
 # Schéma de sortie du profil utilisateur
 class UserProfileOut(BaseModel):

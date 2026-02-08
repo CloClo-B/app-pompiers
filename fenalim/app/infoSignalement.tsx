@@ -15,7 +15,7 @@ type Signale = {
   id_point: string;
   probleme: string;
   photo: string;
-  id_utilisateur: string;
+  mail_utilisateur: string;
   date_creation: string;
 };
 type lePoint = {
@@ -53,7 +53,6 @@ export default function UserDetails() {
     chargerRoleEtToken();
   }, []);
 
-  const [chargement, setChargement] = useState(true);
   const [signalement, setSignalement] = useState<Signale | null>(null);
   const [pointSignale, setPointSignale] = useState<lePoint | null>(null);
 
@@ -79,7 +78,7 @@ export default function UserDetails() {
         id_point: response.data.id_point,
         probleme: response.data.probleme,
         photo: response.data.photo,
-        id_utilisateur: String(response.data.id_utilisateur),
+        mail_utilisateur: String(response.data.mail_utilisateur),
         date_creation: String(response.data.date_creation),
       });
       fetchPointsEau(response.data.id_point);
@@ -87,9 +86,7 @@ export default function UserDetails() {
   } catch (error) {
     console.error("Erreur lors du chargement du signalement :", error);
     Alert.alert("Erreur", "Impossible de récupérer le signalement.");
-  } finally {
-      setChargement(false);
-    }
+  }
   };
 
   const fetchPointsEau = async (id_point: string) => {
@@ -114,9 +111,6 @@ export default function UserDetails() {
       console.error("Erreur lors du chargement du points d'eau :", error);
       Alert.alert("Erreur", "Impossible de récupérer le point d'eau.");
     } 
-    finally {
-      setChargement(false);
-    }
   };
 
 
@@ -144,7 +138,7 @@ export default function UserDetails() {
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>ID du point signaler : </Text> {signalement?.id_point}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Date du signalement : </Text> {signalement?.date_creation ? new Date(signalement.date_creation).toLocaleDateString() : ''}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Heure du signalement : </Text> {signalement?.date_creation ? new Date(signalement.date_creation).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</Text>
-              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Signaler par : </Text> {signalement?.id_utilisateur}</Text>
+              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Signaler par : </Text> {signalement?.mail_utilisateur}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Problème : </Text> {signalement?.probleme}</Text>
               {signalement?.photo && (
                 <Image

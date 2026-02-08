@@ -99,5 +99,3 @@ class Signaler(Base):
     photo = Column(String(255), nullable=False) 
     id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
     date_creation = Column(DateTime, server_default=func.now(), nullable=False)
-
-
