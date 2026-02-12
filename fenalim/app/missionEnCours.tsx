@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Platform, Linking, TouchableHighlight } from 'react-native';
 import {useRouter } from 'expo-router';
-import axios from 'axios';
 import proj4 from "proj4";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_ENDPOINTS } from '@/config/api';
+import { getAllMissions, updateMission } from '@/service/MissionService';
+import { getPointEauByID } from '@/service/pointEauService';
 
 // Donnée de la Mission
 type MissionAvecPoint = {
@@ -138,13 +138,14 @@ const fetchMissions = async (token: string) => {
   if (chargement) return;
     setChargement(true);
   try {
-    const responseMission = await axios.get(API_ENDPOINTS.MISSIONS, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
 
-    const MissionsRaw = Array.isArray(responseMission.data) ? responseMission.data : responseMission.data.missions;
+    // apelle du fichier missionService pour la recuperer les données
+    const responseMission = await getAllMissions(token);
+
+
+    const MissionsRaw = Array.isArray(responseMission) ? responseMission : responseMission.missions;
     if (!MissionsRaw) {
-      console.error("Impossible de récupérer les missions:", responseMission.data);
+      console.error("Impossible de récupérer les missions:", responseMission);
       return;
     }
 
@@ -153,11 +154,12 @@ const fetchMissions = async (token: string) => {
 
     const lesMissions: MissionAvecPoint[] = [];
 
+    // Appel séquentiel pour chaque point
     for (const u of MissionsRaw.filter((m: any) => m.statut === "EN COURS")) {
-      // Appel séquentiel pour chaque point
-      const responsePoint = await axios.get(API_ENDPOINTS.POINT_EAU_BY_ID(u.id_point));
-      const point = responsePoint.data;
-
+      
+      // apelle du fichier pointEauSercice pour la envoyer la requete de recuperation par id Point
+      const point = await getPointEauByID(token, u.id_point);      
+   
       let latitude = 0;
       let longitude = 0;
 
@@ -191,18 +193,16 @@ const fetchMissions = async (token: string) => {
     // Avant l'appel API, pour vérifier les valeurs
     console.log("Vérification de l'id à envoyer pour update\n");
     console.log("Id mission: ",id_mission);
-
+    if(token == null){
+      console.log("Pas de token");
+      alert("Erreur création mission");
+      return;
+    }
     try {
     
-      const response = await axios.put(API_ENDPOINTS.MISSION_UPDATE(Number(id_mission)), {
-        statut: "TERMINER",
-        date_fin: new Date().toISOString(),
-      },
-      {headers: {
-        Authorization: `Bearer ${token}`,
-      }}    
-    );
-    
+    // apelle du fichier missionService pour modifier l'état de la mission en terminer
+    await updateMission(token, id_mission);
+
     router.push({
         pathname: '/succes',
         params: { title: 'Mission terminé avec succès', page:"missions" }

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Button, TouchableOpacity, Alert, Image, ScrollView, Platform, Linking } from "react-native";
 import HautPage from './hautPage';
-import axios from "axios";
 import { router, useLocalSearchParams} from 'expo-router';
 import proj4 from "proj4";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getData } from '@/config/recupRole'; 
 import { naviguerPointEau } from '@/config/navigation';
 import { API_ENDPOINTS } from '@//config/api';
+import { getSignalementByIndex } from "@/service/signalementService";
+import { getPointEauByID } from "@/service/pointEauService";
 
 // Donnée du Signalement
 type Signale = {
@@ -67,21 +68,22 @@ export default function UserDetails() {
     }
     try {
       console.log("iddddd", id_s)
-      const response = await axios.get(API_ENDPOINTS.SIGNALEMENT_BY_ID_SIGNALEMENT(id_s), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      
+      // apelle du fichier signalementService pour recuperer le signalement EN FONCTION DE L'INDEX DU TABLEAU
+      const reponse = await getSignalementByIndex(token, id_s);
+
       // affichage des données
-      console.log("Données reçues:", response.data);
+      console.log("Données reçues:", reponse);
       
       setSignalement({
-        id: String(response.data.id),
-        id_point: response.data.id_point,
-        probleme: response.data.probleme,
-        photo: response.data.photo,
-        mail_utilisateur: String(response.data.mail_utilisateur),
-        date_creation: String(response.data.date_creation),
+        id: String(reponse.id),
+        id_point: reponse.id_point,
+        probleme: reponse.probleme,
+        photo: reponse.photo,
+        mail_utilisateur: String(reponse.mail_utilisateur),
+        date_creation: String(reponse.date_creation),
       });
-      fetchPointsEau(response.data.id_point);
+      fetchPointsEau(reponse.id_point, token);
 
   } catch (error) {
     console.error("Erreur lors du chargement du signalement :", error);
@@ -89,13 +91,18 @@ export default function UserDetails() {
   }
   };
 
-  const fetchPointsEau = async (id_point: string) => {
+  const fetchPointsEau = async (id_point: string, token: string) => {
+    if (!token) {
+      Alert.alert("Erreur", "Impossible de récupérer le point d'eau.");
+      return;
+    }
     try {
       // affichage des données
-      // console.log("Données reçues:", response.data);
+      // console.log("Données reçues:", reponse);
       
-      const response = await axios.get(API_ENDPOINTS.POINT_EAU_BY_ID(id_point));
-      const point = response.data; 
+      // apelle du fichier pointEauSercice pour la envoyer la requete de recuperation par id Point
+      const point = await getPointEauByID(token, id_point);      
+      
       if (point) {
         const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
         const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";

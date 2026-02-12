@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Button, TouchableOpacity, Alert, Image, ScrollView, Platform, Linking } from "react-native";
 import HautPage from './hautPage';
-import axios from "axios";
 import { router, useLocalSearchParams} from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { naviguerPointEau } from '@/config/navigation';
 import { getData } from '@/config/recupRole';
 import { API_ENDPOINTS } from '@/config/api';
+import { deleteSignalement, getSignalementByIndex } from "@/service/signalementService";
 
 // Donnée du Signalement
 type Signale = {
@@ -57,24 +57,24 @@ export default function UserDetails() {
   // Charge les infos du signalement
   const infoSignalementSelect = async (token: string) => {
     if (!token) {
-      alert("Token manquant, impossible d'afficher les missions en cours");
+      Alert.alert("Erreur", "Impossible d'afficher les missions en cours");
       return;
     }
     try {
       console.log("iddddd", id_s)
-      const response = await axios.get(API_ENDPOINTS.SIGNALEMENT_BY_ID_SIGNALEMENT(id_s), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // apelle du fichier signalementService pour recuperer le signalement EN FONCTION DE L'INDEX DU TABLEAU
+      const reponse = await getSignalementByIndex(token, id_s);
+
       // affichage des données
-      console.log("Données reçues:", response.data);
+      console.log("Données reçues:", reponse);
       
       setSignalement({
-        id: String(response.data.id),
-        id_point: response.data.id_point,
-        probleme: response.data.probleme,
-        photo: response.data.photo,
-        mail_utilisateur: String(response.data.mail_utilisateur),
-        date_creation: String(response.data.date_creation),
+        id: String(reponse.id),
+        id_point: reponse.id_point,
+        probleme: reponse.probleme,
+        photo: reponse.photo,
+        mail_utilisateur: String(reponse.mail_utilisateur),
+        date_creation: String(reponse.date_creation),
       });
 
   } catch (error) {
@@ -90,21 +90,24 @@ export default function UserDetails() {
     console.log("Vérification de l'id à envoyer pour supprimer\n");
     console.log("IDPoint:", signalement?.id_point);
 
+    if (!token) {
+      Alert.alert("Erreur, impossible de supprimer le signalement");
+      return;
+    }
+    try {
+        
+      // apelle du fichier signalementService pour supprimer le signalement via son id
+      await deleteSignalement(token, signalement!.id_point);
 
-        try {
         
-      const response = await axios.delete(API_ENDPOINTS.SIGNALEMENT_SUPPRIMER(signalement!.id_point), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-        
-        router.push({
-            pathname: '/succes',
-            params: { title: 'Signalement suprrimer avec succès', page:"point_eau" }
-            });
-        } catch (error) {
-            console.error(error);
-            alert('Erreur lors de la supression du signalement');
-        }
+      router.push({
+          pathname: '/succes',
+          params: { title: 'Signalement suprrimer avec succès', page:"point_eau" }
+          });
+      } catch (error) {
+          console.error(error);
+          Alert.alert("Erreur", "Supresion signalement");
+      }
     };
 
 

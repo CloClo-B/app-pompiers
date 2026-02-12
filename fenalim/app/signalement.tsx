@@ -6,9 +6,9 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import HautPage from './hautPage';
 import { naviguerAccueil} from '@/config/navigation';
-import { API_ENDPOINTS } from '@/config/api';
 import { useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createSignalement } from '@/service/signalementService';
 
 
 // petit encadrer pour choix photo
@@ -122,6 +122,11 @@ const handlePickImage = () => {
       alert("Image requise");
       return;
     }
+    else if(token == null){
+      console.log("Pas de token");
+      alert("Erreur création mission");
+      return;
+    }
     else{        
       try {
         const formData = new FormData();
@@ -132,12 +137,10 @@ const handlePickImage = () => {
           name: "pointsignaler.jpg",
           type: "image/jpeg",
         } as any);
-        const response = await axios.post(API_ENDPOINTS.SIGNALEMENTS, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          }
-        });
+        
+        // apelle du fichier signalementService pour la envoyer la requete
+        await createSignalement(token, formData);
+
         router.push({
             pathname: '/succes',
             params: { title: 'Signalement créé avec succès',  page:"acceuil"  }

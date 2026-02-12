@@ -4,7 +4,7 @@ import {StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native
 import DropDownPicker from 'react-native-dropdown-picker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_ENDPOINTS } from '@/config/api';
+import { createPointEau } from '@/service/pointEauService';
 
 // Page création de Point d'eau
 export default function CreerPoint() {
@@ -205,28 +205,12 @@ export default function CreerPoint() {
 
     else{
       try {
-        const response = await axios.post(API_ENDPOINTS.POINTS_EAU, {
-          numero_pei: parseInt(numeroPEI),
-          nom: '',
-          statut: valueStatut,
-          type_nature: valueType,
-          insee5: insee5, 
-          accessibilite: valueAcces,
-          disponibilite: valueDispo,
-          carto_ref: parseInt(refCarto)  ? parseInt(refCarto) : null ,
-          press_deb: parseFloat(pression.replace(',', '.')),
-          debit_1_bar: parseFloat(debit.replace(',', '.')),
-          vol_eau_mi: parseFloat(volumeMin.replace(',', '.')),
-          longitude: parseFloat(longitude.replace(',', '.')),
-          latitude: parseFloat(latitude.replace(',', '.')),
-          utilisateur: '', //ne pas oublié par la suite c'est pour savoir qui a ajouter le point 
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+
+        // apelle du fichier pointEauSercice pour la envoyer la requete de creation de point d'eau 
+        const response = await createPointEau(token, numeroPEI, '' , valueStatut, valueType,
+          insee5, valueAcces, valueDispo, refCarto, pression, debit, volumeMin, longitude, latitude, ''
+        );
+
         
         router.push({
             pathname: '/succes',

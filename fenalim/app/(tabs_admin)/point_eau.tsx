@@ -53,7 +53,7 @@ export default function HomeScreen() {
 
 
       <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
-      <View>
+      <View style={styles.contenue}>
           {page === "signale" && <PointSignale />}
           {page === "creer" && <CreerPoint />}
       </View>

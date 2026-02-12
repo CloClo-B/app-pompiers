@@ -6,7 +6,7 @@ import { getData } from "../config/recupRole";
 
 const reussi = require('@/assets/images/succes.png');
 
-// Page des Succes de création (point_eau, missions)
+// Page des Succes creation ou supression (point_eau, missions, signalement, supression ...)
 export default function CreationSucces() {
   const [userRole, setUserRole] = useState<string | null>(null);
   

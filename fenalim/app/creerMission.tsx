@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_ENDPOINTS } from '@/config/api';
+import { CreateMission } from '@/service/MissionService';
 
 // Page de création de Mission
 export default function CreerMission() {
@@ -70,19 +70,10 @@ export default function CreerMission() {
     }
     else{
       try {
-        const response = await axios.post(API_ENDPOINTS.MISSIONS, {
-          nom_mission: nomMission,        
-          id_point: parseInt(IDPoint),
-          commentaire: commentaire, 
-          itineraire: itineraire,
-  
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+
+        // apelle du fichier MissionService pour la envoyer la requete de creation mission 
+        const response = await CreateMission(token, nomMission, IDPoint, commentaire, itineraire);
+
         
         router.push({
             pathname: '/succes',
