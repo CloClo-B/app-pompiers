@@ -8,7 +8,7 @@ import { API_ENDPOINTS } from '@/config/api';
 export const createPointEau = async (
   token: string,
   numeroPEI: string,
-  nom: string,
+  // nom: string,
   valueStatut: string,
   valueType: string,
   insee5: string,
@@ -20,11 +20,10 @@ export const createPointEau = async (
   volumeMin: string,
   longitude: string,
   latitude: string,
-  utilisateur: string
 ) => {
   const reponse = await axios.post(API_ENDPOINTS.POINTS_EAU, {
     numero_pei: parseInt(numeroPEI),
-    nom: '',
+    // nom: '',           discuter avec le client pour savoir si réelement nécéssaire
     statut: valueStatut,
     type_nature: valueType,
     insee5: insee5, 
@@ -36,7 +35,6 @@ export const createPointEau = async (
     vol_eau_mi: parseFloat(volumeMin.replace(',', '.')),
     longitude: parseFloat(longitude.replace(',', '.')),
     latitude: parseFloat(latitude.replace(',', '.')),
-    utilisateur: '', //ne pas oublié par la suite c'est pour savoir qui a ajouter le point 
   },
   {
     headers: {
@@ -44,6 +42,9 @@ export const createPointEau = async (
     },
   });
 };
+
+
+
 
 // renvoie tout les points d'eau
 export const getAllPointEau = async () => {

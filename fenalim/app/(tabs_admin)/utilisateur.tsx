@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Pressable, ScrollView, TextInput } from 'react-native';
-import HautPage from '../hautPage';
+import HautPage from '@/app/hautPage';
 import {useRouter } from 'expo-router';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_ENDPOINTS } from '../../config/api';
+import { API_ENDPOINTS } from '@/config/api';
+import { getToken } from '@/service/infosStocker';
 
 const roue = require('@/assets/images/parametres.png');
 
@@ -35,7 +35,7 @@ export default function HomeScreen() {
   // récupérer le token 
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem('@token')
+      const value = await getToken();
       if(value !== null) {
         fetchUtilisateurs(value);
       }

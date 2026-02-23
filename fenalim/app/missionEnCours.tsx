@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Platform, Linking, TouchableHighlight } from 'react-native';
 import {useRouter } from 'expo-router';
 import proj4 from "proj4";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAllMissions, updateMission } from '@/service/MissionService';
 import { getPointEauByID } from '@/service/pointEauService';
+import { getToken } from '@/service/infosStocker';
 
 // Donnée de la Mission
 type MissionAvecPoint = {
@@ -33,7 +33,7 @@ export default function MissionEnCours() {
   }, []);
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem('@token')
+      const value = await getToken();
       if(value !== null) {
         setToken(value);
         fetchMissions(value);

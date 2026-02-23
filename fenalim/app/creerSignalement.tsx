@@ -7,8 +7,8 @@ import { useEffect, useState } from 'react';
 import HautPage from './hautPage';
 import { naviguerAccueil} from '@/config/navigation';
 import { useLocalSearchParams } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createSignalement } from '@/service/signalementService';
+import { getRole, getToken } from '@/service/infosStocker';
 
 
 // petit encadrer pour choix photo
@@ -32,9 +32,9 @@ export default function Signalement() {
 
   const getData = async () => {
     try {
-      const token = await AsyncStorage.getItem('@token')
-      const role = await AsyncStorage.getItem('@role')
-
+      // recup role et token
+      const token = await getToken();
+      const role = await getRole();
       if(token !== null && role !== null) {
         setToken(token);
         setRole(role);

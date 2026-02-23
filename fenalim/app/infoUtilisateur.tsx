@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
-import HautPage from './hautPage';
+import HautPage from '@/app/hautPage';
 import axios from "axios";
 import { router, useLocalSearchParams } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {API_ENDPOINTS } from '@/config/api';
+import { getToken } from "@/service/infosStocker";
 
 // Donnée de l'Utilisateur
 type User = {
@@ -39,7 +39,7 @@ export default function UserDetails() {
 
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem('@token');
+      const value =  await getToken();
       if (value !== null) {
         setToken(value);
         infoUtilisateurSelect(value);

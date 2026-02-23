@@ -6,8 +6,8 @@ import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Image 
 import Button from '@/components/ButtonLog';
 import { useState } from 'react';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS } from '@/config/api';
+import { setRole, setToken } from '@/service/infosStocker';
 
 
 const Oeil = require('@/assets/images/oeil.png');
@@ -58,13 +58,10 @@ export default function Connexion() {
         const role = response.data.role;  //recuperation du role de l'utilisateur
         console.log(role);
 
-        try {
-            await AsyncStorage.setItem('@token', response.data.token)
-            await AsyncStorage.setItem('@role', response.data.role)
+        // stockage du token et du role
+        setToken(response.data.token)
+        setRole(response.data.role)
 
-        } catch (e) {
-          console.log("erreur connexion")
-        }
         // affichage en focntion du role
         if (role === 'public') {
           router.replace('/(tabs_public)/acceuil');
@@ -92,7 +89,7 @@ export default function Connexion() {
   }
 
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <LinearGradient colors={['#E63946', '#1D3557']} style={styles.container}>
 
                 <View>
@@ -183,3 +180,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   }
 });
+function asetRole(role: any) {
+  throw new Error('Function not implemented.');
+}
+

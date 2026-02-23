@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Platform, Linking, TouchableHighlight } from 'react-native';
 import {useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAllMissions, deleteMissionById } from '@/service/MissionService';
+import { getToken } from '@/service/infosStocker';
 
 // Donnée de la Mission
 const info = require('@/assets/images/information.png');
@@ -29,7 +29,7 @@ export default function historiqueMission() {
   }, []);
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem('@token')
+      const value = await getToken();
       if(value !== null) {
         setToken(value);
         fetchMissions(value);

@@ -31,14 +31,13 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs_admin)" options={{ headerShown: false, gestureEnabled: false}} />
         <Stack.Screen name="connexion" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="inscription" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="creation_point_succes" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="succes" options={{ headerShown: false, gestureEnabled: false }} />
         
         <Stack.Screen name="infoUtilisateur" options={{ headerShown: false }} />
         <Stack.Screen name="infoSignalement" options={{ headerShown: false}} />
         <Stack.Screen name="marquerResolu" options={{ headerShown: false}} />
         <Stack.Screen name="infoMissionTerminer" options={{ headerShown: false}} />
-        <Stack.Screen name="signalement" options={{ headerShown: false }} />
+        <Stack.Screen name="creerSignalement" options={{ headerShown: false }} />
 
       </Stack>
       <StatusBar style="auto" />

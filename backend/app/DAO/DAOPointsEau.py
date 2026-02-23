@@ -125,8 +125,7 @@ def create_point_eau(db: Session, point_data: Dict[str, Any]):
         accessibilite=point_data.get("accessibilite"),
         disponibilite=point_data.get("disponibilite"),
         carto_ref=point_data.get("carto_ref"),
-        utilisateur=point_data.get("utilisateur") or None,
-        date_crea=datetime.now(),
+        utilisateur=point_data.get("utilisateur"),
         geom=wkt,
     )
     try:

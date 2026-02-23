@@ -1,11 +1,10 @@
-import axios from "axios";
 import {FontAwesome} from "@expo/vector-icons";
 import * as Location from "expo-location";
 import React, {useEffect, useRef, useState} from "react";
 import {ActivityIndicator, StyleSheet, TouchableOpacity, View, Linking, Platform, Modal, Text} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { useRouter } from 'expo-router';
-import HautPage from "../hautPage";
+import HautPage from "@/app/hautPage";
 import proj4 from "proj4";
 import { getAllPointEau } from "@/service/pointEauService";
 
@@ -196,7 +195,7 @@ export default function HomeScreen() {
                 if (selectedPEI) {
                   
                   router.push({
-                    pathname: '/signalement',
+                    pathname: '/creerSignalement',
                     params: {idPoint: selectedPEI.numero_pei  .toString()},
                   });
                   

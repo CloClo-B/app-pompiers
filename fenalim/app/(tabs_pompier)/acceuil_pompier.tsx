@@ -1,4 +1,3 @@
-import axios from "axios";
 import {FontAwesome} from "@expo/vector-icons";
 import * as Location from "expo-location";
 import React, {useEffect, useRef, useState} from "react";
@@ -196,7 +195,7 @@ export default function HomeScreen() {
                 if (selectedPEI) {
                   
                   router.push({
-                    pathname: '/signalement',
+                    pathname: '/creerSignalement',
                     params: {idPoint: selectedPEI.numero_pei  .toString()},
                   });
                   

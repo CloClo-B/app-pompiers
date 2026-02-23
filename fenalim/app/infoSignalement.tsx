@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Button, TouchableOpacity, Alert, Image, ScrollView, Platform, Linking } from "react-native";
-import HautPage from './hautPage';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, ScrollView, Platform, Linking } from "react-native";
+import HautPage from '@/app/hautPage';
 import { router, useLocalSearchParams} from 'expo-router';
 import proj4 from "proj4";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getData } from '@/config/recupRole'; 
 import { naviguerPointEau } from '@/config/navigation';
 import { API_ENDPOINTS } from '@//config/api';
 import { getSignalementByIndex } from "@/service/signalementService";
 import { getPointEauByID } from "@/service/pointEauService";
+import { getRole, getToken } from "@/service/infosStocker";
 
 // Donnée du Signalement
 type Signale = {
@@ -33,8 +32,8 @@ export default function UserDetails() {
     const chargerRoleEtToken = async () => {
       try {
         // recup role et token
-        const tokenValue = await AsyncStorage.getItem('@token');
-        const roleValue = await getData();
+        const tokenValue = await getToken();
+        const roleValue = await getRole();
         if (tokenValue){
           setToken(tokenValue);
         }
@@ -149,7 +148,7 @@ export default function UserDetails() {
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Problème : </Text> {signalement?.probleme}</Text>
               {signalement?.photo && (
                 <Image
-                  source={{ uri: API_ENDPOINTS.IMAGE(signalement.photo) }}
+                  source={{ uri: API_ENDPOINTS.GET_IMAGE_SIGNALEMENT(signalement.photo) }}
                   style={{ width: 300, height: 250, borderRadius: 10, marginTop: 10, marginBottom:10 }}
                   resizeMode="cover"
                 />

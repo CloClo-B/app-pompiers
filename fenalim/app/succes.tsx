@@ -1,26 +1,29 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { naviguerPointEau, naviguerMission, naviguerAccueil } from '../config/navigation';
-import { getData } from "../config/recupRole"; 
+import { naviguerPointEau, naviguerMission, naviguerAccueil } from '@/config/navigation';
+import { getRole } from "@/service/infosStocker"; 
 
 const reussi = require('@/assets/images/succes.png');
 
 // Page des Succes creation ou supression (point_eau, missions, signalement, supression ...)
+// la page est appeler depuis les autres pages et contient le message envoyer en parametre 
 export default function CreationSucces() {
   const [userRole, setUserRole] = useState<string | null>(null);
   
   // récupérer le role
   useEffect(() => {
-  const chargerRole = async () => {
-    const role = await getData();
-    setUserRole(role);
-  };
+    const chargerRole = async () => {
+      const role = await getRole();
+      setUserRole(role);
+    };
     chargerRole();
   }, []);
   const params = useLocalSearchParams();
-
+  
+  // message afficher sur la page 
   const title = params.title;
+  // page de redirection fonctionne en fonction du rôle
   const page = params.page;
 
   // Redirection de page

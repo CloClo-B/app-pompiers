@@ -1,7 +1,7 @@
 // Fichier de centralisation des URL pour l'application (frontend)
 
 // IP A CHANGER
-export const API_URL = 'http://192.168.1.184:8000';
+export const API_URL = 'http://192.168.1.178:8000';
 
 
 // Liste de tous les points d'accès utilisés par l'application pour accéder a l'API
@@ -34,10 +34,10 @@ export const API_ENDPOINTS = {
   SIGNALEMENT_BY_ID_POINT: (id: string) => `${API_URL}/signaler/id_p/${id}`,
   SIGNALEMENT_BY_ID: (id: string) => `${API_URL}/signaler/${id}`,
   SIGNALEMENT_SUPPRIMER: (id: string) => `${API_URL}/signaler/suprimmer/${id}`,
+  GET_IMAGE_SIGNALEMENT: (id: string) => `${API_URL}/${id}`,
 
 
   HISTORIQUE: `${API_URL}/historiques/`,
 
-  IMAGE: (id: string) => `${API_URL}/${id}`,
 
 };

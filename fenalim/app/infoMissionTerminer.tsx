@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, ScrollView, Platform, Linking } from "react-native";
-import HautPage from './hautPage';
+import HautPage from '@/app/hautPage';
 import axios from "axios";
 import {useLocalSearchParams} from 'expo-router';
 import proj4 from "proj4";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getData } from '@/config/recupRole'; 
 import { naviguerMission } from '@/config/navigation';
 import { getMissionById } from "@/service/MissionService";
 import { getPointEauByID } from "@/service/pointEauService";
+import { getRole, getToken } from "@/service/infosStocker";
 
 // Donnée de la Mission
 type Mission = {
@@ -30,19 +29,15 @@ export default function MissionDetails() {
   const [mission, setMission] = useState<Mission | null>(null);
   const [pointMission, setPointMission] = useState<lePoint | null>(null);
 
-
-  const [token, setToken] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
     
   useEffect(() => {
     const chargerRoleEtToken = async () => {
       try {
         // recup role et token
-        const tokenValue = await AsyncStorage.getItem('@token');
-        const roleValue = await getData();
-        if (tokenValue){
-          setToken(tokenValue);
-        }
+        const tokenValue =  await getToken();
+        const roleValue = await getRole();
+
         if (roleValue){
           setUserRole(roleValue);
         }

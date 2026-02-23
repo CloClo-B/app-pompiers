@@ -6,6 +6,7 @@ from datetime import datetime
 
 
 # POINT D'EAU 
+
 # Schéma de base pour la lecture d’un point d’eau
 class PointEauBase(BaseModel):
     id: int
@@ -13,17 +14,38 @@ class PointEauBase(BaseModel):
     nom: Optional[str] = None
     statut: str
     type_nature: str
-    insee5: Optional[str] = None
-    press_deb: Optional[float] = None
-    debit_1_bar: Optional[float] = None
-    vol_eau_mi: Optional[float] = None
-    accessibilite: Optional[str] = None
-    disponibilite: Optional[str] = None
-    carto_ref: Optional[int] = None
-    utilisateur: Optional[str] = None 
-    latitude: Optional[float] = None  
-    longitude: Optional[float] = None  
-    date_crea: Optional[datetime] = None
+    insee5: str
+    press_deb: float
+    debit_1_bar: float
+    vol_eau_mi: float
+    accessibilite: str
+    disponibilite:str
+    carto_ref: int
+    utilisateur: int 
+    latitude: float  
+    longitude: float  
+    date_crea: datetime
+    date_maj: Optional[datetime] = None
+    
+    model_config = ConfigDict(from_attributes=True)
+
+# Schéma de sortie pour un point d’eau
+class PointEauOut(BaseModel):
+    id: int
+    numero_pei: int
+    nom: Optional[str] = None
+    statut: str
+    type_nature: str
+    insee5: str
+    press_deb: float
+    debit_1_bar: float
+    vol_eau_mi: float
+    accessibilite: str
+    disponibilite:str
+    carto_ref: int
+    utilisateur: int 
+    latitude: float  
+    longitude: float  
     date_maj: Optional[datetime] = None
     
     model_config = ConfigDict(from_attributes=True)
@@ -35,17 +57,15 @@ class PointEauCreate(BaseModel):
     nom: Optional[str] = None
     statut: str
     type_nature: str
-    insee5: Optional[str] = None
-    press_deb: Optional[float] = None
-    debit_1_bar: Optional[float] = None
-    vol_eau_mi: Optional[float] = None
-    accessibilite: Optional[str] = None
-    disponibilite: Optional[str] = None
-    carto_ref: Optional[int] = None
-    utilisateur: Optional[str] = None 
+    insee5: str
+    press_deb: float
+    debit_1_bar: float
+    vol_eau_mi: float
+    accessibilite: str
+    disponibilite: str
+    carto_ref: int
     latitude: float
     longitude: float
-    date_crea: datetime = Field(default_factory=datetime.now)
     date_maj: Optional[datetime] = None
 
 # UTILISATEUR

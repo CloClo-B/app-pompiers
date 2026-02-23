@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
 import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAllSignalement } from '@/service/signalementService';
+import { getToken } from '@/service/infosStocker';
 
 
 const roue = require('@/assets/images/parametres.png');
@@ -20,7 +20,6 @@ export default function PointSignale() {
   
   const [signaler, setSignale] = useState<Signale[]>([]);
   const [chargement, setChargement] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
   
   // récupérer le token 
   useEffect(() => {
@@ -28,16 +27,14 @@ export default function PointSignale() {
   }, []);
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem('@token')
+      const value = await getToken();
       if(value !== null) {
-        setToken(value);
         fetchPointSignale(value);
       }
     } catch(e) {
       console.log("erreur token affichage point eau signaler");
     }
   }
-  
 
   const fetchPointSignale = async (token: string) => {
     if (!token) {
@@ -58,7 +55,6 @@ export default function PointSignale() {
 
       if (!signaleRaw) {
         console.error("Impossible de récupérer les points signaler:", reponseSignalement);
-        setChargement(false);
         return;
     }
 

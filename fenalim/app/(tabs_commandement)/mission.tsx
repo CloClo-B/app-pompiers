@@ -1,11 +1,11 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import HautPage from '../hautPage';
 
-import CreerMission from '../creerMission';
-import HistoriqueMission from '../historiqueMission';
-import MissionEnCours from '../missionEnCours';
+import HautPage from "@/app/hautPage";
+import CreerMission from '@/app/creerMission';
+import HistoriqueMission from '@/app/historiqueMission';
+import MissionEnCours from "@/app/missionEnCours";
 
 
 // Gestion des Missions, affiche les différentes pages

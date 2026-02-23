@@ -2,8 +2,8 @@ import axios from 'axios';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CreateMission } from '@/service/MissionService';
+import { getToken } from '@/service/infosStocker';
 
 // Page de création de Mission
 export default function CreerMission() {
@@ -16,7 +16,7 @@ export default function CreerMission() {
   }, []);
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem('@token')
+      const value = await getToken();
       if(value !== null) {
         setToken(value);
       }
