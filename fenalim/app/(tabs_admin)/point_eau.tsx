@@ -1,11 +1,12 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import HautPage from '../hautPage';
 
 import CreerPoint from '../creerPoint';
-import HautPage from '../hautPage';
 import PointSignale from '../pointSignale';
 
+// Gestion des points d'eau, affiche les différentes pages
 export default function HomeScreen() {
   const { page: pageR } = useLocalSearchParams<{ page?: string }>();
 
@@ -64,6 +65,7 @@ export default function HomeScreen() {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   contenue: {
     marginTop: 20,

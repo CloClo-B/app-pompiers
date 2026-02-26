@@ -5,7 +5,7 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-nativ
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS } from '@/config/api';
 
-
+// Page de création de Mission
 export default function CreerMission() {
 
   const [token, setToken] = useState<string | null>(null);
@@ -147,6 +147,7 @@ export default function CreerMission() {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   tout:{
     alignSelf: 'center',

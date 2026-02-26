@@ -55,7 +55,8 @@ class UtilisateurBase(BaseModel):
     prenom: str
     email: EmailStr
     telephone: Optional[str] = None
-    role: Optional[str] = "admin"
+    role: Optional[str] = "public"
+
 
 # Schéma utilisé lors de la création d’un utilisateur
 class UtilisateurCreate(UtilisateurBase):

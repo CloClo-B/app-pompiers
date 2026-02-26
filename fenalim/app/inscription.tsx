@@ -8,7 +8,7 @@ import { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS } from '@/config/api';
 
-
+// Gère l'inscription des nouveaux utilisateurs
 export default function Connexion() {
 
   // variable pour ensuite envoyer à l'api
@@ -127,7 +127,6 @@ export default function Connexion() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
-
       <ScrollView>
           <LinearGradient colors={['#E63946', '#1D3557']} style={styles.container}>
 
@@ -180,6 +179,7 @@ export default function Connexion() {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   container: {
     flex: 1,

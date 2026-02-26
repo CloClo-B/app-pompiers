@@ -6,6 +6,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {API_ENDPOINTS } from '@/config/api';
 
+// Donnée de l'Utilisateur
 type User = {
   id: string;
   nom: string;
@@ -17,6 +18,8 @@ type User = {
 
 type Role = 'public' | 'pompier' | 'commandement' | 'admin';
 
+
+// Permet de consulter les informations d'un Utilisateur
 export default function UserDetails() {
   const [token, setToken] = useState<string | null>(null);
   const [chargement, setChargement] = useState(true);
@@ -355,7 +358,7 @@ export default function UserDetails() {
             {deleting ? (
               <ActivityIndicator color="#ffffff" size="small" />
             ) : (
-              <Text style={styles.deleteButtonText}>🗑️ SUPPRIMER L'UTILISATEUR</Text>
+              <Text style={styles.deleteButtonText}>SUPPRIMER L'UTILISATEUR</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -364,6 +367,7 @@ export default function UserDetails() {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   container: {
     flex: 1,

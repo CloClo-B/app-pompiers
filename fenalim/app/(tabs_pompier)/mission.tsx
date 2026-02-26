@@ -7,7 +7,7 @@ import HistoriqueMission from '../historiqueMission';
 import MissionEnCours from '../missionEnCours';
 
 
-
+// Affichage des missions
 export default function HomeScreen() {
   const { page: pageR } = useLocalSearchParams<{ page?: string }>();
 
@@ -53,6 +53,7 @@ export default function HomeScreen() {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   contenue: {
     flex: 1,

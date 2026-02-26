@@ -9,6 +9,7 @@ import HautPage from "../hautPage";
 import proj4 from "proj4";
 import { API_ENDPOINTS } from "../../config/api";
 
+// Définit toutes les infos qu'un point possède
 type PointEau = {
   id: number;
   numero_pei: string;
@@ -22,6 +23,7 @@ type PointEau = {
   longitude: number;
 };
 
+// Page Accueil (Admin) carte interactive qui localisation / affiche les points d'eau incendie / itinéraire ou signaler un problème sur les points d'eau
 export default function HomeScreen() {
   const [localisation, setLocalisation] = useState<Location.LocationObject | null>(null);
   const [pointsEau, setPointsEau] = useState<PointEau[]>([]);
@@ -31,8 +33,10 @@ export default function HomeScreen() {
   const [selectedPEI, setSelectedPEI] = useState<PointEau | null>(null);
   const router = useRouter();
 
+  // Référence pour piloter la carte
   const referenceCarte = useRef<MapView>(null);
 
+  // Charge les points d'eau et active le GPS
   useEffect(() => {
     let watchAbonnement: Location.LocationSubscription | null = null;
 
@@ -40,13 +44,11 @@ export default function HomeScreen() {
       try {
         const response = await axios.get(API_ENDPOINTS.POINTS_EAU);
 
-        const lambert93 =
-          "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
+        // Conversion du format (Lambert93) vers le format GPS (WGS84)
+        const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
         const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
-        const pointsRaw = Array.isArray(response.data)
-          ? response.data
-          : response.data.points_eau;
+        const pointsRaw = Array.isArray(response.data) ? response.data : response.data.points_eau;
 
         const pointsEauWGS84 = pointsRaw.map((p: any) => {
           const [lon, lat] = proj4(lambert93, wgs84, [p.longitude, p.latitude]);
@@ -61,7 +63,7 @@ export default function HomeScreen() {
       }
     };
 
-    // Obtenir sa localisation
+    // Demande l'accès au GPS et suit la position de l'utilisateur
     const getLocation = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") return;
@@ -70,6 +72,7 @@ export default function HomeScreen() {
       setLocalisation(loc);
       setLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
 
+      // Met à jour la position automatiquement
       watchAbonnement = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
@@ -94,7 +97,7 @@ export default function HomeScreen() {
     };
   }, []);
 
-  // Aller a la position
+  // Recentre la carte sur la position de l'utilisateur
   const allerPosition = () => {
     if (referenceCarte.current && localisation?.coords) {
       referenceCarte.current.animateToRegion(
@@ -127,6 +130,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <HautPage title="Carte des points d’eau" />
 
+      {/* Carte */}
       <MapView
         ref={referenceCarte}
         style={styles.map}
@@ -136,7 +140,7 @@ export default function HomeScreen() {
           latitudeDelta: 0.2,
           longitudeDelta: 0.2,
         }}
-        showsUserLocation
+        showsUserLocation // Affiche le point bleu
       >
         {pointsEau.slice(0, 100).map((point) => (
           <Marker
@@ -153,7 +157,8 @@ export default function HomeScreen() {
       <TouchableOpacity style={styles.boutonLocalisation} onPress={allerPosition}>
         <FontAwesome name="location-arrow" size={24} color="#FFF" />
       </TouchableOpacity>
-
+      
+      {/* Description des points d'eau */}
       <Modal transparent animationType="fade" visible={modalVisible}>
         <View style={styles.overlay}>
           <View style={styles.alertBox}>

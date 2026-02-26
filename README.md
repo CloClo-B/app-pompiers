@@ -1,87 +1,84 @@
 # FEN-Alim 🚒
 
-Bienvenue sur le dépôt GitLab du projet **FEN-Alim** !  
-Ce projet est une application développée avec **React Native** et **Expo**.
+Bienvenue sur le dépôt Git du projet **FEN-Alim**.
 
-Lien du projet : https://forgens.univ-ubs.fr/gitlab/but2info/fen-alim_a
+Ce projet s’inscrit dans le cadre de la **lutte contre les feux d’espaces naturels**, où un accès rapide, fiable et sécurisé aux points d’eau est un enjeu majeur pour l’efficacité des secours.
 
 
-## 📥 Récupérer le projet depuis Git
+## 📌 Présentation du projet
 
-1. Pour commencer, récupérez l’application depuis GitLab (méthode SSH) :
+Lors d’un incendie en milieu naturel, les pompiers doivent pouvoir localiser rapidement des points d’eau fonctionnels (hydrants, points d’eau naturels, réserves privées). Or, ces informations sont souvent dispersées, obsolètes ou difficiles d’accès, ce qui peut ralentir considérablement les interventions.
 
-   ```bash
-   git clone git@forgens.univ-ubs.fr:but2info/fen-alim_a.git
-   ```
+Le projet **FEN-Alim** vise à répondre à cette problématique en développant une **application mobile Android et iOS**, connectée à un **serveur central**, destinée aux pompiers et aux acteurs concernés.
 
-2. Ensuite, déplacez-vous dans le projet :
 
-   ```bash
-   cd fen-alim_a
-   ```
+## 🎯 Objectifs de l’application
 
-Voici l’arborescence du projet **FEN-Alim** :
+L’application FEN-Alim permet :
+
+- 📍 **Le suivi et la gestion des points d’eau**  
+  - Coordonnées GPS  
+  - Débit  
+  - Type de raccordement  
+  - État de fonctionnement  
+  - Date de dernière vérification  
+  - Photos  
+
+- 🗺️ **La visualisation cartographique**
+  - Localisation des points d’eau
+  - Description détailler des points d'eau
+  - Calcul de l'itinéraire
+
+- 👥 **Une gestion multi-niveaux des accès**
+  - Public
+  - Pompier
+  - Commandement
+  - Admin
+
+Les citoyens peuvent notamment :
+- Signaler des anomalies (fuite, casse, obstruction…)
+
+
+## 🔐 Sécurité
+
+Les échanges entre l’application mobile et le serveur sont sécurisés grâce à :
+- Une **API protégée**
+- L’utilisation de **certificats SSL**, garantissant la confidentialité et l’intégrité des données
+
+
+## 🛠️ Technologies utilisées
+
+- **Frontend** : React Native + Expo  
+- **Backend** : API + Base de données (Docker)  
+- **Plateformes** : Android & iOS  
+
+
+## 👋 Équipe du projet
+
+| Nom Prénom | Email | Groupe |
+|-----------|-------|--------|
+| Clovis BOURRE | bourre.e2402184@etud.univ-ubs.fr | Gr2B |
+| Mathéo BIET | biet.e2400505@etud.univ-ubs.fr | Gr2B |
+| Valentin HUTA-CEVAER | huta-cevaer.e2402478@etud.univ-ubs.fr | Gr2B |
+| Tei GARNIER | garnier.e2401205@etud.univ-ubs.fr | Gr2C |
+| Clément HOARAU | hoarau.e2400553@etud.univ-ubs.fr | Gr2C |
+
+
+## 📒 Documentation Notion
+
+📌 **Lien vers le site Notion du projet** : https://fen-alim-a.notion.site/FEN-Alim-27eaa60e3d6581e6b773e16efbe575c4
+
+
+## 🔗 Dépôt du projet
+
+📌 **Lien GitLab** : https://forgens.univ-ubs.fr/gitlab/but2info/fen-alim_a
+
+
+
+## 📁 Arborescence du projet
 
 ```bash
 fen-alim_a/
-├─ backend/   (API + Base de données)
-├─ fenalim/   (Application Front-End)
+├─ backend/   # API + Base de données
+├─ fenalim/   # Application Frontend (React Native)
 ├─ README.md
-```
-
-## 📝 Guide GitLab
-
-### 1. Mettre à jour vos fichiers locaux (pull)
-
-```bash
-git pull
-```
-
-### 2. Envoyer vos modifications sur GitLab (push)
-
-```bash
-git add .
-git commit -m "COMMENTAIRE DU COMMIT"
-git push
-```
-
-
-## 🚀 Lancer l’application
-
-### 1 - Backend (API Docker)
-
-1. Se déplacer dans le dossier backend :
-
-   ```bash
-   cd backend
-   ```
-
-2. Lancer l’API avec Docker :
-
-   ```bash
-   docker compose up -d --build
-   ```
-
-⚠️ Si vous souhaitez **réinstaller la base de données** (réinitialisation complète) :
-
-```bash
-docker compose down -v
-```
-
----
-
-### 2 - Frontend (Fenalim : React Native + Expo)
-
-1. Se déplacer dans le dossier fenalim :
-
-   ```bash
-   cd fenalim
-   ```
-
-2. Démarrer l’application avec Expo Go :
-
-   ```bash
-   npx expo start
-   ```
-
-⚠️ Dans **/fenalim/app/(tabs)/accueil.tsx** : N’oubliez pas de **modifier l’adresse IP** et de mettre **la vôtre** !

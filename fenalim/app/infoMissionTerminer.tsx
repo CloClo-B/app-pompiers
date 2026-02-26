@@ -9,7 +9,7 @@ import { getData } from '@/config/recupRole';
 import { naviguerMission } from '@/config/navigation';
 import { API_ENDPOINTS } from '@/config/api';
 
-
+// Donnée de la Mission
 type Mission = {
   id_mission: string;
   nom_mission: string;
@@ -23,7 +23,8 @@ type lePoint = {
   latitude: number;
   longitude: number;
 };
- 
+
+// Permet de consulter l'historique d'une intervention
 export default function MissionDetails() {
   const [mission, setMission] = useState<Mission | null>(null);
   const [pointMission, setPointMission] = useState<lePoint | null>(null);
@@ -210,7 +211,7 @@ export default function MissionDetails() {
   );
 }
 
-
+// Style
 const styles = StyleSheet.create({
   contenue: {
     marginTop: 40,

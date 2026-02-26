@@ -9,7 +9,7 @@ import { getData } from '@/config/recupRole';
 import { naviguerPointEau } from '@/config/navigation';
 import { API_ENDPOINTS } from '@//config/api';
 
-
+// Donnée du Signalement
 type Signale = {
   id: string;
   id_point: string;
@@ -23,6 +23,7 @@ type lePoint = {
   longitude: number;
 };
 
+// Permet de consulter les informations d'un Signalement
 export default function UserDetails() {
   const [token, setToken] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -193,7 +194,7 @@ export default function UserDetails() {
   );
 }
 
-
+// Style
 const styles = StyleSheet.create({
   contenue: {
     marginTop: 40,

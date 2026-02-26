@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import HautPage from '../hautPage';
 import authService, { UserData } from '@/service/authService';
 
+// Icon
 const imgMonCompte = require('@/assets/images/mon_compte.png');
 const imgCrayon = require('@/assets/images/stylo.png');
 const Oeil = require('@/assets/images/oeil.png');
 const OeilCache = require('@/assets/images/oeil_cacher.png');
 
+// Profil de l'utilisateur
 export default function Compte() {
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -34,10 +36,12 @@ export default function Compte() {
   
   const router = useRouter();
 
+  // Charger les infos de l'utilisateur
   useEffect(() => {
     loadUserData();
   }, []);
 
+  // Chargement des infos du user
   const loadUserData = async () => {
     try {
       setLoading(true);
@@ -59,6 +63,7 @@ export default function Compte() {
     }
   };
 
+  // Enregistre les Modifications
   const handleUpdateField = async (field: string, value: string) => {
     // Validation basique
     if (!value || value.trim() === '') {
@@ -100,6 +105,7 @@ export default function Compte() {
     }
   };
 
+  // Changement du mot de passe
   const handleChangePassword = async () => {
     if (!oldPassword || !newPassword || !confirmNewPassword) {
       Alert.alert('Erreur', 'Veuillez remplir tous les champs');
@@ -132,6 +138,7 @@ export default function Compte() {
     }
   };
 
+  // Déconnecte l'utilisateur
   const handleLogout = () => {
     Alert.alert(
       'Déconnexion',
@@ -150,6 +157,7 @@ export default function Compte() {
     );
   };
 
+  // Texte lisible des Roles
   const getRoleLabel = (role: string) => {
     const labels = {
       'public': 'Utilisateur Public',
@@ -159,7 +167,8 @@ export default function Compte() {
     };
     return labels[role as keyof typeof labels] || role;
   };
-
+  
+  // Couleur du badge selon le métier
   const getRoleBadgeColor = (role: string) => {
     const colors = {
       'public': '#457B9D',
@@ -179,6 +188,7 @@ export default function Compte() {
     );
   }
 
+  // Affiche la Page
   return (
     <>
       <View>
@@ -195,6 +205,7 @@ export default function Compte() {
         >
           <Image source={imgMonCompte} style={styles.imageH} />
 
+          {/* Affichage du rôle (Badge) */}
           {userData && (
             <View style={[styles.roleBadge, { backgroundColor: getRoleBadgeColor(userData.role) }]}>
               <Text style={styles.roleText}>{getRoleLabel(userData.role)}</Text>
@@ -339,6 +350,7 @@ export default function Compte() {
                     <Image source={showNewPassword ? Oeil : OeilCache} style={styles.imageC} />
                   </TouchableOpacity>
                 </View>
+                
 
                 <Text style={styles.text}>Confirmer le mot de passe</Text>
                 <View style={styles.entreeCryon}>
@@ -378,6 +390,7 @@ export default function Compte() {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,

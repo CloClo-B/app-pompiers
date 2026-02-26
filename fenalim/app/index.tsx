@@ -10,7 +10,7 @@ import ImageLogo from '@/components/LogoSDIS56';
 const Flamme = require('@/assets/images/flamme1.png');
 
 
-
+// Page index qui affiche les méthodes de connection
 export default function Accueil() {
   const router = useRouter();
 
@@ -41,6 +41,7 @@ export default function Accueil() {
   );
 }
 
+// Style
 const styles = StyleSheet.create({
   container: {
     flex: 1,
