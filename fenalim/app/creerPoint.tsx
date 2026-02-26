@@ -3,8 +3,8 @@ import React, {useEffect, useState } from 'react';
 import {StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_ENDPOINTS } from '@/config/api';
+import { createPointEau } from '@/service/pointEauService';
+import { getToken } from '@/service/infosStocker';
 
 // Page création de Point d'eau
 export default function CreerPoint() {
@@ -17,7 +17,7 @@ export default function CreerPoint() {
   }, []);
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem('@token')
+      const value = await getToken();
       if(value !== null) {
         setToken(value);
       }
@@ -119,7 +119,7 @@ export default function CreerPoint() {
     // Avant l'appel API, pour vérifier les valeurs
   console.log("Vérification des valeurs à envoyer\n");
   console.log("numeroPEI:", numeroPEI);
-  console.log("nom:", ""); // a changer par la suite
+  // console.log("nom:", "");
   console.log("statut:", valueStatut);
   console.log("type_nature:", valueType);
   console.log("insee5:", insee5);
@@ -131,17 +131,13 @@ export default function CreerPoint() {
   console.log("vol_eau_mi:", parseFloat(volumeMin));
   console.log("longitude:", parseFloat(longitude));
   console.log("latitude:", parseFloat(latitude));
-  console.log("utilisateur:", "");
+  console.log(token);
   
+  // vérfication des valeurs correct avant envoyer à l'api + affichage message de l'erreur
   if (!token) {
-    alert("Token manquant, impossible de créer le point d'eau");
+    alert("Erreur, impossible de créer le point d'eau");
     return;
   }
-  else{
-    console.log(token);
-  }
-
-  // vérfication des valeurs correct avant envoyer à l'api + affichage message de l'erreur
   if(valueType == null || verifTypePoint(valueType) == false){
     console.log("Erreur le type de point est incorrect");
     alert("Le type de point est incorrect");
@@ -205,28 +201,12 @@ export default function CreerPoint() {
 
     else{
       try {
-        const response = await axios.post(API_ENDPOINTS.POINTS_EAU, {
-          numero_pei: parseInt(numeroPEI),
-          nom: '',
-          statut: valueStatut,
-          type_nature: valueType,
-          insee5: insee5, 
-          accessibilite: valueAcces,
-          disponibilite: valueDispo,
-          carto_ref: parseInt(refCarto)  ? parseInt(refCarto) : null ,
-          press_deb: parseFloat(pression.replace(',', '.')),
-          debit_1_bar: parseFloat(debit.replace(',', '.')),
-          vol_eau_mi: parseFloat(volumeMin.replace(',', '.')),
-          longitude: parseFloat(longitude.replace(',', '.')),
-          latitude: parseFloat(latitude.replace(',', '.')),
-          utilisateur: '', //ne pas oublié par la suite c'est pour savoir qui a ajouter le point 
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+
+        // apelle du fichier pointEauSercice pour la envoyer la requete de creation de point d'eau 
+        await createPointEau(token, numeroPEI , valueStatut, valueType,
+          insee5, valueAcces, valueDispo, refCarto, pression, debit, volumeMin, longitude, latitude
+        );
+
         
         router.push({
             pathname: '/succes',
@@ -236,6 +216,7 @@ export default function CreerPoint() {
       catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           // erreur renvoyée par l’API
+          console.log(JSON.stringify(error.response?.data, null, 2));
           console.log(error.response?.status);
           console.log(error.response?.data);
           alert(error.response?.data?.detail ?? "Erreur lors de la création du point d'eau");

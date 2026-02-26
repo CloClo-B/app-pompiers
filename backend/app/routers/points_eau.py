@@ -5,7 +5,7 @@ from sqlalchemy import func
 from geoalchemy2.elements import WKTElement
 from ..database import SessionLocal
 from ..models import PointEau
-from ..schemas import PointEauBase, PointEauCreate
+from ..schemas import PointEauBase, PointEauCreate, PointEauOut
 from app.DAO.DAOPointsEau import (
     create_point_eau,
     get_all_points_eau,
@@ -43,16 +43,17 @@ def get_point(numero_pei: int, db: Session = Depends(get_db)):
     return point
 
 # Crée un nouveau point d'eau
-@router.post("/", response_model=PointEauBase)
+@router.post("/", response_model=PointEauOut)
 def create_point(payload: PointEauCreate, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
+    
+    # recup l'id utilisateur pour l'envoyer au DAO
+    point_data = payload.model_dump()
+    point_data["utilisateur"] = user_check.id_utilisateur
+    
     try:
-        nouveau_point = create_point_eau(db, payload.model_dump())
+        nouveau_point = create_point_eau(db, point_data)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
-    # Calculer latitude / longitude depuis geom
-    latitude = db.scalar(func.ST_Y(nouveau_point.geom))
-    longitude = db.scalar(func.ST_X(nouveau_point.geom))
     
     return {
         "id": nouveau_point.id,
@@ -67,12 +68,14 @@ def create_point(payload: PointEauCreate, db: Session = Depends(get_db), user_ch
         "press_deb": nouveau_point.press_deb,
         "debit_1_bar": nouveau_point.debit_1_bar,
         "vol_eau_mi": nouveau_point.vol_eau_mi,
-        "date_crea": nouveau_point.date_crea,
         "date_maj": nouveau_point.date_maj,
         "utilisateur": nouveau_point.utilisateur,
-        "latitude": latitude,
-        "longitude": longitude,
+        "latitude": point_data["latitude"],
+        "longitude": point_data["longitude"],
     }
+
+
+
 
 # Supprime un point d'eau selon son numéro PEI.
 @router.delete("/{numero_pei}")

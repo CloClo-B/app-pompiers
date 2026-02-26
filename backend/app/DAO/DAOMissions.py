@@ -2,6 +2,7 @@
 DAO pour la gestion des mission
 """
 from app import models 
+from app.DAO.DAOUtilisateurs import dechiffrerTelEtMail
 from sqlalchemy.orm import Session
 from typing import Dict, Any
 from datetime import datetime, date, timedelta
@@ -19,8 +20,24 @@ def get_all_mission(db:Session):
     return out
 
 # Récupère une mission par ID
-def get_mission_by_id(db: Session, id_mission:int):
-    return db.query(models.Mission).filter(models.Mission.id_mission == id_mission).first()
+def get_mission_by_id(db: Session, id_mission: int):
+    mission = db.query(models.Mission).filter(models.Mission.id_mission == id_mission).first()
+    if not mission:
+        raise ValueError("Mission introuvble")
+    user = db.query(models.Utilisateur).filter(models.Utilisateur.id_utilisateur == mission.id_utilisateur).first()
+    mail_utilisateur = dechiffrerTelEtMail(user.email) 
+
+    return {
+        "id_mission": mission.id_mission,
+        "nom_mission": mission.nom_mission,
+        "id_point": mission.id_point,
+        "mail_utilisateur": mail_utilisateur,
+        "date_creation": mission.date_creation,
+        "statut": mission.statut,
+        "commentaire": mission.commentaire,
+        "itineraire": mission.itineraire,
+        "date_fin": mission.date_fin
+    }
 
 # Récupère les missions d'une date donnée
 def get_mission_by_date(db: Session, laDate : date):

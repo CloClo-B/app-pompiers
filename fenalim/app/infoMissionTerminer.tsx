@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, ScrollView, Platform, Linking } from "react-native";
-import HautPage from './hautPage';
+import HautPage from '@/app/hautPage';
 import axios from "axios";
 import {useLocalSearchParams} from 'expo-router';
 import proj4 from "proj4";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getData } from '@/config/recupRole'; 
 import { naviguerMission } from '@/config/navigation';
-import { API_ENDPOINTS } from '@/config/api';
+import { getMissionById } from "@/service/MissionService";
+import { getPointEauByID } from "@/service/pointEauService";
+import { getRole, getToken } from "@/service/infosStocker";
 
 // Donnée de la Mission
 type Mission = {
@@ -15,7 +15,7 @@ type Mission = {
   nom_mission: string;
   commentaire: string;
   address:string;
-  id_utilisateur: string;
+  mail_utilisateur: string;
   date_creation: string;
   date_fin: string;
 };
@@ -29,19 +29,15 @@ export default function MissionDetails() {
   const [mission, setMission] = useState<Mission | null>(null);
   const [pointMission, setPointMission] = useState<lePoint | null>(null);
 
-
-  const [token, setToken] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
     
   useEffect(() => {
     const chargerRoleEtToken = async () => {
       try {
         // recup role et token
-        const tokenValue = await AsyncStorage.getItem('@token');
-        const roleValue = await getData();
-        if (tokenValue){
-          setToken(tokenValue);
-        }
+        const tokenValue =  await getToken();
+        const roleValue = await getRole();
+
         if (roleValue){
           setUserRole(roleValue);
         }
@@ -84,34 +80,34 @@ export default function MissionDetails() {
   // recuperer la mission
   const infoMissionSelect = async (token: string) => {
     if (!token) {
-      alert("Token manquant, impossible d'afficher la missions séléctionne");
+      Alert.alert("Erreur" +"impossible d'afficher la missions séléctionne");
       return;
     }
     try {
       console.log("iddddd", id_m)
-      const responseMission = await axios.get(API_ENDPOINTS.MISSION_BY_ID(id_m), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+
+      // apelle du fichier missionService pour la recuperer les données
+      const reponseMission = await getMissionById(token, id_m);
 
       // affichage des données
-      console.log("Données reçues :", responseMission.data);
+      console.log("Données reçues :", reponseMission);
       
       setMission({
-        id_mission: String(responseMission.data.id_mission),
-        nom_mission: responseMission.data.nom_mission,
-        commentaire: responseMission.data.commentaire,
-        address: responseMission.data.itineraire,
-        id_utilisateur: String(responseMission.data.id_utilisateur),
-        date_creation: String(responseMission.data.date_creation),
-        date_fin: String(responseMission.data.date_fin)
+        id_mission: String(reponseMission.id_mission),
+        nom_mission: reponseMission.nom_mission,
+        commentaire: reponseMission.commentaire,
+        address: reponseMission.itineraire,
+        mail_utilisateur: String(reponseMission.mail_utilisateur),
+        date_creation: String(reponseMission.date_creation),
+        date_fin: String(reponseMission.date_fin)
       });
 
-      fetchPointsEau(responseMission.data.id_point);
+      fetchPointsEau(reponseMission.id_point, token);
 
     }  
     catch (err: unknown) {
         if (axios.isAxiosError(err)) {
-            console.error("Erreur Axios:", err.response?.data || err.message);
+            console.error("Erreur Axios:", err.response);
             Alert.alert("Erreur", "Impossible de récupérer la mission");
         } 
         else {
@@ -123,13 +119,18 @@ export default function MissionDetails() {
 
 
   // recuperer localisation du point d'eau   
-  const fetchPointsEau = async (id_point: string) => {
+  const fetchPointsEau = async (id_point: string, token: string) => {
+    if (!token) {
+      Alert.alert("Erreur" +"impossible d'afficher la missions séléctionne");
+      return;
+    }
     try {
-      // affichage des données
-      // console.log("Données reçues:", response.data);
+      // apelle du fichier pointEauSercice pour la envoyer la requete de recuperation par id Point
+      const point = await getPointEauByID(token, id_point);      
       
-      const response = await axios.get(API_ENDPOINTS.POINT_EAU_BY_ID(id_point));
-      const point = response.data; 
+      // affichage des données
+      // console.log("Données reçues:", reponse);
+      
       if (point) {
         const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
         const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
@@ -170,7 +171,7 @@ export default function MissionDetails() {
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Date de début : </Text> {mission?.date_creation ? new Date(mission.date_creation).toLocaleDateString() : ''}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Date de fin : </Text> {mission?.date_fin ? new Date(mission.date_fin).toLocaleDateString() : ''}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Durée : </Text>{mission?.date_fin ? calculerDuree(mission.date_creation, mission.date_fin): ''}</Text>
-              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>ID de l'utilisateur qui à créer la mission : </Text> {mission?.id_utilisateur}</Text>
+              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Email créateur de la mission : </Text> {mission?.mail_utilisateur}</Text>
             </View>
 
             

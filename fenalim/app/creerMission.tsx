@@ -2,8 +2,8 @@ import axios from 'axios';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_ENDPOINTS } from '@/config/api';
+import { CreateMission } from '@/service/MissionService';
+import { getToken } from '@/service/infosStocker';
 
 // Page de création de Mission
 export default function CreerMission() {
@@ -16,7 +16,7 @@ export default function CreerMission() {
   }, []);
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem('@token')
+      const value = await getToken();
       if(value !== null) {
         setToken(value);
       }
@@ -46,7 +46,6 @@ export default function CreerMission() {
     console.log("Vérification des valeurs à envoyer\n");
     console.log("nomMission:", nomMission);
     console.log("IDPoint:", IDPoint);
-    console.log("idUtilisateur temporaire", "1")
     console.log("commentaire:", commentaire);
     console.log("itinéraire:", itineraire);
     if(nomMission == null || !nomMission.trim()){
@@ -71,20 +70,10 @@ export default function CreerMission() {
     }
     else{
       try {
-        const response = await axios.post(API_ENDPOINTS.MISSIONS, {
-          nom_mission: nomMission,        
-          id_point: parseInt(IDPoint),
-          id_utilisateur : 1,  // a changer par la suite celui ci est un utilisateur créer sur ma bdd
-          commentaire: commentaire, 
-          itineraire: itineraire,
-  
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+
+        // apelle du fichier MissionService pour la envoyer la requete de creation mission 
+        const response = await CreateMission(token, nomMission, IDPoint, commentaire, itineraire);
+
         
         router.push({
             pathname: '/succes',

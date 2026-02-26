@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import HautPage from '../hautPage';
 
-import CreerPoint from '../creerPoint';
-import PointSignale from '../pointSignale';
+import CreerPoint from '@/app/creerPoint';
+import PointSignale from '@/app/pointSignale';
 
 // Gestion des points d'eau, affiche les différentes pages
 export default function HomeScreen() {
@@ -53,7 +53,7 @@ export default function HomeScreen() {
 
 
       <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
-      <View>
+      <View style={styles.contenue}>
           {page === "signale" && <PointSignale />}
           {page === "creer" && <CreerPoint />}
       </View>

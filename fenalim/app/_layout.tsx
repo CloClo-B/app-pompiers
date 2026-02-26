@@ -17,6 +17,11 @@ export default function RootLayout() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#1D3557' }}>
 
+
+    {/* 
+      gestureEnabled pour eviter de faire retour en arriere en glissant 
+      headerShown pour eviter d'avoir la bar en haut qui affiche le retour
+    */}
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false, gestureEnabled: false}} />
@@ -26,13 +31,13 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs_admin)" options={{ headerShown: false, gestureEnabled: false}} />
         <Stack.Screen name="connexion" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="inscription" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="creation_point_succes" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="succes" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="infoUtilisateur" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="infoSignalement" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="marquerResolu" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="infoMissionTerminer" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="signalement" options={{ headerShown: false, gestureEnabled: false }} />
+        
+        <Stack.Screen name="infoUtilisateur" options={{ headerShown: false }} />
+        <Stack.Screen name="infoSignalement" options={{ headerShown: false}} />
+        <Stack.Screen name="marquerResolu" options={{ headerShown: false}} />
+        <Stack.Screen name="infoMissionTerminer" options={{ headerShown: false}} />
+        <Stack.Screen name="creerSignalement" options={{ headerShown: false }} />
 
       </Stack>
       <StatusBar style="auto" />

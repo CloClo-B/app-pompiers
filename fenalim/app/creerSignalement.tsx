@@ -5,10 +5,10 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import HautPage from './hautPage';
-import { getData } from '@/config/recupRole'; 
 import { naviguerAccueil} from '@/config/navigation';
-import { API_ENDPOINTS } from '@/config/api';
 import { useLocalSearchParams } from 'expo-router';
+import { createSignalement } from '@/service/signalementService';
+import { getRole, getToken } from '@/service/infosStocker';
 
 
 // petit encadrer pour choix photo
@@ -18,33 +18,39 @@ const ajouterPhoto = require('@/assets/images/ajouter_photo.png');
 export default function Signalement() {
   const router = useRouter();
   const { idPoint } = useLocalSearchParams<{ idPoint: string }>();
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (idPoint) {
       setIDPoint(idPoint);
+      getData();
     }
   }, [idPoint]);
 
 
-  useEffect(() => {
-  const chargerRole = async () => {
-    const role = await getData();
-    setUserRole(role);
-  };
-    chargerRole();
-  }, []);
+  const getData = async () => {
+    try {
+      // recup role et token
+      const token = await getToken();
+      const role = await getRole();
+      if(token !== null && role !== null) {
+        setToken(token);
+        setRole(role);
+      }
+    } catch(e) {
+      console.log("erreur créer singalement");
+    }
+  }
 
 
 
   // variable pour ensuite envoyer à l'api
-  
   const [IDPoint, setIDPoint] = useState(''); 
   const [probleme, setProbleme] = useState('');
-  const [photo, setPhoto] = useState('');
 
-//  ouvrir la galerie
-  const [image, setImage] = useState<string | null>(null);
+  //  ouvrir la galerie
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
@@ -103,7 +109,7 @@ const handlePickImage = () => {
     console.log("Vérification des valeurs à envoyer\n");
     console.log("IDPoint:", IDPoint);
     console.log("probleme:", probleme);
-    console.log("photo", photo);
+    console.log("photo", image);
 
 
     if(probleme == null || !probleme.trim() || probleme.trim().length<10 || probleme.trim().length> 100){
@@ -116,6 +122,11 @@ const handlePickImage = () => {
       alert("Image requise");
       return;
     }
+    else if(token == null){
+      console.log("Pas de token");
+      alert("Erreur création mission");
+      return;
+    }
     else{        
       try {
         const formData = new FormData();
@@ -126,11 +137,10 @@ const handlePickImage = () => {
           name: "pointsignaler.jpg",
           type: "image/jpeg",
         } as any);
-        formData.append("id_utilisateur", "1");
         
-        const response = await axios.post(API_ENDPOINTS.SIGNALEMENTS, formData, {
-          headers: { "Content-Type": "multipart/form-data" }
-        });
+        // apelle du fichier signalementService pour la envoyer la requete
+        await createSignalement(token, formData);
+
         router.push({
             pathname: '/succes',
             params: { title: 'Signalement créé avec succès',  page:"acceuil"  }
@@ -187,7 +197,7 @@ const handlePickImage = () => {
             {/* choix validation annulation */}
             <View style={styles.validation}>
 
-                <TouchableOpacity style={styles.boutton} onPress={() => {if (userRole) naviguerAccueil(userRole); else alert("Rôle utilisateur introuvable"); }}>
+                <TouchableOpacity style={styles.boutton} onPress={() => {if (role) naviguerAccueil(role); else alert("Rôle utilisateur introuvable"); }}>
                 <Text style={{color:'#ffffff'}}>ANNULER</Text>
                 </TouchableOpacity>
 

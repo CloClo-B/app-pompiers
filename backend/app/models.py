@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Float, TIMESTAMP, Enum, ForeignK
 from geoalchemy2 import Geometry
 import enum
 from .database import Base
+
 # Modèles SQLAlchemy de l’application contient le model de création de table
 
 # Rôles possibles pour un utilisateur
@@ -11,14 +12,28 @@ class RoleEnum(str, enum.Enum):
     commandement = "commandement"
     admin = "admin"
 
+# Table des utilisateur
+class Utilisateur(Base):
+    __tablename__ = "utilisateurs"
+    id_utilisateur = Column(Integer, primary_key=True, index=True)
+    nom = Column(String(40), nullable=False)
+    prenom = Column(String(40), nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
+    telephone = Column(String(255), unique=True, nullable=False)
+    mot_de_passe = Column(String(255), nullable=False)
+    role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.public)
+    date_creation = Column(DateTime, server_default=func.now(), nullable=False)
+    derniere_connexion = Column(DateTime)
+
+
 # Table des points d’eau
 class PointEau(Base):
     """Représente un point d'eau."""
-
     __tablename__ = "points_eau"
     id = Column(Integer, primary_key=True, index=True)
     numero_pei = Column(Integer, nullable=False, unique=True)
-    nom = Column(String(100))
+    nom = Column(String(100), nullable=True)
+
     # Statut autorisé : PUBLIC ou PRIVE
     statut = Column(        
         Enum('PUBLIC', 'PRIVE', name="type_statut_autorise"),
@@ -32,34 +47,23 @@ class PointEau(Base):
     insee5 = Column(String(10))
     # type d'accessibilité autorisée : C (accessible), NC (non communiquée), NON (inaccessible)
     accessibilite = Column(
-        Enum('C', 'NC', 'NON', name="type_accessibilite_autorise"),
+        Enum('C', 'NC', 'NON', name="type_accessibilite_autorise"), nullable=False
     )
 
     # Type de disponnibilite autorisée : DI (disponible), IN (indisponible)
     disponibilite = Column(
-        Enum('DI', 'IN', name="type_disponibilite_autorise"),
+        Enum('DI', 'IN', name="type_disponibilite_autorise"), nullable=False
     )
-    carto_ref = Column(Integer)
-    press_deb = Column(Float)
-    debit_1_bar = Column(Float)
-    vol_eau_mi = Column(Float)
-    date_crea = Column(TIMESTAMP)
-    date_maj = Column(TIMESTAMP)
-    utilisateur = Column(String(50))
-    geom = Column(Geometry("POINT", srid=2154))
+    carto_ref = Column(Integer, nullable=False)
+    press_deb = Column(Float, nullable=False)
+    debit_1_bar = Column(Float, nullable=False)
+    vol_eau_mi = Column(Float, nullable=False)
+    date_crea = Column(TIMESTAMP, server_default=func.now() , nullable=False)
+    date_maj = Column(TIMESTAMP, nullable=True)
+    utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
+    geom = Column(Geometry("POINT", srid=2154), nullable=False)
 
-# Table des utilisateur
-class Utilisateur(Base):
-    __tablename__ = "utilisateurs"
-    id_utilisateur = Column(Integer, primary_key=True, index=True)
-    nom = Column(String(40), nullable=False)
-    prenom = Column(String(40), nullable=False)
-    email = Column(String(255), unique=True, nullable=False)
-    telephone = Column(String(10), unique=True, nullable=False)
-    mot_de_passe = Column(String(255), nullable=False)
-    role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.public)
-    date_creation = Column(DateTime, server_default=func.now())
-    derniere_connexion = Column(DateTime)
+
 
 # Table des Mission
 class Mission(Base):
@@ -68,7 +72,7 @@ class Mission(Base):
     nom_mission = Column(String(100), nullable=False)
     id_point = Column(Integer, ForeignKey("points_eau.numero_pei"), nullable=False)
     id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
-    date_creation = Column(DateTime, server_default=func.now())
+    date_creation = Column(DateTime, server_default=func.now(), nullable=False)
         
     # Statut de mission autorisé : EN COURS ou TERMINER
     statut = Column(
@@ -78,16 +82,6 @@ class Mission(Base):
     commentaire = Column(String(100), nullable=True)
     itineraire = Column(String, nullable=True)
     date_fin = Column(DateTime, nullable=True)
-
-# Historique des actions utilisateurs 
-class Historique(Base):
-    __tablename__ = "historiques"
-    id_log = Column(Integer, primary_key=True, index=True)
-    id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
-    action = Column(String(100), nullable=False)
-    cible = Column(String(100))
-    date_action = Column(DateTime, server_default=func.now())
-    ip = Column(String(50))
 
 
 # Signalement de problème sur un point d’eau
@@ -100,4 +94,12 @@ class Signaler(Base):
     id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
     date_creation = Column(DateTime, server_default=func.now(), nullable=False)
 
-
+# Historique des actions utilisateurs 
+class Historique(Base):
+    __tablename__ = "historiques"
+    id_log = Column(Integer, primary_key=True, index=True)
+    id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
+    action = Column(String(100), nullable=False)
+    cible = Column(String(100))
+    date_action = Column(DateTime, server_default=func.now())
+    ip = Column(String(50))

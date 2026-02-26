@@ -4,13 +4,14 @@ import uuid, os
 from sqlalchemy.orm import Session
 from ..database import SessionLocal
 from ..models import Signaler, PointEau, Utilisateur
-from ..schemas import SignalerBase, SignalerCreate
+from ..schemas import SignalerBase, SignalerCreate, SignalerOut
 from app.DAO.DAOSignaler import (
     create_signale as dao_create_signale,  
     get_all_signale,
     get_signale_by_id_point,
     delete_signale_by_id_point
 )
+from app.DAO.DAOUtilisateurs import (dechiffrerTelEtMail,)
 from ..models import Utilisateur
 from .dependencies import rolesChecker
 
@@ -44,28 +45,32 @@ def get_signalements_by_point(id_point: int, db: Session = Depends(get_db), user
     return signalements
 
 
-# Récupère un signalement unique par son identifiant accèes non autorisé pour les utilisateurs public
-@router.get("/id_s/{signalement_id}", response_model=SignalerBase)
+# Récupère un signalement par son identifiant accèes non autorisé pour les utilisateurs public
+@router.get("/id_s/{signalement_id}", response_model=SignalerOut)
 def get_user(signalement_id: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("pompier", "commandement","admin"))):
     signal = db.query(Signaler).filter(Signaler.id == signalement_id).first()
     if not signal:
         raise HTTPException(status_code=404, detail=f"Le point numéro: {signalement_id} n'a pas été trouvé")
-    return signal
+    user = db.query(Utilisateur).filter(Utilisateur.id_utilisateur == signal.id_utilisateur).first()
+    return {
+        "id": signal.id,
+        "id_point": signal.id_point,
+        "probleme": signal.probleme,
+        "photo": signal.photo,
+        "mail_utilisateur": dechiffrerTelEtMail(user.email),
+        "date_creation": signal.date_creation,
+    }
 
 
 # Création d’un nouveau signalement avec une photo
 @router.post("/", response_model=SignalerCreate)
-def create_signalement(id_point: int = Form(...), probleme: str = Form(...), id_utilisateur: int = Form(...), photo: UploadFile = File(...), db: Session = Depends(get_db)):
+def create_signalement(id_point: int = Form(...), probleme: str = Form(...), photo: UploadFile = File(...), db: Session = Depends(get_db),user_check: Utilisateur = Depends(rolesChecker("public", "pompier", "commandement","admin"))):
    
     # verification des infos
     # Vérification de l’existence du point d’eau
     point = db.query(PointEau).filter(PointEau.numero_pei == id_point).first()
     if not point:
         raise HTTPException(status_code=404, detail=f"Le point numéro : {id_point} n'a pas été trouvé")
-    utilisateurExite = db.query(Utilisateur).filter(Utilisateur.id_utilisateur == id_utilisateur).first()
-    # Vérification de l’existence de l’utilisateur
-    if not utilisateurExite:
-        raise HTTPException(status_code=404, detail="L'utilisateur est introuvable")
     
 
     # création d'un id unique pour la photo
@@ -82,7 +87,7 @@ def create_signalement(id_point: int = Form(...), probleme: str = Form(...), id_
         "id_point": id_point,
         "probleme": probleme,
         "photo": file_path,
-        "id_utilisateur": id_utilisateur,
+        "id_utilisateur": user_check.id_utilisateur,
     }
     # Création du signalement
     try:

@@ -1,7 +1,7 @@
 import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
-import HautPage from '../hautPage';
+import HautPage from "@/app/hautPage";
 import authService, { UserData } from '@/service/authService';
 
 // Icon

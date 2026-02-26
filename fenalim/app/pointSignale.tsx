@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
 import { router } from 'expo-router';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_ENDPOINTS } from '@/config/api';
+import { getAllSignalement } from '@/service/signalementService';
+import { getToken } from '@/service/infosStocker';
 
 
 const roue = require('@/assets/images/parametres.png');
@@ -21,7 +20,6 @@ export default function PointSignale() {
   
   const [signaler, setSignale] = useState<Signale[]>([]);
   const [chargement, setChargement] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
   
   // récupérer le token 
   useEffect(() => {
@@ -29,16 +27,14 @@ export default function PointSignale() {
   }, []);
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem('@token')
+      const value = await getToken();
       if(value !== null) {
-        setToken(value);
         fetchPointSignale(value);
       }
     } catch(e) {
       console.log("erreur token affichage point eau signaler");
     }
   }
-  
 
   const fetchPointSignale = async (token: string) => {
     if (!token) {
@@ -49,19 +45,16 @@ export default function PointSignale() {
       console.log(token);
     }
     try {
-      const response = await axios.get(API_ENDPOINTS.SIGNALEMENTS, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // apelle du fichier signalementService pour recuperer tout les signalement via la requete
+      const reponseSignalement = await getAllSignalement(token);
+
       // affichage des données
-      console.log("Données reçues:", response.data);
+      console.log("Données reçues:", reponseSignalement);
       
-      const signaleRaw = Array.isArray(response.data) ? response.data : response.data.signalement;
+      const signaleRaw = Array.isArray(reponseSignalement) ? reponseSignalement : reponseSignalement.signalement;
 
       if (!signaleRaw) {
-        console.error("Impossible de récupérer les points signaler:", response.data);
-        setChargement(false);
+        console.error("Impossible de récupérer les points signaler:", reponseSignalement);
         return;
     }
 

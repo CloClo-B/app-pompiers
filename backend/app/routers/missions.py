@@ -5,8 +5,8 @@ from typing import List
 
 
 from ..database import SessionLocal
-from ..models import Mission, Utilisateur
-from ..schemas import MissionCreate, MissionUpdate, MissionOut, MissionBase
+from ..models import Utilisateur
+from ..schemas import MissionCreate, MissionUpdate, MissionOut, MissionCreateClient
 from app.DAO.DAOMissions import (
     create_mission,
     delete_mission_by_id,
@@ -30,19 +30,16 @@ def get_db():
 
 # Crée une nouvelle mission uniqument pour les commandent et administrateur
 @router.post("/", response_model=MissionCreate)  
-def create_mission_route(payload: MissionCreate, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("commandement","admin"))):
+def create_mission_route(payload: MissionCreateClient, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("commandement","admin"))):
+    # recup l'id utilisateur pour l'envoyer au DAO
+    mission_data = payload.model_dump()
+    mission_data["id_utilisateur"] = user_check.id_utilisateur
     try:
-        nouveau_mission = create_mission(db, payload.model_dump())
+        nouveau_mission = create_mission(db, mission_data)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
-    return {
-        "nom_mission": nouveau_mission.nom_mission,
-        "id_point": nouveau_mission.id_point,
-        "id_utilisateur": nouveau_mission.id_utilisateur,
-        "commentaire": nouveau_mission.commentaire,
-        "itineraire": nouveau_mission.itineraire,
-    }
+    return nouveau_mission
+
 
 
 # Récupère toutes les missions interdit aux public

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Platform, Linking, TouchableHighlight } from 'react-native';
 import {useRouter } from 'expo-router';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_ENDPOINTS } from '@/config/api';
+import { getAllMissions, deleteMissionById } from '@/service/MissionService';
+import { getToken } from '@/service/infosStocker';
 
 // Donnée de la Mission
 const info = require('@/assets/images/information.png');
@@ -30,7 +29,7 @@ export default function historiqueMission() {
   }, []);
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem('@token')
+      const value = await getToken();
       if(value !== null) {
         setToken(value);
         fetchMissions(value);
@@ -116,17 +115,17 @@ export default function historiqueMission() {
       console.log(token);
     }
     try {
-      const responseMission = await axios.get(API_ENDPOINTS.MISSIONS, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-            
+
+    // apelle du fichier missionService pour la recuperer les données
+      const responseMission = await getAllMissions(token);
+  
       // affichage des données
-      console.log("Données reçues:", responseMission.data);
+      console.log("Données reçues:", responseMission);
       
-      const MissionsRaw = Array.isArray(responseMission.data) ? responseMission.data : responseMission.data.missions;
+      const MissionsRaw = Array.isArray(responseMission) ? responseMission : responseMission.missions;
       
       if (!MissionsRaw) {
-        console.error("Impossible de récupérer l'historique des mission:", responseMission.data);
+        console.error("Impossible de récupérer l'historique des mission:", responseMission);
         return;
       }
     
@@ -156,13 +155,13 @@ export default function historiqueMission() {
     // Avant l'appel API, pour vérifier les valeurs
     console.log("Vérification de l'id à envoyer pour supprimer\n");
     console.log("Id mission: ",id_mission);
-
+    if (!token) {
+      Alert.alert("Erreur", "Supression impossible");
+      return;
+    }
     try {
-    
-      const response = await axios.delete(API_ENDPOINTS.MISSION_DELETE(Number(id_mission)),  {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+    // apelle du fichier missionService pour la supression
+    await deleteMissionById(token, Number(id_mission));
     
     router.push({
         pathname: '/succes',

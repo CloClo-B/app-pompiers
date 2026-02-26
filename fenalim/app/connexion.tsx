@@ -1,19 +1,24 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
 
 import Button from '@/components/ButtonLog';
 import { useState } from 'react';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS } from '@/config/api';
+import { setRole, setToken } from '@/service/infosStocker';
+
+
+const Oeil = require('@/assets/images/oeil.png');
+const OeilCache = require('@/assets/images/oeil_cacher.png');
 
 // Gère la connexion des utilisateurs
 export default function Connexion() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [motDePasse, setMDP] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // Vérif adresse mail
   const verifEmail = (email: string) => {
@@ -52,12 +57,11 @@ export default function Connexion() {
 
         const role = response.data.role;  //recuperation du role de l'utilisateur
         console.log(role);
-        try {
-            await AsyncStorage.setItem('@token', response.data.token)
-            await AsyncStorage.setItem('@role', response.data.role)
-        } catch (e) {
-          console.log("erreur token")
-        }
+
+        // stockage du token et du role
+        setToken(response.data.token)
+        setRole(response.data.role)
+
         // affichage en focntion du role
         if (role === 'public') {
           router.replace('/(tabs_public)/acceuil');
@@ -85,7 +89,7 @@ export default function Connexion() {
   }
 
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <LinearGradient colors={['#E63946', '#1D3557']} style={styles.container}>
 
                 <View>
@@ -101,7 +105,12 @@ export default function Connexion() {
                 {/* Champ Mot de passe */}
                 <View style={styles.aligne}>
                     <Text style={styles.title_ID_MDP}>Mot de passe</Text>
-                  <TextInput value={motDePasse} secureTextEntry onChangeText={setMDP} style={styles.saisiChamp}/>
+                    <View style={styles.entreeCrayon}>          
+                      <TextInput value={motDePasse} secureTextEntry={!showPassword} onChangeText={setMDP} style={styles.saisiChampMDP}/>
+                      <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                        <Image source={showPassword ? Oeil : OeilCache} style={styles.imageC} />
+                      </TouchableOpacity>
+                  </View>
                 </View>
 
                 {/* Bouton de validation */}
@@ -152,5 +161,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     paddingHorizontal: 10,
+  },
+  imageC: {
+    width: 30,
+    height: 30,
+    marginLeft: 8,
+  },
+  entreeCrayon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  saisiChampMDP: {
+    flex: 1,
+    height: 40,
+    color: '#000000ff',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 10,
   }
 });
+function asetRole(role: any) {
+  throw new Error('Function not implemented.');
+}
+

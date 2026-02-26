@@ -1,13 +1,12 @@
-import axios from "axios";
 import {FontAwesome} from "@expo/vector-icons";
 import * as Location from "expo-location";
 import React, {useEffect, useRef, useState} from "react";
 import {ActivityIndicator, StyleSheet, TouchableOpacity, View, Linking, Platform, Modal, Text} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { useRouter } from 'expo-router';
-import HautPage from "../hautPage";
+import HautPage from "@/app/hautPage";
 import proj4 from "proj4";
-import { API_ENDPOINTS } from "../../config/api";
+import { getAllPointEau } from "@/service/pointEauService";
 
 // Définit toutes les infos qu'un point possède
 type PointEau = {
@@ -23,7 +22,7 @@ type PointEau = {
   longitude: number;
 };
 
-// Page Accueil (Admin) carte interactive qui localisation / affiche les points d'eau incendie / itinéraire ou signaler un problème sur les points d'eau
+// Page Accueil (Public) carte interactive qui localisation / affiche les points d'eau incendie / itinéraire ou signaler un problème sur les points d'eau
 export default function HomeScreen() {
   const [localisation, setLocalisation] = useState<Location.LocationObject | null>(null);
   const [pointsEau, setPointsEau] = useState<PointEau[]>([]);
@@ -42,13 +41,13 @@ export default function HomeScreen() {
 
     const fetchPointsEau = async () => {
       try {
-        const response = await axios.get(API_ENDPOINTS.POINTS_EAU);
+        const response = await getAllPointEau();
 
         // Conversion du format (Lambert93) vers le format GPS (WGS84)
         const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
         const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
-        const pointsRaw = Array.isArray(response.data) ? response.data : response.data.points_eau;
+        const pointsRaw = Array.isArray(response) ? response : response.points_eau;
 
         const pointsEauWGS84 = pointsRaw.map((p: any) => {
           const [lon, lat] = proj4(lambert93, wgs84, [p.longitude, p.latitude]);
@@ -196,7 +195,7 @@ export default function HomeScreen() {
                 if (selectedPEI) {
                   
                   router.push({
-                    pathname: '/signalement',
+                    pathname: '/creerSignalement',
                     params: {idPoint: selectedPEI.numero_pei  .toString()},
                   });
                   

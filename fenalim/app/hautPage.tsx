@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 // Logo du SDIS
 const imgSDIS = require('@/assets/images/logo_sdis_56-detoure.png');
 
-// Haut des Pages de l'appplication (titre)
+// Haut des Pages de l'appplication (titre) petit mot afficher en haut de la page près du logo pour indiqué la page actuel 
 export default function hautPage({ title }: { title: string }) {
   return (
 

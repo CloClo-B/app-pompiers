@@ -15,7 +15,7 @@ export default function Accueil() {
   const router = useRouter();
 
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <LinearGradient colors={['#E63946', '#1D3557']} style={styles.container}>
 
                 <View>
@@ -27,9 +27,6 @@ export default function Accueil() {
                     <Text style={styles.title}>FEN-Alim</Text>
                 </View>
 
-                <View>
-                    <Text style={styles.title2}> Localisez et accédez rapidement {'\n'}    aux points d’eau disponibles</Text>
-                </View>
 
                 <View style={{ marginTop: 40}}>
                     <Button label="Se connecter" type="connexion" onPress={() => router.navigate('/connexion')} />

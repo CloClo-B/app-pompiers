@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, Any
 from datetime import datetime
 # Schémas Pydantic utilisés pour la validation la création et la sortie des données de l’API
@@ -6,6 +6,7 @@ from datetime import datetime
 
 
 # POINT D'EAU 
+
 # Schéma de base pour la lecture d’un point d’eau
 class PointEauBase(BaseModel):
     id: int
@@ -13,17 +14,38 @@ class PointEauBase(BaseModel):
     nom: Optional[str] = None
     statut: str
     type_nature: str
-    insee5: Optional[str] = None
-    press_deb: Optional[float] = None
-    debit_1_bar: Optional[float] = None
-    vol_eau_mi: Optional[float] = None
-    accessibilite: Optional[str] = None
-    disponibilite: Optional[str] = None
-    carto_ref: Optional[int] = None
-    utilisateur: Optional[str] = None 
-    latitude: Optional[float] = None  
-    longitude: Optional[float] = None  
-    date_crea: Optional[datetime] = None
+    insee5: str
+    press_deb: float
+    debit_1_bar: float
+    vol_eau_mi: float
+    accessibilite: str
+    disponibilite:str
+    carto_ref: int
+    utilisateur: int 
+    latitude: float  
+    longitude: float  
+    date_crea: datetime
+    date_maj: Optional[datetime] = None
+    
+    model_config = ConfigDict(from_attributes=True)
+
+# Schéma de sortie pour un point d’eau
+class PointEauOut(BaseModel):
+    id: int
+    numero_pei: int
+    nom: Optional[str] = None
+    statut: str
+    type_nature: str
+    insee5: str
+    press_deb: float
+    debit_1_bar: float
+    vol_eau_mi: float
+    accessibilite: str
+    disponibilite:str
+    carto_ref: int
+    utilisateur: int 
+    latitude: float  
+    longitude: float  
     date_maj: Optional[datetime] = None
     
     model_config = ConfigDict(from_attributes=True)
@@ -35,17 +57,15 @@ class PointEauCreate(BaseModel):
     nom: Optional[str] = None
     statut: str
     type_nature: str
-    insee5: Optional[str] = None
-    press_deb: Optional[float] = None
-    debit_1_bar: Optional[float] = None
-    vol_eau_mi: Optional[float] = None
-    accessibilite: Optional[str] = None
-    disponibilite: Optional[str] = None
-    carto_ref: Optional[int] = None
-    utilisateur: Optional[str] = None 
+    insee5: str
+    press_deb: float
+    debit_1_bar: float
+    vol_eau_mi: float
+    accessibilite: str
+    disponibilite: str
+    carto_ref: int
     latitude: float
     longitude: float
-    date_crea: datetime = Field(default_factory=datetime.now)
     date_maj: Optional[datetime] = None
 
 # UTILISATEUR
@@ -53,9 +73,8 @@ class PointEauCreate(BaseModel):
 class UtilisateurBase(BaseModel):
     nom: str
     prenom: str
-    email: EmailStr
-    telephone: Optional[str] = None
-    role: Optional[str] = "public"
+    email: str
+    telephone: str
 
 
 # Schéma utilisé lors de la création d’un utilisateur
@@ -71,7 +90,7 @@ class UtilisateurCreate(UtilisateurBase):
 class UtilisateurUpdate(BaseModel):
     nom: Optional[str] = None
     prenom: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     telephone: Optional[str] = None
     role: Optional[str] = None
     mot_de_passe: Optional[str] = None
@@ -81,14 +100,13 @@ class UtilisateurOut(BaseModel):
     id_utilisateur: int
     nom: str
     prenom: str
-    email: EmailStr
-    telephone: Optional[str] = None
-    role: Optional[str] = "admin"
+    email: str
+    telephone: str
+    role: str
     model_config = ConfigDict(from_attributes=True)
 
 # Réponse retournée après authentification
 class AuthResponse(BaseModel):
-    id_utilisateur: int
     token: str
     role: str
     model_config = ConfigDict(from_attributes=True)
@@ -99,7 +117,7 @@ class LogoutPayload(BaseModel):
 
 # Payload de connexion
 class LoginPayload(BaseModel):
-    email: EmailStr
+    email: str
     mot_de_passe: str
 
 
@@ -112,13 +130,20 @@ class MissionBase(BaseModel):
     commentaire: Optional[str]
     itineraire: Optional[Any]
 
-# Schéma de création d’une mission
 class MissionCreate(MissionBase):
     nom_mission: str
     id_point: int
     id_utilisateur: int
     commentaire: Optional[str]
     itineraire: Optional[Any]
+
+
+class MissionCreateClient(BaseModel):
+    nom_mission: str
+    id_point: int
+    commentaire: Optional[str]
+    itineraire: Optional[Any]
+
 
 # Schéma de mise à jour d’une mission
 class MissionUpdate(BaseModel):
@@ -135,7 +160,7 @@ class MissionOut(BaseModel):
     id_mission: int
     nom_mission: str
     id_point: int
-    id_utilisateur: int
+    mail_utilisateur: Optional[str] = None
     date_creation: datetime
     statut: str
     commentaire: Optional[str]
@@ -175,7 +200,7 @@ class SignalerBase(BaseModel):
     id:int
     id_point: int
     probleme: str
-    photo: Optional[str]
+    photo: str
     id_utilisateur: int
     date_creation: datetime
     
@@ -183,16 +208,29 @@ class SignalerBase(BaseModel):
 class SignalerCreate(BaseModel):
     id_point: int
     probleme: str
-    photo: Optional[str]
+    photo: str
     id_utilisateur: int
     model_config = ConfigDict(from_attributes=True)
+
+class SignalerOut(BaseModel):
+    id:int
+    id_point: int
+    probleme: str
+    photo: str
+    mail_utilisateur: str
+    date_creation: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+
+
 
 # Schéma de sortie du profil utilisateur
 class UserProfileOut(BaseModel):
     id_utilisateur: int
     nom: str
     prenom: str
-    email: EmailStr
+    email: str
     telephone: str
     role: str
     date_creation: datetime
@@ -204,7 +242,7 @@ class UserProfileOut(BaseModel):
 class UserProfileUpdate(BaseModel):
     nom: Optional[str] = Field(None, min_length=2, max_length=40)
     prenom: Optional[str] = Field(None, min_length=2, max_length=40)
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     telephone: Optional[str] = Field(None, pattern=r'^\d{10}$') 
 
 # Schéma de changement de mot de passe
