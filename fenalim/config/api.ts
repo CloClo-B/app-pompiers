@@ -1,7 +1,7 @@
 // Fichier de centralisation des URL pour l'application (frontend)
 
 // IP A CHANGER
-export const API_URL = 'http://192.168.1.178:8000';
+export const API_URL = 'http://192.168.1.18:8000';
 
 
 // Liste de tous les points d'accès utilisés par l'application pour accéder a l'API

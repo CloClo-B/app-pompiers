@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import HautPage from "@/app/hautPage";
 import proj4 from "proj4";
 import { getAllPointEau } from "@/service/pointEauService";
+import Signalement from "../creerSignalement";
 
 // Définit toutes les infos qu'un point possède
 type PointEau = {
@@ -175,7 +176,7 @@ export default function HomeScreen() {
 
             {/* Itinéraire pour aller au point d'eau */}
             <TouchableOpacity
-              style={styles.primaryButton}
+              style={[styles.communButtonInfo, styles.itineraireButton]}
               onPress={() => {
                 if (!selectedPEI) return;
                 const url =
@@ -188,15 +189,34 @@ export default function HomeScreen() {
               <Text style={styles.buttonText}>Itinéraire</Text>
             </TouchableOpacity>
 
+            {/* Créer une mission */}
+            <TouchableOpacity
+              style={[styles.communButtonInfo, styles.missionButton]}
+              onPress={() => {
+                if (selectedPEI) {
+                  
+                  router.push({
+                    pathname: '/creerMissionCarte',
+                    params: {idPoint: selectedPEI.numero_pei.toString()},
+                  });
+                  
+                };
+                setModalVisible(false)
+              }}
+            >
+              <Text style={styles.buttonText}>Créer une mission</Text>
+            </TouchableOpacity>
+
+            
             {/* Signaler le point d'eau */}
             <TouchableOpacity
-              style={styles.dangerButton}
+              style={[styles.communButtonInfo, styles.signalementButton]}
               onPress={() => {
                 if (selectedPEI) {
                   
                   router.push({
                     pathname: '/creerSignalement',
-                    params: {idPoint: selectedPEI.numero_pei  .toString()},
+                    params: {idPoint: selectedPEI.numero_pei.toString()},
                   });
                   
                 };
@@ -205,7 +225,8 @@ export default function HomeScreen() {
             >
               <Text style={styles.buttonText}>Signaler</Text>
             </TouchableOpacity>
-
+            
+            
 
             <TouchableOpacity onPress={() => setModalVisible(false)}>
               <Text style={styles.cancelText}>Fermer</Text>
@@ -265,18 +286,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     lineHeight: 22,
   },
-  primaryButton: {
-    backgroundColor: "#007AFF",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  dangerButton: {
-    backgroundColor: "#FF9500",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
   buttonText: {
     color: "white",
     textAlign: "center",
@@ -288,4 +297,22 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 10,
   },
+  // bouttons pour les infos qui s'affiche quand on clique sur un bouton
+  communButtonInfo:{
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  itineraireButton: {
+    backgroundColor: "#007AFF",
+
+  },
+  missionButton: {
+    backgroundColor: "#FF9500",
+
+  },
+  signalementButton: {
+    backgroundColor: "#FF3B30",
+  },
+
 });
