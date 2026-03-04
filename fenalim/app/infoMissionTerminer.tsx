@@ -8,6 +8,7 @@ import { naviguerMission } from '@/config/navigation';
 import { getMissionById } from "@/service/MissionService";
 import { getPointEauByID } from "@/service/pointEauService";
 import { getRole, getToken } from "@/service/infosStocker";
+import ButtonLog from '@/components/ButtonLog';
 
 // Donnée de la Mission
 type Mission = {
@@ -80,7 +81,7 @@ export default function MissionDetails() {
   // recuperer la mission
   const infoMissionSelect = async (token: string) => {
     if (!token) {
-      Alert.alert("Erreur" +"impossible d'afficher la missions séléctionne");
+      Alert.alert("Erreur" +"impossible d'afficher la mission sélectionnée");
       return;
     }
     try {
@@ -154,7 +155,7 @@ export default function MissionDetails() {
     <>
 
       <View>
-        <HautPage title="Information mission terminer" />
+        <HautPage title="Informations mission terminée" />
       </View>
       
       <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
@@ -177,31 +178,27 @@ export default function MissionDetails() {
             
             {/* BOUTONS */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-              <TouchableOpacity style={[styles.boutton, { backgroundColor: '#457B9D', width: 150, height: 45 }]} onPress={() => {if (userRole) naviguerMission(userRole); else alert("Rôle utilisateur introuvable"); } }>
-                <Text style={{color:'#ffffff'}}>Fermer</Text>
-              </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[styles.boutton ,{ backgroundColor: '#457B9D', width: 150, height: 45 }]}
+              <ButtonLog label="FERMER" onPress={() => { if (userRole) naviguerMission(userRole); 
+                else alert("Rôle utilisateur introuvable"); }} type="primary" 
+                width={150} height={45} marginTop={35}
+              />
+
+              <ButtonLog
+                label="VOIR MISSION"
                 onPress={() => {
-                    const latitude = pointMission?.latitude;
-                    const longitude = pointMission?.longitude;
-                    
-                    let url = "";
-                    if (Platform.OS === "ios") {
-                        // Apple Maps
-                        url = `http://maps.apple.com/?daddr=${latitude},${longitude}&dirflg=d`;
-                    } else {
-                        // Android / Google Maps
-                        url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-                    }
-                    Linking.openURL(url).catch((err) =>
-                    console.error("Impossible d'ouvrir l'application de navigation", err)
-                    );
+                  const latitude = pointMission?.latitude;
+                  const longitude = pointMission?.longitude;
+                  let url = Platform.OS === "ios"
+                    ? `http://maps.apple.com/?daddr=${latitude},${longitude}&dirflg=d`
+                    : `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+                  Linking.openURL(url).catch(err => console.error("Impossible d'ouvrir l'application de navigation", err));
                 }}
-                >
-                    <Text style={{ color: '#FFF'}}>Afficher le point</Text>
-                </TouchableOpacity>
+                type="primary"
+                width={150}
+                height={45}
+                marginTop={35}
+              />
             </View>
 
 
@@ -240,10 +237,4 @@ const styles = StyleSheet.create({
     marginBottom: 15
   },
 
-  boutton:{
-    marginTop: 15,
-    justifyContent: 'center',
-    alignItems: 'center',    
-    borderRadius: 30,
-  },
 });

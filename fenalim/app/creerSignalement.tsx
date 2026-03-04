@@ -1,5 +1,5 @@
 import { Camera } from 'expo-camera';
-import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Button, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -9,6 +9,7 @@ import { naviguerAccueil} from '@/config/navigation';
 import { useLocalSearchParams } from 'expo-router';
 import { createSignalement } from '@/service/signalementService';
 import { getRole, getToken } from '@/service/infosStocker';
+import ButtonLog from '@/components/ButtonLog';
 
 
 // petit encadrer pour choix photo
@@ -40,7 +41,7 @@ export default function Signalement() {
         setRole(role);
       }
     } catch(e) {
-      console.log("erreur créer singalement");
+      console.log("erreur créer signalement");
     }
   }
 
@@ -197,14 +198,8 @@ const handlePickImage = () => {
             {/* choix validation annulation */}
             <View style={styles.validation}>
 
-                <TouchableOpacity style={styles.boutton} onPress={() => {if (role) naviguerAccueil(role); else alert("Rôle utilisateur introuvable"); }}>
-                <Text style={{color:'#ffffff'}}>ANNULER</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.boutton} onPress={creerSignalement}>
-                <Text style={{color:'#ffffff'}}>CONFIRMER</Text>
-                </TouchableOpacity>
-
+                <ButtonLog label="ANNULER" onPress={() => { if (role) naviguerAccueil(role); else alert("Rôle utilisateur introuvable"); }} type="primary" width={150} height={45} />
+                <ButtonLog label="CONFIRMER" onPress={creerSignalement} type="primary" width={150} height={45}/>
             </View>
 
         </View>
@@ -250,15 +245,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 20,
   },
-
-  boutton:{
-    paddingVertical: 15,
-    paddingHorizontal:25,
-    backgroundColor: '#457B9D',
-    borderRadius: 30,
-    alignSelf: 'center',
-  },
-
+  
   info: {
     alignItems: 'center',
     width: '100%', 

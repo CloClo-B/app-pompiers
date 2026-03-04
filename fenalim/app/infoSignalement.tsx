@@ -8,6 +8,7 @@ import { API_ENDPOINTS } from '@//config/api';
 import { getSignalementByIndex } from "@/service/signalementService";
 import { getPointEauByID } from "@/service/pointEauService";
 import { getRole, getToken } from "@/service/infosStocker";
+import ButtonLog from '@/components/ButtonLog';
 
 // Donnée du Signalement
 type Signale = {
@@ -158,13 +159,11 @@ export default function UserDetails() {
             
             {/* BOUTONS */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-                <TouchableOpacity
-                  style={[styles.boutton ,{ backgroundColor: '#457B9D', width: 150, height: 45 }]}
-                  onPress={() => {
-                    const latitude = pointSignale?.latitude;
-                    const longitude = pointSignale?.longitude;
-                
-                    let url = "";
+
+                <ButtonLog label="Itinéraire" onPress={() => {
+                  const latitude = pointSignale?.latitude;
+                  const longitude = pointSignale?.longitude;
+                  let url = "";
                     if (Platform.OS === "ios") {
                       // Apple Maps
                       url = `http://maps.apple.com/?daddr=${latitude},${longitude}&dirflg=d`;
@@ -174,16 +173,15 @@ export default function UserDetails() {
                     }
                 
                     Linking.openURL(url).catch((err) =>
-                      console.error("Impossible d'ouvrir l'application de navigation", err)
-                    );
-                  }}
-                >
-                  <Text style={{ color: '#FFF'}}>Itinéraire</Text>
-                </TouchableOpacity>
+                      console.error("Impossible d'ouvrir l'application de navigation", err));
+                    }} type="primary" width={150} height={45}
+                />
 
-              <TouchableOpacity style={[styles.boutton, { backgroundColor: '#457B9D', width: 150, height: 45 }]} onPress={() => router.push({ pathname: '/marquerResolu', params: { id_s: id_s } })}>
-                <Text style={{color:'#ffffff'}}>Marquer resolu</Text>
-              </TouchableOpacity>
+              <ButtonLog
+                label="Marquer résolu"
+                onPress={() => router.push({ pathname: '/marquerResolu', params: { id_s: id_s } })}
+                type="primary" width={150} height={45}/>
+
             </View>
 
 
@@ -221,10 +219,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 15
   },
-  boutton:{
-    justifyContent: 'center',
-    alignItems: 'center',    
-    borderRadius: 30,
-  },
-
 });

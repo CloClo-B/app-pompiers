@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import HautPage from "@/app/hautPage";
 import proj4 from "proj4";
 import { getAllPointEau } from "@/service/pointEauService";
+import ButtonLog from '@/components/ButtonLog';
 
 // Définit toutes les infos qu'un point possède
 type PointEau = {
@@ -174,37 +175,33 @@ export default function HomeScreen() {
             </Text>
 
             {/* Itinéraire pour aller au point d'eau */}
-            <TouchableOpacity
-              style={styles.primaryButton}
+            <ButtonLog
+              label="Itinéraire"
               onPress={() => {
                 if (!selectedPEI) return;
-                const url =
-                  Platform.OS === "ios"
-                    ? `maps://maps.apple.com/?daddr=${selectedPEI.latitude},${selectedPEI.longitude}`
-                    : `https://www.google.com/maps/dir/?api=1&destination=${selectedPEI.latitude},${selectedPEI.longitude}`;
+                const url = Platform.OS === "ios"
+                  ? `maps://maps.apple.com/?daddr=${selectedPEI.latitude},${selectedPEI.longitude}`
+                  : `https://www.google.com/maps/dir/?api=1&destination=${selectedPEI.latitude},${selectedPEI.longitude}`;
                 Linking.openURL(url);
               }}
-            >
-              <Text style={styles.buttonText}>Itinéraire</Text>
-            </TouchableOpacity>
+              type="itineraire"
+              width={'100%'}
+              height={45}
+            />
 
             {/* Signaler le point d'eau */}
-            <TouchableOpacity
-              style={styles.dangerButton}
+            <ButtonLog
+              label="Signaler"
               onPress={() => {
                 if (selectedPEI) {
-                  
-                  router.push({
-                    pathname: '/creerSignalement',
-                    params: {idPoint: selectedPEI.numero_pei  .toString()},
-                  });
-                  
+                  router.push({ pathname: '/creerSignalement', params: {idPoint: selectedPEI.numero_pei.toString()} });
                 };
-                setModalVisible(false)
+                setModalVisible(false);
               }}
-            >
-              <Text style={styles.buttonText}>Signaler</Text>
-            </TouchableOpacity>
+              type="signalement"
+              width={'100%'}
+              height={45}
+            />
 
 
             <TouchableOpacity onPress={() => setModalVisible(false)}>
@@ -264,23 +261,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginBottom: 20,
     lineHeight: 22,
-  },
-  primaryButton: {
-    backgroundColor: "#007AFF",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  dangerButton: {
-    backgroundColor: "#FF9500",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  buttonText: {
-    color: "white",
-    textAlign: "center",
-    fontWeight: "600",
   },
   cancelText: {
     color: "#007AFF",

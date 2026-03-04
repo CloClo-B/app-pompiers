@@ -8,6 +8,7 @@ import HautPage from "@/app/hautPage";
 import proj4 from "proj4";
 import { getAllPointEau } from "@/service/pointEauService";
 import Signalement from "../creerSignalement";
+import ButtonLog from '@/components/ButtonLog';
 
 // Définit toutes les infos qu'un point possède
 type PointEau = {
@@ -175,56 +176,48 @@ export default function HomeScreen() {
             </Text>
 
             {/* Itinéraire pour aller au point d'eau */}
-            <TouchableOpacity
-              style={[styles.communButtonInfo, styles.itineraireButton]}
+            <ButtonLog
+              label="Itinéraire"
               onPress={() => {
                 if (!selectedPEI) return;
-                const url =
-                  Platform.OS === "ios"
-                    ? `maps://maps.apple.com/?daddr=${selectedPEI.latitude},${selectedPEI.longitude}`
-                    : `https://www.google.com/maps/dir/?api=1&destination=${selectedPEI.latitude},${selectedPEI.longitude}`;
+                const url = Platform.OS === "ios"
+                  ? `maps://maps.apple.com/?daddr=${selectedPEI.latitude},${selectedPEI.longitude}`
+                  : `https://www.google.com/maps/dir/?api=1&destination=${selectedPEI.latitude},${selectedPEI.longitude}`;
                 Linking.openURL(url);
               }}
-            >
-              <Text style={styles.buttonText}>Itinéraire</Text>
-            </TouchableOpacity>
+              type="itineraire"
+              width={'100%'}
+              height={45}
+            />
 
             {/* Créer une mission */}
-            <TouchableOpacity
-              style={[styles.communButtonInfo, styles.missionButton]}
+            <ButtonLog
+              label="Créer une mission"
               onPress={() => {
                 if (selectedPEI) {
-                  
-                  router.push({
-                    pathname: '/creerMissionCarte',
-                    params: {idPoint: selectedPEI.numero_pei.toString()},
-                  });
-                  
+                  router.push({ pathname: '/creerMissionCarte', params: {idPoint: selectedPEI.numero_pei.toString()} });
                 };
-                setModalVisible(false)
+                setModalVisible(false);
               }}
-            >
-              <Text style={styles.buttonText}>Créer une mission</Text>
-            </TouchableOpacity>
+              type="mission"
+              width={'100%'}
+              height={45}
+            />
 
             
             {/* Signaler le point d'eau */}
-            <TouchableOpacity
-              style={[styles.communButtonInfo, styles.signalementButton]}
+            <ButtonLog
+              label="Signaler"
               onPress={() => {
                 if (selectedPEI) {
-                  
-                  router.push({
-                    pathname: '/creerSignalement',
-                    params: {idPoint: selectedPEI.numero_pei.toString()},
-                  });
-                  
+                  router.push({ pathname: '/creerSignalement', params: {idPoint: selectedPEI.numero_pei.toString()} });
                 };
-                setModalVisible(false)
+                setModalVisible(false);
               }}
-            >
-              <Text style={styles.buttonText}>Signaler</Text>
-            </TouchableOpacity>
+              type="signalement"
+              width={'100%'}
+              height={45}
+            />
             
             
 
@@ -297,22 +290,5 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 10,
   },
-  // bouttons pour les infos qui s'affiche quand on clique sur un bouton
-  communButtonInfo:{
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  itineraireButton: {
-    backgroundColor: "#007AFF",
-
-  },
-  missionButton: {
-    backgroundColor: "#FF9500",
-
-  },
-  signalementButton: {
-    backgroundColor: "#FF3B30",
-  },
-
+ 
 });

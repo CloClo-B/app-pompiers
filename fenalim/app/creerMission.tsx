@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { CreateMission } from '@/service/MissionService';
 import { getToken } from '@/service/infosStocker';
+import ButtonLog from '@/components/ButtonLog';
 
 // Page de création de Mission
 export default function CreerMission() {
@@ -127,9 +128,7 @@ export default function CreerMission() {
 
     {/* creer */}
       <View style={styles.tout}>
-        <TouchableOpacity style={[styles.boutton, {marginTop: 15, backgroundColor: '#457B9D', width: 200, height: 45}]} onPress = {creerMission}>
-          <Text style={{color:'#ffffff'}}>CREER</Text>
-        </TouchableOpacity>
+        <ButtonLog label="CREER" onPress={creerMission} type="primary" width={200} height={45} marginTop={15}/>
     </View>
 
     </>
@@ -159,11 +158,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     borderWidth: 1,
     borderColor: '#1D3557',
-  },
-  boutton:{
-    justifyContent: 'center',
-    alignItems: 'center',    
-    borderRadius: 30,
   },
 
   entreeD: {

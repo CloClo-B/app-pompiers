@@ -1,8 +1,9 @@
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Button, Image, StyleSheet, Text, View } from 'react-native';
 import { naviguerPointEau, naviguerMission, naviguerAccueil } from '@/config/navigation';
-import { getRole } from "@/service/infosStocker"; 
+import { getRole } from "@/service/infosStocker";
+import ButtonLog from '@/components/ButtonLog';
 
 const reussi = require('@/assets/images/succes.png');
 
@@ -56,9 +57,7 @@ export default function CreationSucces() {
         <Image source={reussi} style={styles.imageR}></Image>
 
     {/* retour */}
-        <TouchableOpacity style={styles.boutton} onPress={() => {choixType()}}>
-          <Text style={{color:'#ffffff', fontSize:20}}>CONTINUER</Text>
-        </TouchableOpacity>
+      <ButtonLog label="CONTINUER" onPress={choixType} type="primary" width={250} height={55}/>
     </View>
     </>
   );
@@ -84,15 +83,5 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
   },
-
-  boutton:{
-    justifyContent: 'center',
-    alignItems: 'center',    
-    borderRadius: 30,
-    marginTop: 15, 
-    backgroundColor: '#457B9D', 
-    width: 250, 
-    height: 55
-},
 
 });

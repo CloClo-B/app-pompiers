@@ -5,6 +5,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import axios from 'axios';
 import { createPointEau } from '@/service/pointEauService';
 import { getToken } from '@/service/infosStocker';
+import ButtonLog from '@/components/ButtonLog';
 
 // Page création de Point d'eau
 export default function CreerPoint() {
@@ -316,7 +317,7 @@ export default function CreerPoint() {
 
     {/* préssion */}
     <View style={[styles.tout, {marginTop:20}]}>
-      <Text style={styles.text}>préssion</Text> 
+      <Text style={styles.text}>Pression</Text> 
       <TextInput value={pression} onChangeText={setPression} keyboardType='decimal-pad' style={styles.entree} placeholder=""></TextInput>
     </View> 
 
@@ -328,7 +329,7 @@ export default function CreerPoint() {
 
    {/* insee5 */}
     <View style={[styles.tout, {marginTop:20}]}>
-      <Text style={styles.text}>insee5</Text> 
+      <Text style={styles.text}>INSEE5</Text> 
       <TextInput value={insee5} onChangeText={setInsee5} keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
     </View> 
 
@@ -346,15 +347,13 @@ export default function CreerPoint() {
 
     {/* lattitude */}
     <View style={[styles.tout, {marginTop:20}]}>
-      <Text style={styles.text}>Lattitude</Text> 
+      <Text style={styles.text}>Latitude</Text> 
       <TextInput value={latitude} onChangeText={setLatitude} keyboardType='numbers-and-punctuation' style={styles.entree} placeholder=""></TextInput>
     </View> 
 
     {/* creer */}
       <View style={[styles.tout, {marginTop:20}]}>
-        <TouchableOpacity style={[styles.boutton, {marginTop: 15, backgroundColor: '#457B9D', width: 200, height: 45}]} onPress = {creerPointAPI} >
-          <Text style={{color:'#ffffff'}}>CREER</Text>
-        </TouchableOpacity>
+        <ButtonLog label="CREER" onPress={creerPointAPI} type="primary" width={200} height={45} marginTop={15}/>
     </View>
     </>
   );
@@ -388,13 +387,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#1D3557',
   },
-
-  boutton:{
-    justifyContent: 'center',
-    alignItems: 'center',    
-    borderRadius: 30,
-  },
-
 
 });
   

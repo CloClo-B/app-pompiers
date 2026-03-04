@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import HautPage from "@/app/hautPage";
 import authService, { UserData } from '@/service/authService';
+import ButtonLog from '@/components/ButtonLog';
 
 // Icon
 const imgMonCompte = require('@/assets/images/mon_compte.png');
@@ -364,25 +365,27 @@ export default function Compte() {
                   />
                 </View>
 
-                <TouchableOpacity 
-                  style={[styles.boutton, styles.validateButton]}
+                <ButtonLog
+                  label={saving ? 'ENREGISTREMENT...' : 'VALIDER'}
                   onPress={handleChangePassword}
+                  type="valider"
+                  width={200}
+                  height={45}
+                  marginTop={20}
                   disabled={saving}
-                >
-                  <Text style={{color:'#ffffff', fontWeight: '600'}}>
-                    {saving ? 'ENREGISTREMENT...' : 'VALIDER'}
-                  </Text>
-                </TouchableOpacity>
+                />
               </>
             )}
 
             {/* Déconnexion */}
-            <TouchableOpacity 
-              style={styles.boutton} 
+            <ButtonLog
+              label="SE DÉCONNECTER"
               onPress={handleLogout}
-            >
-              <Text style={{color:'#ffffff', fontWeight: '600'}}>SE DÉCONNECTER</Text>
-            </TouchableOpacity>
+              type="secondary"
+              width={200}
+              height={45}
+              marginTop={40}
+            />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
