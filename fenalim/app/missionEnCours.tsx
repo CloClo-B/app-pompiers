@@ -47,7 +47,7 @@ export default function MissionEnCours() {
   // alerte terminer mission
   const appuieLongSupp = (nomMission : string, id: string) => {
     Alert.alert(
-    "Mission terminé ?",
+    "Mission terminée ?",
     "Nom de la mission: "+ nomMission,
     [
         {
@@ -205,7 +205,7 @@ const fetchMissions = async (token: string) => {
 
     router.push({
         pathname: '/succes',
-        params: { title: 'Mission terminé avec succès', page:"missions" }
+        params: { title: 'Mission terminée avec succès', page:"missions" }
         });
     } catch (error) {
         console.error(error);

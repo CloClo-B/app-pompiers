@@ -15,24 +15,23 @@ from .models import Utilisateur
 
 security = HTTPBearer()
 
-# Vérification des variables d'environnement
-#key_use = os.getenv("key_use")
-#algo_use = os.getenv("algo_use")
-#time_token = int(os.getenv("time_token"))
+# Chemin vers le .env : remonte de app/ → backend/ → fen-alim_a/
+pathEnv = Path(__file__).resolve().parent.parent.parent
+load_dotenv(dotenv_path=pathEnv / ".env")
 
-key_use="projet_Sprint3" # la clé secrète à utiliser pour le token
-algo_use="HS256" #Algorithme utilisé pour le token
-time_token=8 #Temps en heures de validité du token de l'utilisateur
+key_use = os.getenv("key_use")
+algo_use = os.getenv("algo_use")
+time_token = int(os.getenv("time_token"))
+
+#key_use="projet_Sprint3" # la clé secrète à utiliser pour le token
+#algo_use="HS256" #Algorithme utilisé pour le token
+#time_token=8 #Temps en heures de validité du token de l'utilisateur
 
 print(f"key_use: {key_use}")
 print(f"algo_use: {algo_use}")
 print(f"time_token: {time_token}")
 
-# Chemin du repertoire pour trouver le .env
-#pathEnv = Path(__file__).resolve().parent.parent.parent
 
-# Définir les variables à utiliser à partir du fichier .env
-#load_dotenv(dotenv_path=pathEnv)
 
 # Crée un token JWT
 # Le token expire après 'time_token' heures

@@ -77,7 +77,7 @@ def create_point(payload: PointEauCreate, db: Session = Depends(get_db), user_ch
 
 
 
-# Supprime un point d'eau selon son numéro PEI.
+# Supprime un point d'eau selon son numéro PEI
 @router.delete("/{numero_pei}")
 def delete_point(numero_pei: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
     success = delete_point_eau_by_numero_pei(db, numero_pei)

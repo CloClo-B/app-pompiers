@@ -165,7 +165,7 @@ const handlePickImage = () => {
   return (
     <>
     <View>
-      <HautPage title="Signalement hydrant" />
+      <HautPage title="Signalement hydrant"/>
     </View>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -182,9 +182,9 @@ const handlePickImage = () => {
 
             {/* message signalement */}
             <View style={styles.total}>
-              <Text style={styles.text}>Descripton du problème</Text>
+              <Text style={styles.text}>Description du problème</Text>
               <View style={styles.entreeCryon}>
-                  <TextInput value={probleme} onChangeText={setProbleme} style={styles.entree} maxLength={100} multiline={true} placeholder="Ecrivez ici"></TextInput>
+                  <TextInput value={probleme} onChangeText={setProbleme} style={styles.entree} maxLength={100} multiline={true} placeholder="Explication du problème"></TextInput>
               </View>
             </View>
 
@@ -197,7 +197,6 @@ const handlePickImage = () => {
 
             {/* choix validation annulation */}
             <View style={styles.validation}>
-
                 <ButtonLog label="ANNULER" onPress={() => { if (role) naviguerAccueil(role); else alert("Rôle utilisateur introuvable"); }} type="primary" width={150} height={45} />
                 <ButtonLog label="CONFIRMER" onPress={creerSignalement} type="primary" width={150} height={45}/>
             </View>
@@ -221,7 +220,6 @@ const styles = StyleSheet.create({
   },
   contenue: {
     marginTop: 40,
-    
     alignItems: 'center',
     justifyContent: 'center',
   },

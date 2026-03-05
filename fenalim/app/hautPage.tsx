@@ -1,11 +1,11 @@
 import { Image } from 'expo-image';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
 
 // Logo du SDIS
 const imgSDIS = require('@/assets/images/logo_sdis_56-detoure.png');
 
-// Haut des Pages de l'appplication (titre) petit mot afficher en haut de la page près du logo pour indiqué la page actuel 
-export default function hautPage({ title }: { title: string }) {
+// Haut des Pages de l'appplication
+export default function hautPage({ title, onLogoPress, isRefreshing = false }: { title: string; onLogoPress?: () => void; isRefreshing?: boolean }) {
   return (
 
     <View style={styles.container}>
@@ -13,7 +13,11 @@ export default function hautPage({ title }: { title: string }) {
       <View style={styles.rectangle1}></View>
       <View style={styles.rectangle2}></View>
 
-      <Image source={imgSDIS} style={styles.imageSdis}/>
+      <TouchableOpacity onPress={onLogoPress} activeOpacity={0.7} disabled={isRefreshing} style={styles.logoButton}>
+        {isRefreshing ? (
+          <ActivityIndicator size="small" color="#ffffff" />
+        ) : (<Image source={imgSDIS} style={styles.imageSdis}/>)}
+      </TouchableOpacity>
       <Text style={styles.leTexte}>{title}</Text>
     </View>
   
@@ -50,8 +54,17 @@ const styles = StyleSheet.create({
     width: 80,
     height: 50,
     zIndex: 2,
+    left: 5,
+    position: 'absolute',
+  },
+  logoButton: {
+    width: 80,
+    height: 50,
+    zIndex: 2,
     left: 15,
     position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   leTexte: {
   position: 'absolute',

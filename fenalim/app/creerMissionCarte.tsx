@@ -1,16 +1,20 @@
 import axios from 'axios';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { CreateMission } from '@/service/MissionService';
-import { getToken } from '@/service/infosStocker';
+import { getRole, getToken } from '@/service/infosStocker';
 import { useLocalSearchParams } from 'expo-router';
 import ButtonLog from '@/components/ButtonLog';
+import { naviguerAccueil} from '@/config/navigation';
+import HautPage from './hautPage';
 
 // Page de création de Mission depuis la carte
 export default function CreerMission() {
   const { idPoint } = useLocalSearchParams<{ idPoint: string }>();
   const [token, setToken] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+   
 
   // récupérer le token et l'id du point
   useEffect(() => {
@@ -21,12 +25,13 @@ export default function CreerMission() {
   }, [idPoint]);
 
 
-
   const getData = async () => {
     try {
       const value = await getToken();
-      if(value !== null) {
+      const role = await getRole();
+      if(value !== null && role !== null) {
         setToken(value);
+        setRole(role);
       }
     } catch(e) {
       console.log("erreur token creation point eau");
@@ -85,7 +90,7 @@ export default function CreerMission() {
         
         router.push({
             pathname: '/succes',
-            params: { title: 'Mission créé avec succès', page:"missions" }
+            params: { title: 'Mission créée avec succès', page:"missions" }
           });
         }
       catch (error: unknown) {
@@ -107,29 +112,42 @@ export default function CreerMission() {
 
   return (
     <>  
+      <View>
+          <HautPage title="Créer une mission" />
+      </View>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
 
-    <View style={styles.tout}>
-      {/* hydrant selectionner */}
-      <Text style={styles.choixhydrant}> Hydrant #{IDPoint}</Text>
-    
-      {/* nom mission */}
-      <Text style={styles.text}>Nom de la mission</Text> 
-      <TextInput value={nomMission} onChangeText={setnomMission} style={styles.entree} placeholder=""></TextInput>
+          <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
+
+            <View style={styles.tout}>
+              {/* hydrant selectionner */}
+              <Text style={styles.choixhydrant}> Hydrant #{IDPoint}</Text>
+            
+              {/* nom mission */}
+              <Text style={styles.text}>Nom de la mission</Text> 
+              <TextInput value={nomMission} onChangeText={setnomMission} style={styles.entree} placeholder=""></TextInput>
+
+              {/* message mission */}
+
+              <View style={styles.total}>
+                <Text style={styles.text}>Détails de la mission</Text>
+                <TextInput value={commentaire} onChangeText={setCommentaire} style={styles.entreeD} maxLength={250} multiline={true} placeholder="Explication de la mission"></TextInput>
+              </View>
+
+              {/* itinéraire */}
+              <Text style={styles.text}>Adresse de la mission</Text> 
+              <TextInput value={itineraire} onChangeText={setItineraire} style={styles.entree} placeholder=""></TextInput>
 
 
-      {/* message mission */}
-      <Text style={styles.text}>Détails de la mission</Text>
-      <TextInput value={commentaire} onChangeText={setCommentaire} style={styles.entreeD} maxLength={250} multiline={true} placeholder="Ecrivez ici"></TextInput>
-
-      {/* itinéraire */}
-      <Text style={styles.text}>Adresse de la mission</Text> 
-      <TextInput value={itineraire} onChangeText={setItineraire} style={styles.entree} placeholder=""></TextInput>
-
-
-      {/* creer */}
-      <ButtonLog label="CREER" onPress={creerMission} type="primary" width={200} height={45} marginTop={35}/>
-    </View> 
-
+              {/* creer / annuler*/}
+              <View style={styles.validation}>
+                <ButtonLog label="ANNULER" onPress={() => { if (role) naviguerAccueil(role); else alert("Rôle utilisateur introuvable"); }} type="primary" width={150} height={45}/>
+                <ButtonLog label="CREER" onPress={creerMission} type="primary" width={150} height={45}/>
+              </View>
+              
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
     </>
   );
 }
@@ -142,12 +160,23 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 
+  validation:{
+    flexDirection: 'row',
+    marginTop: 20,
+    alignItems: 'center',
+    gap:'10%',
+  },
   text: {
     marginBottom: 5,
     color: '#1D3557',
     fontSize: 15,
     fontWeight: '600',
     alignSelf: 'center',
+  },
+  contenue: {
+    marginTop: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   entree: {
     backgroundColor: '#ffffffff',
@@ -157,6 +186,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     borderWidth: 1,
     borderColor: '#1D3557',
+    marginBottom: 20,
   },
 
   entreeD: {
@@ -169,6 +199,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 20,
     textAlignVertical:"top",
+    marginBottom: 20,
   },
 
   choixhydrant: {
@@ -178,5 +209,13 @@ const styles = StyleSheet.create({
     backgroundColor:'#c8cac8ff',
     borderRadius: 40,
     fontSize: 20,
+  },
+
+  total:{
+    backgroundColor:'#ffffff',
+    width: '90%',
+    padding: 20,
+    borderRadius: 20,
+    marginBottom: 20,
   },
 });

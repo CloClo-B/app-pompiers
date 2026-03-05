@@ -8,7 +8,7 @@ import ButtonLog from '@/components/ButtonLog';
 const reussi = require('@/assets/images/succes.png');
 
 // Page des Succes creation ou supression (point_eau, missions, signalement, supression ...)
-// la page est appeler depuis les autres pages et contient le message envoyer en parametre 
+// la page est appelée depuis les autres pages et contient le message envoyer en parametre 
 export default function CreationSucces() {
   const [userRole, setUserRole] = useState<string | null>(null);
   
@@ -22,7 +22,7 @@ export default function CreationSucces() {
   }, []);
   const params = useLocalSearchParams();
   
-  // message afficher sur la page 
+  // message affiché sur la page 
   const title = params.title;
   // page de redirection fonctionne en fonction du rôle
   const page = params.page;

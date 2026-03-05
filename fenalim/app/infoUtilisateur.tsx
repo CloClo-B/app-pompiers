@@ -154,7 +154,7 @@ export default function UserDetails() {
     }
 
     Alert.alert(
-      "⚠️ Confirmation de suppression",
+      "Confirmation de suppression",
       `Êtes-vous vraiment sûr de vouloir supprimer l'utilisateur :\n\n${utilisateur.prenom} ${utilisateur.nom}\n(${utilisateur.email})\n\nCette action est irréversible !`,
       [
         { text: "Annuler", style: "cancel" },
@@ -490,6 +490,7 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.5,
+    backgroundColor: "#9e9e9e",
   },
   buttonText: {
     color: "#ffffff",

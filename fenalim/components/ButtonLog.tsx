@@ -30,8 +30,6 @@ export default function Button({
   borderRadius = undefined,
   marginBottom = undefined,
   padding = undefined,
-  fontWeight = undefined,
-  textAlign = undefined,
   disabled = false,
 
 }: Props) {

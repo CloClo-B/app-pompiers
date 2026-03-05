@@ -42,7 +42,7 @@ export default function historiqueMission() {
   // afficher la mission a supprimer
   const appuieLongSupp = (nomMisson : string, id: string) => {
     Alert.alert(
-    "Suprrimer la mission ?",
+    "Supprimer la mission ?",
     "Nom de la mission: "+ nomMisson,
     [
         {
@@ -125,7 +125,7 @@ export default function historiqueMission() {
       const MissionsRaw = Array.isArray(responseMission) ? responseMission : responseMission.missions;
       
       if (!MissionsRaw) {
-        console.error("Impossible de récupérer l'historique des mission:", responseMission);
+        console.error("Impossible de récupérer l'historique des missions :", responseMission);
         return;
       }
     
@@ -146,7 +146,7 @@ export default function historiqueMission() {
     
   } catch (error) {
       console.error("Erreur lors du chargement de l'historique des missions :", error);
-      Alert.alert("Erreur", "Impossible de récupérer l'historique des missions.");
+      Alert.alert("Erreur", "Impossible de récupérer l'historique des missions");
     }
   };
 
@@ -165,11 +165,11 @@ export default function historiqueMission() {
     
     router.push({
         pathname: '/succes',
-        params: { title: 'Mission supprimer avec succès', page:"missions" }
+        params: { title: 'Mission supprimée avec succès', page:"missions" }
         });
     } catch (error) {
         console.error(error);
-        alert('Erreur lors de la suprression de la mission');
+        alert('Erreur lors de la suppression de la mission');
     }
   };
 

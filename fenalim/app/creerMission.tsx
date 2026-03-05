@@ -78,7 +78,7 @@ export default function CreerMission() {
         
         router.push({
             pathname: '/succes',
-            params: { title: 'Mission créé avec succès', page:"missions" }
+            params: { title: 'Mission créée avec succès', page:"missions" }
           });
         }
       catch (error: unknown) {
@@ -128,7 +128,7 @@ export default function CreerMission() {
 
     {/* creer */}
       <View style={styles.tout}>
-        <ButtonLog label="CREER" onPress={creerMission} type="primary" width={200} height={45} marginTop={15}/>
+        <ButtonLog label="CREER" onPress={creerMission} type="primary" width={200} height={45} marginTop={15} marginBottom={50}/>
     </View>
 
     </>

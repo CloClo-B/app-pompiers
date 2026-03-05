@@ -81,7 +81,7 @@ export default function MissionDetails() {
   // recuperer la mission
   const infoMissionSelect = async (token: string) => {
     if (!token) {
-      Alert.alert("Erreur" +"impossible d'afficher la mission sélectionnée");
+      Alert.alert("Erreur" +"impossible d'afficher la mission séléctionnée");
       return;
     }
     try {
@@ -122,7 +122,7 @@ export default function MissionDetails() {
   // recuperer localisation du point d'eau   
   const fetchPointsEau = async (id_point: string, token: string) => {
     if (!token) {
-      Alert.alert("Erreur" +"impossible d'afficher la missions séléctionne");
+      Alert.alert("Erreur" +"impossible d'afficher la mission séléctionnée");
       return;
     }
     try {
@@ -144,7 +144,7 @@ export default function MissionDetails() {
       } 
     } 
     catch (error) {
-      console.error("Erreur lors du chargement du points d'eau :", error);
+      console.error("Erreur lors du chargement du point d'eau :", error);
       Alert.alert("Erreur", "Impossible de récupérer le point d'eau.");
     } 
   };
@@ -155,7 +155,7 @@ export default function MissionDetails() {
     <>
 
       <View>
-        <HautPage title="Informations mission terminée" />
+        <HautPage title="Information mission terminée" />
       </View>
       
       <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
@@ -178,14 +178,10 @@ export default function MissionDetails() {
             
             {/* BOUTONS */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-
-              <ButtonLog label="FERMER" onPress={() => { if (userRole) naviguerMission(userRole); 
-                else alert("Rôle utilisateur introuvable"); }} type="primary" 
-                width={150} height={45} marginTop={35}
-              />
+              <ButtonLog label="FERMER" onPress={() => { if (userRole) naviguerMission(userRole); else alert("Rôle utilisateur introuvable"); }} type="primary" width={150} height={45}/>
 
               <ButtonLog
-                label="VOIR MISSION"
+                label="VOIR LIEU"
                 onPress={() => {
                   const latitude = pointMission?.latitude;
                   const longitude = pointMission?.longitude;
@@ -194,10 +190,7 @@ export default function MissionDetails() {
                     : `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
                   Linking.openURL(url).catch(err => console.error("Impossible d'ouvrir l'application de navigation", err));
                 }}
-                type="primary"
-                width={150}
-                height={45}
-                marginTop={35}
+                type="primary" width={150} height={45}
               />
             </View>
 
@@ -237,4 +230,10 @@ const styles = StyleSheet.create({
     marginBottom: 15
   },
 
+  boutton:{
+    marginTop: 15,
+    justifyContent: 'center',
+    alignItems: 'center',    
+    borderRadius: 30,
+  },
 });

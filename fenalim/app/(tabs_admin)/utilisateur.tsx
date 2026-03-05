@@ -274,6 +274,8 @@ const styles = StyleSheet.create({
     color: '#1D3557',
     fontSize: 25,
     marginBottom: 20,
+    marginTop: 50,
+    
   },
 
   scrollHorizontal:{

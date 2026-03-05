@@ -32,7 +32,7 @@ export default function PointSignale() {
         fetchPointSignale(value);
       }
     } catch(e) {
-      console.log("erreur token affichage point eau signaler");
+      console.log("Erreur token affichage point eau signalé");
     }
   }
 
@@ -54,7 +54,7 @@ export default function PointSignale() {
       const signaleRaw = Array.isArray(reponseSignalement) ? reponseSignalement : reponseSignalement.signalement;
 
       if (!signaleRaw) {
-        console.error("Impossible de récupérer les points signaler:", reponseSignalement);
+        console.error("Impossible de récupérer les points signalés:", reponseSignalement);
         return;
     }
 
@@ -67,8 +67,8 @@ export default function PointSignale() {
     setSignale(lesSignaler);
 
     } catch (error) {
-        console.error("Erreur lors du chargement des points signaler :", error);
-        Alert.alert("Erreur", "Impossible de récupérer les points signaler.");
+        console.error("Erreur lors du chargement des points signalés :", error);
+        Alert.alert("Erreur", "Impossible de récupérer les points signalés.");
     } finally {
         setChargement(false);
     }

@@ -246,6 +246,7 @@ export default function CreerPoint() {
         setItems={setItemsType}
         onOpen={onOpenType}
         placeholder="Sélectionnez un type de point d'eau"
+        placeholderStyle={{ color: '#9e9c9c' }}
         listMode="SCROLLVIEW"
         style={styles.menuD}
       />
@@ -262,7 +263,8 @@ export default function CreerPoint() {
         setValue={setValueDispo} 
         setItems={setItemsDispo}
         onOpen={onOpenDispo}
-        placeholder="Sélectionnez la disponibilité du point d'eau" 
+        placeholder="Sélectionnez la disponibilité du point d'eau"
+        placeholderStyle={{ color: '#9e9c9c' }}
         listMode= "SCROLLVIEW"
         style={styles.menuD}
       /> 
@@ -270,7 +272,7 @@ export default function CreerPoint() {
 
     {/* accessibilite */}
     <View style={[styles.tout, {zIndex: 200, marginTop:20}]}>
-      <Text style={styles.text}>Acceésibilite du point d’eau</Text> 
+      <Text style={styles.text}>Accessibilité du point d’eau</Text> 
       <DropDownPicker 
         open={openAcces} 
         value={valueAcces} 
@@ -279,7 +281,8 @@ export default function CreerPoint() {
         setValue={setValueAcces} 
         setItems={setItemsAcces}
         onOpen={onOpenAcces}
-        placeholder="Sélectionnez le niveau d'accèes du point d'eau" 
+        placeholder="Sélectionnez le niveau d'accès du point d'eau"
+        placeholderStyle={{ color: '#9e9c9c' }}
         listMode= "SCROLLVIEW"
         style={styles.menuD}
       /> 
@@ -296,7 +299,8 @@ export default function CreerPoint() {
         setValue={setValueStatut} 
         setItems={setItemsStatut}
         onOpen={onOpenStatut}
-        placeholder="Sélectionnez le statut du point d'eau" 
+        placeholder="Sélectionnez le statut du point d'eau"
+        placeholderStyle={{ color: '#9e9c9c' }}
         listMode= "SCROLLVIEW"
         style={styles.menuD}
       /> 

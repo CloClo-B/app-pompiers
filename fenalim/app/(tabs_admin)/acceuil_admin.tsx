@@ -1,13 +1,14 @@
 import {FontAwesome} from "@expo/vector-icons";
 import * as Location from "expo-location";
 import React, {useEffect, useRef, useState, useMemo} from "react";
-import {ActivityIndicator, StyleSheet, TouchableOpacity, View, Linking, Platform, Modal, Text} from "react-native";
+import {ActivityIndicator, StyleSheet, TouchableOpacity, View, Linking, Platform, Modal, Text, Alert} from "react-native";
 import { Marker } from "react-native-maps";
 import MapView from "react-native-map-clustering";
 import { useRouter } from 'expo-router';
 import HautPage from "@/app/hautPage";
 import proj4 from "proj4";
-import { getAllPointEau } from "@/service/pointEauService";
+import { getAllPointEau, deletePointEau } from "@/service/pointEauService";
+import { getToken } from "@/service/infosStocker";
 import ButtonLog from '@/components/ButtonLog';
 
 // Définit toutes les infos qu'un point possède
@@ -29,40 +30,54 @@ export default function HomeScreen() {
   const [localisation, setLocalisation] = useState<Location.LocationObject | null>(null);
   const [pointsEau, setPointsEau] = useState<PointEau[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPEI, setSelectedPEI] = useState<PointEau | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [enlever, setDeleting] = useState(false);
   const router = useRouter();
 
   // Référence pour piloter la carte
   const referenceCarte = useRef<any>(null);
 
+  // Fonction pour charger les points d'eau
+  const fetchPointsEau = async () => {
+    try {
+      const response = await getAllPointEau();
+
+      // Conversion du format (Lambert93) vers le format GPS (WGS84)
+      const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
+      const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+
+      const pointsRaw = Array.isArray(response) ? response : response.points_eau;
+
+      const pointsEauWGS84 = pointsRaw.map((p: any) => {
+        const [lon, lat] = proj4(lambert93, wgs84, [p.longitude, p.latitude]);
+        return { ...p, latitude: lat, longitude: lon };
+      });
+
+      setPointsEau(pointsEauWGS84);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Actualiser les points d'eau depuis le logo SDIS
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchPointsEau();
+    setIsRefreshing(false);
+  };
+
   // Charge les points d'eau et active le GPS
   useEffect(() => {
     let watchAbonnement: Location.LocationSubscription | null = null;
 
-    const fetchPointsEau = async () => {
-      try {
-        const response = await getAllPointEau();
-
-        // Conversion du format (Lambert93) vers le format GPS (WGS84)
-        const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
-        const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
-
-        const pointsRaw = Array.isArray(response) ? response : response.points_eau;
-
-        const pointsEauWGS84 = pointsRaw.map((p: any) => {
-          const [lon, lat] = proj4(lambert93, wgs84, [p.longitude, p.latitude]);
-          return { ...p, latitude: lat, longitude: lon };
-        });
-
-        setPointsEau(pointsEauWGS84);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    // récupérer le token pour les opérations admin (suppression)
+    getToken().then((t) => {
+      if (t) setToken(t);
+    });
 
     // Demande l'accès au GPS et suit la position de l'utilisateur
     const getLocation = async () => {
@@ -90,7 +105,12 @@ export default function HomeScreen() {
       );
     };
 
-    fetchPointsEau();
+    const initializeApp = async () => {
+      await fetchPointsEau();
+      setLoading(false);
+    };
+
+    initializeApp();
     getLocation();
 
     return () => {
@@ -120,6 +140,46 @@ export default function HomeScreen() {
     setModalVisible(true);
   };
 
+  // suppression d'un point d'eau
+  const handleDeletePoint = async () => {
+    if (!token || !selectedPEI) return;
+
+    Alert.alert(
+      "Confirmation de suppression",
+      `Êtes-vous sûr de vouloir supprimer le point d'eau numéro ${selectedPEI.numero_pei} ? Cette action est irréversible !`,
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setDeleting(true);
+              await deletePointEau(token, selectedPEI.numero_pei.toString());
+              Alert.alert("Succès", "Point d'eau supprimé avec succès", [
+                {
+                  text: "OK",
+                  onPress: () => {
+                    setModalVisible(false);
+                    router.push('/(tabs_admin)/point_eau');
+                  },
+                },
+              ]);
+            } catch (error: any) {
+              console.error("Erreur suppression point :", error);
+              Alert.alert(
+                "Erreur",
+                error.response?.data?.detail || "Impossible de supprimer le point"
+              );
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   // Mémoire pour éviter le recalcule des markers
   const markers = useMemo(() => {
     return pointsEau.map((point) => (
@@ -144,7 +204,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <HautPage title="Carte des points d’eau" />
+      <HautPage title="Carte des points d'eau" onLogoPress={handleRefresh} isRefreshing={isRefreshing} />
 
       {/* Carte */}
       <MapView
@@ -178,9 +238,17 @@ export default function HomeScreen() {
       <Modal transparent animationType="fade" visible={modalVisible}>
         <View style={styles.overlay}>
           <View style={styles.alertBox}>
-            <Text style={styles.title}>
-              Numero PEI : {selectedPEI?.numero_pei}
-            </Text>
+            <View style={styles.titleContainer}>
+
+              <TouchableOpacity style={styles.refresh} onPress={handleDeletePoint} disabled={enlever} >
+                {enlever ? (<ActivityIndicator size="small" color="#E63946" />) : ( <FontAwesome name="trash" size={20} color="#E63946" /> )}
+              </TouchableOpacity>
+
+              <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">
+                Numero PEI : {selectedPEI?.numero_pei}
+              </Text>
+
+            </View>
 
             <Text style={styles.message}>
               Statut : {selectedPEI?.statut}{"\n"}
@@ -192,23 +260,19 @@ export default function HomeScreen() {
 
             {/* Itinéraire pour aller au point d'eau */}
             <ButtonLog
-              label="Itinéraire"
-              onPress={() => {
+              label="Itinéraire" onPress={() => {
                 if (!selectedPEI) return;
                 const url = Platform.OS === "ios"
                   ? `maps://maps.apple.com/?daddr=${selectedPEI.latitude},${selectedPEI.longitude}`
                   : `https://www.google.com/maps/dir/?api=1&destination=${selectedPEI.latitude},${selectedPEI.longitude}`;
                 Linking.openURL(url);
               }}
-              type="itineraire"
-              width={'100%'}
-              height={45}
+              type="itineraire" width={'100%'} height={45}
             />
 
             {/* Créer une mission */}
             <ButtonLog
-              label="Créer une mission"
-              onPress={() => {
+              label="Créer une mission" onPress={() => {
                 if (selectedPEI) {
                   router.push({ 
                     pathname: '/creerMissionCarte', 
@@ -217,23 +281,18 @@ export default function HomeScreen() {
                 };
                 setModalVisible(false);
               }}
-              type="mission"
-              width={'100%'}
-              height={45}
+              type="mission" width={'100%'} height={45}
             />
   
             {/* Signaler le point d'eau */}
             <ButtonLog
-              label="Signaler"
-              onPress={() => {
+              label="Signaler" onPress={() => {
                 if (selectedPEI) {
                   router.push({ pathname: '/creerSignalement', params: {idPoint: selectedPEI.numero_pei.toString()} });
                 };
                 setModalVisible(false);
               }}
-              type="signalement"
-              width={'100%'}
-              height={45}
+              type="signalement" width={'100%'} height={45}
             />
             
             
@@ -283,6 +342,18 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 14,
     padding: 20,
+  },
+  titleContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  refresh: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    padding: 5,
+    zIndex: 2,
   },
   title: {
     fontSize: 18,

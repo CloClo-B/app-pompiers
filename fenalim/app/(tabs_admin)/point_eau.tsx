@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import HautPage from '../hautPage';
 
 import CreerPoint from '@/app/creerPoint';
@@ -34,6 +34,8 @@ export default function HomeScreen() {
       <TouchableOpacity style={[styles.bouttonG, styles.boutton, choix === "signale" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("signale"); setChoix("signale");}}>
       <Text style={choix === "signale" ? styles.txtActif : styles.txtInactif}>Point d’eau signalé</Text>
       </TouchableOpacity>
+
+      {/* <TextInput value={recherche} onChangeText={setRecherche} style={styles.recherche} placeholder="Rechercher un utilisateur" /> */}
 
       <TouchableOpacity style={[styles.bouttonD, styles.boutton, choix === "creer" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("creer"); setChoix("creer");}}>
       <Text style={choix === "creer" ? styles.txtActif : styles.txtInactif}>Créer un point d’eau</Text>

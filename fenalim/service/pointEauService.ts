@@ -62,3 +62,13 @@ export const getPointEauByID = async (token: string, idPoint: string) => {
   });
   return reponse.data;
 };
+
+// suppression d'un point d'eau par numéro PEI (string car peut être long)
+export const deletePointEau = async (token: string, numeroPEI: string) => {
+  const reponse = await axios.delete(API_ENDPOINTS.POINT_EAU_BY_ID(numeroPEI), {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return reponse.data;
+};

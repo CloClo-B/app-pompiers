@@ -6,6 +6,7 @@ import { naviguerPointEau } from '@/config/navigation';
 import { getRole, getToken } from '@/service/infosStocker';
 import { API_ENDPOINTS } from '@/config/api';
 import { deleteSignalement, getSignalementByIndex } from "@/service/signalementService";
+import ButtonLog from '@/components/ButtonLog';
 
 // Donnée du Signalement
 type Signale = {
@@ -101,11 +102,11 @@ export default function UserDetails() {
         
       router.push({
           pathname: '/succes',
-          params: { title: 'Signalement suprrimer avec succès', page:"point_eau" }
+          params: { title: 'Signalement supprimé avec succès', page:"point_eau" }
           });
       } catch (error) {
           console.error(error);
-          Alert.alert("Erreur", "Supresion signalement");
+          Alert.alert("Erreur", "Suppression signalement");
       }
     };
 
@@ -143,16 +144,11 @@ export default function UserDetails() {
               )}
             </View>
 
-
             
             {/* BOUTONS */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-              <TouchableOpacity style={[styles.boutton, { backgroundColor: '#457B9D', width: 150, height: 45 }]}  onPress={() => {if (userRole) naviguerPointEau(userRole); else alert("Rôle utilisateur introuvable"); }}>
-                <Text style={{color:'#ffffff'}}>Annuler</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.boutton, { backgroundColor: '#457B9D', width: 150, height: 45 }]} onPress={suprimmerSignalement}>
-                <Text style={{color:'#ffffff'}}>Valider</Text>
-              </TouchableOpacity>
+              <ButtonLog label="ANNULER" onPress={() => { if (userRole) naviguerPointEau(userRole); else alert("Rôle utilisateur introuvable"); }} type="primary" width={150} height={45}/>
+              <ButtonLog label="VALIDER" onPress={suprimmerSignalement} type="primary" width={150} height={45}/>
             </View>
 
 
@@ -190,11 +186,6 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: "bold",
     marginBottom: 15
-  },
-  boutton:{
-    justifyContent: 'center',
-    alignItems: 'center',    
-    borderRadius: 30,
   },
 
 });
