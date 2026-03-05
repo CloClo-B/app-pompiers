@@ -1,13 +1,13 @@
 import {FontAwesome} from "@expo/vector-icons";
 import * as Location from "expo-location";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState, useMemo} from "react";
 import {ActivityIndicator, StyleSheet, TouchableOpacity, View, Linking, Platform, Modal, Text} from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import { Marker } from "react-native-maps";
+import MapView from "react-native-map-clustering";
 import { useRouter } from 'expo-router';
 import HautPage from "@/app/hautPage";
 import proj4 from "proj4";
 import { getAllPointEau } from "@/service/pointEauService";
-import Signalement from "../creerSignalement";
 import ButtonLog from '@/components/ButtonLog';
 
 // Définit toutes les infos qu'un point possède
@@ -35,7 +35,7 @@ export default function HomeScreen() {
   const router = useRouter();
 
   // Référence pour piloter la carte
-  const referenceCarte = useRef<MapView>(null);
+  const referenceCarte = useRef<any>(null);
 
   // Charge les points d'eau et active le GPS
   useEffect(() => {
@@ -113,11 +113,26 @@ export default function HomeScreen() {
     }
   };
 
+
   // Description des points d'eaux
   const infoPointEau = (point: PointEau) => {
     setSelectedPEI(point);
     setModalVisible(true);
   };
+
+  // Mémoire pour éviter le recalcule des markers
+  const markers = useMemo(() => {
+    return pointsEau.map((point) => (
+      <Marker
+        key={point.id}
+        coordinate={{ latitude: point.latitude, longitude: point.longitude }}
+        title={`Numero PEI : ${point.numero_pei}`}
+        description="Cliquez ici pour avoir plus d'infos"
+        onCalloutPress={() => infoPointEau(point)}
+      />
+    ));
+  }, [pointsEau]);
+
 
   if (loading || !location) {
     return (
@@ -141,18 +156,18 @@ export default function HomeScreen() {
           latitudeDelta: 0.2,
           longitudeDelta: 0.2,
         }}
-        showsUserLocation // Affiche le point bleu
+        showsUserLocation // Affiche le point bleu Localisation
+
+        // Réglage des bulles de regroupement
+        clusterColor="#007AFF"
+        clusterTextColor="#FFFFFF"
+        radius={50}
+        extent={512}
       >
-        {pointsEau.slice(0, 100).map((point) => (
-          <Marker
-            key={point.id}
-            coordinate={{ latitude: point.latitude, longitude: point.longitude }}
-            title={`Numero PEI : ${point.numero_pei}`}
-            description="Cliquez ici pour avoir plus d'infos"
-            onCalloutPress={() => infoPointEau(point)}
-          />
-        ))}
+        {/* Affichage de la mémoire des markers */}
+        {markers}
       </MapView>
+      
 
       {/* Bouton retour a la Positions */}
       <TouchableOpacity style={styles.boutonLocalisation} onPress={allerPosition}>
@@ -206,10 +221,7 @@ export default function HomeScreen() {
               width={'100%'}
               height={45}
             />
-
-          
-
-            
+  
             {/* Signaler le point d'eau */}
             <ButtonLog
               label="Signaler"
@@ -225,7 +237,6 @@ export default function HomeScreen() {
             />
             
             
-
             <TouchableOpacity onPress={() => setModalVisible(false)}>
               <Text style={styles.cancelText}>Fermer</Text>
             </TouchableOpacity>
