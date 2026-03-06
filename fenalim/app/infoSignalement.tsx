@@ -47,7 +47,7 @@ export default function UserDetails() {
         }
       } 
       catch (e) {
-        console.log("erreur récupération token ou rôle");
+        console.log("erreur de récupération du token ou du rôle");
       }
     };
 
@@ -69,7 +69,7 @@ export default function UserDetails() {
     try {
       console.log("iddddd", id_s)
       
-      // apelle du fichier signalementService pour recuperer le signalement EN FONCTION DE L'INDEX DU TABLEAU
+      // appel du fichier signalementService pour recuperer le signalement EN FONCTION DE L'INDEX DU TABLEAU
       const reponse = await getSignalementByIndex(token, id_s);
 
       // affichage des données
@@ -100,7 +100,7 @@ export default function UserDetails() {
       // affichage des données
       // console.log("Données reçues:", reponse);
       
-      // apelle du fichier pointEauSercice pour la envoyer la requete de recuperation par id Point
+      // appel du fichier pointEauService pour la envoyer la requete de recuperation par id Point
       const point = await getPointEauByID(token, id_point);      
       
       if (point) {

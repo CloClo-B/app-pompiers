@@ -1,13 +1,13 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Image, KeyboardAvoidingView, Platform } from 'react-native';
 
-import Button from '@/components/ButtonLog';
 import { useState } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS } from '@/config/api';
 import { setRole, setToken } from '@/service/infosStocker';
+import ButtonLog, { BoutonConnexion } from '@/components/ButtonLog';
 
 
 const Oeil = require('@/assets/images/oeil.png');
@@ -19,6 +19,7 @@ export default function Connexion() {
   const [email, setEmail] = useState('');
   const [motDePasse, setMDP] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [attenteChargement, setLoading] = useState(false);
 
   // Vérif adresse mail
   const verifEmail = (email: string) => {
@@ -26,6 +27,9 @@ export default function Connexion() {
     return regex.test(email.trim());
   }
   const verifUtilisateurExiste = async () => {
+
+    if (attenteChargement) return;
+    
 
     // Avant l'appel API, pour vérifier les valeurs
     console.log("Vérification des valeurs à envoyer\n");
@@ -36,23 +40,24 @@ export default function Connexion() {
     // vérfication des valeurs correct avant envoyer à l'api + affichage message de l'erreur
     if(email == null || !email.trim() || !verifEmail(email)){
       console.log("Erreur le mail est incorrect");
-      alert("Le mail est incorrect");
+      alert("Le champ mail est incorrect ou non complété");
       return;
     }
     else if(motDePasse == null || !motDePasse.trim()){
-      console.log("Erreur le mot de passe n'est pas remplie");
-      alert("Le champ mot de passe n'est pas completer");
+      console.log("Erreur le mot de passe n'est pas rempli");
+      alert("Le champ mot de passe est incorrect ou non complété");
       return;
     }
 
-    else{
+    setLoading(true);
+
       try {
         const response = await axios.post(API_ENDPOINTS.LOGIN, {
           email: email,        
           mot_de_passe: motDePasse,
         });
 
-        // recup token
+        // recupération du token utilisateur
         console.log("Token du compte", email, ":", response.data.token);
 
         const role = response.data.role;  //recuperation du role de l'utilisateur
@@ -62,7 +67,7 @@ export default function Connexion() {
         setToken(response.data.token)
         setRole(response.data.role)
 
-        // affichage en focntion du role
+        // affichage en fonction du role
         if (role === 'public') {
           router.replace('/(tabs_public)/acceuil');
         } else if (role === 'pompier') {
@@ -84,48 +89,53 @@ export default function Connexion() {
           // autre erreur
           alert("Erreur lors de la connexion");
         }
+      } finally {
+        setLoading(false);
       }
-    };
+      
   }
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <LinearGradient colors={['#E63946', '#1D3557']} style={styles.container}>
+    <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
 
-                <View>
-                    <Text style={[styles.title,{marginTop: 30}]}>Connexion</Text>
-                </View>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <LinearGradient colors={['#E63946', '#1D3557']} style={styles.container}>
 
-                {/* Champ E-mail */}
-                <View style={styles.aligne}>
-                  <Text style={styles.title_ID_MDP}>E-mail</Text>
-                  <TextInput keyboardType='email-address' value={email} onChangeText={setEmail} style={styles.saisiChamp}/>
-                </View>
-
-                {/* Champ Mot de passe */}
-                <View style={styles.aligne}>
-                    <Text style={styles.title_ID_MDP}>Mot de passe</Text>
-                    <View style={styles.entreeCrayon}>          
-                      <TextInput value={motDePasse} secureTextEntry={!showPassword} onChangeText={setMDP} style={styles.saisiChampMDP}/>
-                      <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                        <Image source={showPassword ? Oeil : OeilCache} style={styles.imageC} />
-                      </TouchableOpacity>
+                  <View>
+                      <Text style={[styles.title,{marginTop: 30}]}>Connexion</Text>
                   </View>
-                </View>
 
-                {/* Bouton de validation */}
-                <View style={{ marginTop: 50}}>
-                    <Button label='Connexion' onPress={verifUtilisateurExiste} backColor="#30D936"/>
-                </View>
-                
-                {/* Liens vers Mot de passe oublié / Inscription */}
-                <View>
-                    <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Mot de passe oublié' onPress={() => {console.log('en cours')}}/>
-                    <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Créer un compte' onPress={() => router.navigate('/inscription')}/>
-                </View>
-                
-        </LinearGradient>
-    </ScrollView>
+                  {/* Champ E-mail */}
+                  <View style={styles.aligne}>
+                    <Text style={styles.title_ID_MDP}>E-mail</Text>
+                    <TextInput keyboardType='email-address' value={email} onChangeText={setEmail} style={styles.saisiChamp}/>
+                  </View>
+
+                  {/* Champ Mot de passe */}
+                  <View style={styles.aligne}>
+                      <Text style={styles.title_ID_MDP}>Mot de passe</Text>
+                      <View style={styles.entreeCrayon}>          
+                        <TextInput value={motDePasse} secureTextEntry={!showPassword} onChangeText={setMDP} style={styles.saisiChampMDP}/>
+                        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                          <Image source={showPassword ? Oeil : OeilCache} style={styles.imageC} />
+                        </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  {/* Bouton de validation */}
+                  <View style={{ marginTop: 50}}>
+                      <ButtonLog label='Connexion' onPress={verifUtilisateurExiste} backColor="#30D936" disabled={attenteChargement} loading={attenteChargement}/>
+                  </View>
+                  
+                  {/* Liens vers Mot de passe oublié / Inscription */}
+                  <BoutonConnexion/>
+                  
+          </LinearGradient>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

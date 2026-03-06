@@ -200,7 +200,7 @@ export default function HomeScreen() {
         <Text style={styles.textTittre}>Nom</Text>
         <Text style={styles.textTittre}>Prénom</Text>
         <Text style={styles.textTittre}>Rôle</Text>
-        <Text style={styles.textTittre}>info</Text>
+        <Text style={styles.textTittre}>Info</Text>
       </View>
 
       {/* Liste déroulante*/}

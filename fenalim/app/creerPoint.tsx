@@ -203,7 +203,7 @@ export default function CreerPoint() {
     else{
       try {
 
-        // apelle du fichier pointEauSercice pour la envoyer la requete de creation de point d'eau 
+        // appel du fichier pointEauService pour la envoyer la requete de creation de point d'eau 
         await createPointEau(token, numeroPEI , valueStatut, valueType,
           insee5, valueAcces, valueDispo, refCarto, pression, debit, volumeMin, longitude, latitude
         );
@@ -252,7 +252,7 @@ export default function CreerPoint() {
       />
     </View> 
 
-    {/* disponiilite */}
+    {/* disponibilité */}
     <View style={[styles.tout, {zIndex: 300, marginTop:20}]}>
       <Text style={styles.text}>Disponibilité du point d’eau</Text> 
       <DropDownPicker 
@@ -270,7 +270,7 @@ export default function CreerPoint() {
       /> 
     </View> 
 
-    {/* accessibilite */}
+    {/* accessibilité */}
     <View style={[styles.tout, {zIndex: 200, marginTop:20}]}>
       <Text style={styles.text}>Accessibilité du point d’eau</Text> 
       <DropDownPicker 

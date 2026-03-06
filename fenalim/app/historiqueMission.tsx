@@ -78,11 +78,12 @@ export default function historiqueMission() {
     const diffHeures = Math.floor(diffMs / (1000 * 60 * 60));
     const jours = Math.floor(diffHeures / 24);
     const heures = diffHeures % 24;
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
     if (jours > 0) {
-      return `${jours} j ${heures} h`;
+      return `${jours} j ${heures} h ${minutes} m`;
     }
-    return `${heures} h`;
+    return `${heures} h ${minutes} m`;
   };
 
 
@@ -116,7 +117,7 @@ export default function historiqueMission() {
     }
     try {
 
-    // apelle du fichier missionService pour la recuperer les données
+    // appel du fichier missionService pour la recuperer les données
       const responseMission = await getAllMissions(token);
   
       // affichage des données
@@ -128,19 +129,14 @@ export default function historiqueMission() {
         console.error("Impossible de récupérer l'historique des missions :", responseMission);
         return;
       }
-    
-      const lesMissions: MissionAvecPoint[] = await Promise.all(
-      
-        MissionsRaw.filter((u: any) => u.statut === "TERMINER").map(async (u: any) => {
-          
-          return {
-            id_mission: String(u.id_mission),
-            nom_mission: u.nom_mission,
-            date_creation: u.date_creation,
-            date_fin: u.date_fin,
-          }; 
-      })
-    );
+
+      const lesMissions: MissionAvecPoint[] = MissionsRaw.filter((u: any) => u.statut === "TERMINER").map((u: any) => ({
+          id_mission: String(u.id_mission),
+          nom_mission: u.nom_mission,
+          date_creation: u.date_creation,
+          date_fin: u.date_fin,
+        })
+      );
     
     seetMission(lesMissions);
     
@@ -181,10 +177,10 @@ export default function historiqueMission() {
     <View style={styles.container}>
 
     <View style={styles.hautBleu}>
-      <Text style={styles.textTittre}>Nom</Text>
-      <Text style={styles.textTittre}>commencement</Text>
-      <Text style={styles.textTittre}>Durée</Text>
-      <Text style={styles.textTittre}>Infos</Text>
+      <Text style={styles.textTitre}>Nom</Text>
+      <Text style={styles.textTitre}>Début</Text>
+      <Text style={styles.textTitre}>Durée</Text>
+      <Text style={styles.textTitre}>Info</Text>
     </View> 
 
 
@@ -207,7 +203,8 @@ const styles = StyleSheet.create({
     flex: 1, 
     padding: 16,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    marginTop: 3,
   },
   tableContainer: { 
     width: 345, 
@@ -218,13 +215,17 @@ const styles = StyleSheet.create({
   },
   row: { 
     justifyContent: 'center',
+    alignItems: 'center',
     flexDirection: 'row', 
     padding: 15, 
     borderBottomWidth: 1, 
     borderBottomColor: '#eee' 
   },
   cell: { 
-    flex: 1 
+    flex: 1,
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   cellImage: { 
     width: 25, 
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1D3557',
   },
 
-  textTittre:{
+  textTitre:{
     color: '#ffffff',
     fontSize: 17,
   },

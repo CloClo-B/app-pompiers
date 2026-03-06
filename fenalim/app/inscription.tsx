@@ -2,11 +2,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { KeyboardAvoidingView,Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
 
-import Button from '@/components/ButtonLog';
 import axios from 'axios';
 import { useState } from 'react';
 import { API_ENDPOINTS } from '@/config/api';
 import { setRole, setToken } from '@/service/infosStocker';
+import ButtonLog, { BoutonInscription } from '@/components/ButtonLog';
 
 const Oeil = require('@/assets/images/oeil.png');
 const OeilCache = require('@/assets/images/oeil_cacher.png');
@@ -24,6 +24,7 @@ export default function Inscription() {
   const [confirmmotDePasse, setConfirmMDP] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmePassword, setshowConfirmePassword] = useState(false);
+  const [attenteChargement, setLoading] = useState(false);
 
   const verifEmail = (email: string) => {
     const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -31,6 +32,8 @@ export default function Inscription() {
   }
 
   const creerUtilisateur = async () => {
+    
+    if (attenteChargement) return;
 
     // Avant l'appel API, pour vérifier les valeurs
     console.log("Vérification des valeurs à envoyer\n");
@@ -73,7 +76,9 @@ export default function Inscription() {
       alert("Les mots de passe sont différents");
       return;
     }
-    else{
+    
+    setLoading(true);
+
       try {
         const response = await axios.post(API_ENDPOINTS.REGISTER, {
           nom: nom,        
@@ -113,8 +118,10 @@ export default function Inscription() {
           // autre erreur
           alert("Erreur lors de l'inscription");
         }
+        
+      } finally {
+        setLoading(false);
       }
-    };
   }
 
 
@@ -187,12 +194,10 @@ export default function Inscription() {
                   </View>
 
                   <View style={{ marginTop: 50}}>
-                      <Button label='Valider' onPress={creerUtilisateur} backColor="#30D936"/>
+                      <ButtonLog label='Valider' onPress={creerUtilisateur} backColor="#30D936" disabled={attenteChargement} loading={attenteChargement}/>
                   </View>
 
-                  <View>
-                      <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Connexion' onPress={() => router.navigate('/connexion')}/>
-                  </View>
+                  <BoutonInscription/>
                   
           </LinearGradient>
       </ScrollView>

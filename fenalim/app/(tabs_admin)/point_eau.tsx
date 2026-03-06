@@ -28,7 +28,7 @@ export default function HomeScreen() {
     </View>
 
 
-  {/* choix type demande */}
+  {/* onglet entre deux choix */}
   <View style={styles.typeD}>
 
       <TouchableOpacity style={[styles.bouttonG, styles.boutton, choix === "signale" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("signale"); setChoix("signale");}}>
@@ -70,33 +70,33 @@ export default function HomeScreen() {
 // Style
 const styles = StyleSheet.create({
   contenue: {
-    marginTop: 20,
+    marginTop: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   typeD:{ 
     flexDirection: 'row',
-    marginTop: 20,
+    marginTop: 30,
     alignSelf: 'center',  
   },
   boutton:{
     paddingVertical: 15,
-    paddingHorizontal:25,
+    paddingHorizontal:15,
     alignSelf: 'center',
     borderWidth: 1,
     borderColor: '#1D3557',
   },
 
   bouttonG:{
-    borderTopLeftRadius: 30,
-    borderBottomLeftRadius: 30,
+    borderTopLeftRadius: 26,
+    borderBottomLeftRadius: 27,
   },
 
   bouttonD:{
 
-    borderTopRightRadius: 30,
-    borderBottomRightRadius: 30,
+    borderTopRightRadius: 26,
+    borderBottomRightRadius: 27,
   },
 
 

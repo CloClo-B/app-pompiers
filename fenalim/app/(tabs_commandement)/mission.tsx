@@ -33,15 +33,15 @@ export default function HomeScreen() {
   {/* choix type demande */}
   <View style={styles.typeD}>
 
-      <TouchableOpacity style={[styles.bouttonG, styles.boutton, choix === "creer" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("creer"); setChoix("creer");}}>
+      <TouchableOpacity style={[styles.boutonG, styles.bouton, choix === "creer" ? styles.boutonActif : styles.boutonInactif]} onPress={() => {setPage("creer"); setChoix("creer");}}>
       <Text style={choix === "creer" ? styles.txtActif : styles.txtInactif}>Créer mission</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.boutton, choix === "enCours" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("enCours"); setChoix("enCours");}}>
+      <TouchableOpacity style={[styles.bouton, choix === "enCours" ? styles.boutonActif : styles.boutonInactif]} onPress={() => {setPage("enCours"); setChoix("enCours");}}>
       <Text style={choix === "enCours" ? styles.txtActif : styles.txtInactif}>En cours</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.bouttonD, styles.boutton, choix === "historique" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("historique"); setChoix("historique");}}>
+      <TouchableOpacity style={[styles.boutonD, styles.bouton, choix === "historique" ? styles.boutonActif : styles.boutonInactif]} onPress={() => {setPage("historique"); setChoix("historique");}}>
       <Text style={choix === "historique" ? styles.txtActif : styles.txtInactif}>Historique</Text>
       </TouchableOpacity>
    
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',  
   },
   
-  boutton:{
+  bouton:{
     paddingVertical: 15,
     paddingHorizontal:20,
     alignSelf: 'center',
@@ -100,25 +100,25 @@ const styles = StyleSheet.create({
     borderColor: '#1D3557',
   },
 
-  bouttonG:{
-    borderTopLeftRadius: 30,
-    borderBottomLeftRadius: 30,
+  boutonG:{
+    borderTopLeftRadius: 26,
+    borderBottomLeftRadius: 27,
   },
 
-  bouttonD:{
+  boutonD:{
 
-    borderTopRightRadius: 30,
-    borderBottomRightRadius: 30,
+    borderTopRightRadius: 26,
+    borderBottomRightRadius: 27,
   },
 
 
 
   /* couleurs bouton état */
-  bouttonActif:{
+  boutonActif:{
     backgroundColor: '#1D3557',
   },
 
-  bouttonInactif:{
+  boutonInactif:{
     backgroundColor: '#E7E7E7',
   },
 

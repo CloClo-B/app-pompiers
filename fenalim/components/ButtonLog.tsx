@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 
 type Props = {
   label: string;
@@ -16,6 +16,7 @@ type Props = {
   textAlign?: string | undefined;
   disabled?: boolean;
   alignSelf?: 'center'| undefined;
+  loading?: boolean;
 };
 
 export default function Button({
@@ -31,6 +32,7 @@ export default function Button({
   marginBottom = undefined,
   padding = undefined,
   disabled = false,
+  loading = false,
 
 }: Props) {
   return (
@@ -54,22 +56,54 @@ export default function Button({
       }
     ]}>
       <Pressable onPress={disabled ? undefined : onPress} style={styles.press}>
-        <Text style={[
-          styles.buttonLabel,
-          type === 'primary' || type === 'secondary' || 
-          type === 'itineraire' || type === 'mission' || 
-          type === 'signalement' || type === 'valider'
-          ? { color: color || '#ffffff' }
-          :type === 'action'
-          ? { color: color || '#000000' }
-          : { color: color || '#0e0d0d' }
-        ]}>
-          {label}
-        </Text>
+        {loading ? (
+          <ActivityIndicator size="small" color={color || '#ffffff'} />
+        ) : (
+
+          <Text style={[
+            styles.buttonLabel,
+            type === 'primary' || type === 'secondary' || 
+            type === 'itineraire' || type === 'mission' || 
+            type === 'signalement' || type === 'valider'
+            ? { color: color || '#ffffff' }
+            :type === 'action'
+            ? { color: color || '#000000' }
+            : { color: color || '#0e0d0d' }
+          ]}>
+            {label}
+          </Text>
+        )}
       </Pressable>
+    </View>
+    
+  );
+}
+
+import { router, useRouter } from 'expo-router';
+
+// boutons de la page connexion (uniques)
+export function BoutonConnexion() {
+  const router = useRouter();
+
+  return (
+    <View>
+      <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Mot de passe oublié' onPress={() => {console.log('en cours')}}/>
+      <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Créer un compte' onPress={() => router.navigate('/inscription')}/>
     </View>
   );
 }
+
+// boutons de la page inscription (unique)
+export function BoutonInscription() {
+  const router = useRouter();
+
+  return (
+    <View>
+      <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Connexion' onPress={() => router.navigate('/connexion')}/>
+    </View>
+  );
+}
+
 
 const styles = StyleSheet.create({
   container: {
@@ -87,7 +121,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f1f1f1',
   },
 
-  // Bleu clair pour CREER, CONFIRMER, Fermer, ...
+  // Bleu clair pour CREER, CONFIRMER, Fermer
   primary: {
     backgroundColor: '#457B9D',
     color: '#fff',

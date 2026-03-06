@@ -92,10 +92,10 @@ export default function PointSignale() {
     <View style={styles.container}>
 
       <View style={styles.hautBleu}>
-        <Text style={styles.textTittre}>ID point</Text>
-        <Text style={styles.textTittre}>Problème</Text>
-        <Text style={styles.textTittre}>Date</Text>
-        <Text style={styles.textTittre}>Info</Text>
+        <Text style={styles.textTitre}>ID point</Text>
+        <Text style={styles.textTitre}>Problème</Text>
+        <Text style={styles.textTitre}>Date</Text>
+        <Text style={styles.textTitre}>Info</Text>
       </View>
 
 
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     backgroundColor: '#1D3557',
   },
-  textTittre:{
+  textTitre:{
     color: '#ffffff',
     fontSize: 17,
   },

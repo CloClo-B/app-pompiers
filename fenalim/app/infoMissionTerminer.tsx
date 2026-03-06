@@ -166,7 +166,7 @@ export default function MissionDetails() {
               
 
             {/* Infos de la mission*/}
-            <View style={{ gap: 10 }}>
+            <View style={{ gap: 15 }}>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Détails de la mission : </Text> {mission?.commentaire}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Adresse : </Text> {mission?.address}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Date de début : </Text> {mission?.date_creation ? new Date(mission.date_creation).toLocaleDateString() : ''}</Text>
@@ -177,8 +177,9 @@ export default function MissionDetails() {
 
             
             {/* BOUTONS */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-              <ButtonLog label="FERMER" onPress={() => { if (userRole) naviguerMission(userRole); else alert("Rôle utilisateur introuvable"); }} type="primary" width={150} height={45}/>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10, marginTop: 30 }}>
+              <ButtonLog label="FERMER" onPress={() => { if (userRole) naviguerMission(userRole); else alert("Rôle utilisateur introuvable"); }} 
+              type="primary" width={150} height={45}/>
 
               <ButtonLog
                 label="VOIR LIEU"
@@ -225,9 +226,9 @@ const styles = StyleSheet.create({
 
   titre: {
     textAlign: "center",
-    fontSize: 26,
+    fontSize: 30,
     fontWeight: "bold",
-    marginBottom: 15
+    marginBottom: 30
   },
 
   boutton:{
