@@ -68,7 +68,7 @@ export default function HomeScreen() {
       return;
     }
     try {
-      const response = await axios.get(API_ENDPOINTS.REGISTER, {
+      const response = await axios.get(API_ENDPOINTS.GET_UTILISATEUR_MINIMUM, {
       headers: { Authorization: `Bearer ${token}` },
     });
       // affichage des données
@@ -100,7 +100,8 @@ export default function HomeScreen() {
   };
   
 
-  // gerer les infos afficher en fonction des valeurs de recherche et des rôle
+
+  // gerer les infos afficher en fonction des valeurs de recherche et des rôles
   const utilisateursFiltres = utilisateur.filter(
     u => (recherche === '' ||
     u.nom.toLowerCase().includes(recherche.toLowerCase()) ||
@@ -110,7 +111,7 @@ export default function HomeScreen() {
 
 
 
-  // changement de couleur en focntion du choix de role + actualisation du tableau
+  // changement de couleur en focntion du choix de role + actualisation du tableau 
   const setChoix = (choix: string) => {
     let newPublic = publicR;
     let newPompier = pompier;
@@ -123,7 +124,8 @@ export default function HomeScreen() {
       newCommandement = false;
       newAdmin = false;
       setTout(true);
-    } else {
+    } 
+    else {
       setTout(false);
 
       if (choix === "public") newPublic = !publicR;
@@ -132,13 +134,13 @@ export default function HomeScreen() {
       if (choix === "admin") newAdmin = !admin;
     }
 
-    // Mettre à jour les boolean
+    // Mettre à jour les boolean pour les roles séléctionner
     setPublicR(newPublic);
     setPompier(newPompier);
     setCommandement(newCommandement);
     setAdmin(newAdmin);
 
-    // tableau a partir des nouveaux boolean
+    // tableau a partir des nouveaux boolean séléctionner
     const newChoixRole: string[] = [];
     if (newPublic) newChoixRole.push("public");
     if (newPompier) newChoixRole.push("pompier");

@@ -61,14 +61,26 @@ export default function HomeScreen() {
     setIsRefreshing(false);
   };
 
+  // récupérer le token 
+  const getData = async () => {
+    try {
+      const value = await getToken();
+      if(value !== null) {
+        setToken(value);
+      }
+    } catch(e) {
+      console.log("erreur token creation point eau");
+    }
+  }
+
+
+
   // Charge les points d'eau et active le GPS
   useEffect(() => {
     let watchAbonnement: Location.LocationSubscription | null = null;
+    getData();
 
-    // récupérer le token pour les opérations admin (suppression)
-    getToken().then((t) => {
-      if (t) setToken(t);
-    });
+
 
     // Demande l'accès au GPS et suit la position de l'utilisateur
     const getLocation = async () => {
@@ -95,6 +107,7 @@ export default function HomeScreen() {
         }
       );
     };
+
 
     const initializeApp = async () => {
       await fetchPointsEau();

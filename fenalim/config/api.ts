@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
   REGISTER: `${API_URL}/utilisateurs/`,
   LOGOUT: `${API_URL}/utilisateurs/logout`,
   
+  GET_UTILISATEUR_MINIMUM: `${API_URL}/utilisateurs/minimum`,
   GET_USER_INFO: `${API_URL}/utilisateurs/me`,
   UPDATE_USER_INFO: `${API_URL}/utilisateurs/me`,
   CHANGE_PASSWORD: `${API_URL}/utilisateurs/me/change-password`,

@@ -105,6 +105,14 @@ class UtilisateurOut(BaseModel):
     role: str
     model_config = ConfigDict(from_attributes=True)
 
+# Schéma de sortie utilisateur (sans le mot de passe, num de téléphone et mail )
+class UtilisateurOutMin(BaseModel):
+    id_utilisateur: int
+    nom: str
+    prenom: str
+    role: str
+    model_config = ConfigDict(from_attributes=True)
+
 # Réponse retournée après authentification
 class AuthResponse(BaseModel):
     token: str

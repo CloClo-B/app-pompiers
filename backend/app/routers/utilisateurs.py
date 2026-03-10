@@ -2,10 +2,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
-from passlib.context import CryptContext
 from ..database import SessionLocal
 from ..models import Utilisateur
-from ..schemas import UtilisateurCreate, UtilisateurOut, UtilisateurUpdate, LoginPayload, AuthResponse, LogoutPayload, UserProfileOut, UserProfileUpdate, PasswordChangeRequest
+from ..schemas import UtilisateurCreate, UtilisateurOut, UtilisateurOutMin, UtilisateurUpdate, LoginPayload, AuthResponse, LogoutPayload, UserProfileOut, UserProfileUpdate, PasswordChangeRequest
 from ..token_jwt import createToken, getTokenUser
 from .dependencies import rolesChecker
 from ..DAO.DAOUtilisateurs import (update_own_profile, change_password as dao_change_password, create_utilisateur, verifier_connexion, dechiffrerTelEtMail)
@@ -204,10 +203,32 @@ def verif_login(payload: LoginPayload, db: Session = Depends(get_db)):
 
 
 # ADMINISTRATION
-# Récupération de tous les utilisateurs autorisé pour admin uniquement
+# Récupération de tous les utilisateurs sans mot de passe autorisé pour admin uniquement 
 @router.get("/", response_model=list[UtilisateurOut])
 def list_users(current_user: Utilisateur = Depends(getTokenUser), db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
     return db.query(Utilisateur).all()
+
+# Récupération de tous les utilisateurs sans les info sensible comme email, téléphone et mot de passe autorisé pour admin uniquement 
+@router.get("/minimum", response_model=list[UtilisateurOutMin])
+def list_users_min(current_user: Utilisateur = Depends(getTokenUser), db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
+    
+    complet = db.query(
+        Utilisateur.id_utilisateur,
+        Utilisateur.nom,
+        Utilisateur.prenom,
+        Utilisateur.role
+    ).all()
+    
+    return [
+        {
+        "id_utilisateur": u.id_utilisateur,
+        "nom": u.nom,
+        "prenom": u.prenom,
+        "role": u.role,
+        } 
+        for u in complet
+    ]
+
 
 # Récupération d’un utilisateur par ID autorisé pour admin uniquement
 @router.get("/{user_id}", response_model=UtilisateurOut)
@@ -229,6 +250,8 @@ def get_user(user_id: int, db: Session = Depends(get_db), user_check: Utilisateu
         "role": user.role,
     }
     
+
+
 # Mise à jour d’un utilisateur autorisé pour admin uniquement
 @router.put("/{user_id}", response_model=UtilisateurOut)
 def update_user(user_id: int, payload: UtilisateurUpdate, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
