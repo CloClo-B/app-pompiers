@@ -8,6 +8,7 @@ from typing import Dict, Any, List
 from app.models import PointEau
 from pyproj import Transformer
 from geoalchemy2.elements import WKTElement
+from geoalchemy2.functions import ST_Transform
 from sqlalchemy.exc import IntegrityError
 
 
@@ -29,8 +30,8 @@ def get_all_points_eau(db: Session) -> List[Dict[str, Any]]:
         PointEau.date_crea,
         PointEau.date_maj,
         PointEau.utilisateur,
-        func.ST_Y(PointEau.geom).label("latitude"),
-        func.ST_X(PointEau.geom).label("longitude"),
+        func.ST_Y(ST_Transform(PointEau.geom, 4326)).label("latitude"),
+        func.ST_X(ST_Transform(PointEau.geom, 4326)).label("longitude"),
     ).all()
     
     return [

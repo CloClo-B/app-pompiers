@@ -5,8 +5,7 @@ import {ActivityIndicator, StyleSheet, TouchableOpacity, View, Linking, Platform
 import { Marker } from "react-native-maps";
 import MapView from "react-native-map-clustering"; 
 import { useRouter } from 'expo-router';
-import HautPage from "../hautPage";
-import proj4 from "proj4";
+import HautPage from "@/app/hautPage";
 import { getAllPointEau } from "@/service/pointEauService";
 import ButtonLog from '@/components/ButtonLog';
 
@@ -41,28 +40,19 @@ export default function HomeScreen() {
   useEffect(() => {
     let watchAbonnement: Location.LocationSubscription | null = null;
 
-    const fetchPointsEau = async () => {
-      try {
-        const response = await getAllPointEau();
+  // Fonction pour charger les points d'eau
+  const fetchPointsEau = async () => {
+    try {
+      const response = await getAllPointEau();
 
-        // Conversion du format (Lambert93) vers le format GPS (WGS84)
-        const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
-        const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
-
-        const pointsRaw = Array.isArray(response) ? response : response.points_eau;
-
-        const pointsEauWGS84 = pointsRaw.map((p: any) => {
-          const [lon, lat] = proj4(lambert93, wgs84, [p.longitude, p.latitude]);
-          return { ...p, latitude: lat, longitude: lon };
-        });
-
-        setPointsEau(pointsEauWGS84);
-      } catch (error) {
-        console.error(error);
-      } finally {
+      const pointsRaw = Array.isArray(response) ? response : response.points_eau;
+      setPointsEau(pointsRaw);
+    } catch (error) {
+      console.error(error);
+    }finally {
         setLoading(false);
-      }
-    };
+    }
+  };
 
     // Demande l'accès au GPS et suit la position de l'utilisateur
     const getLocation = async () => {
