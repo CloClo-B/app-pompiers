@@ -2,6 +2,12 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+ARG CLE_CHIFFREMENT
+ENV CLE_CHIFFREMENT=$CLE_CHIFFREMENT
+
+ARG time_token
+ENV time_token=$time_token
+
 # Copier et installer les dépendances
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
