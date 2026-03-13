@@ -21,8 +21,9 @@ export const API_ENDPOINTS = {
   
 
   POINTS_EAU: `${API_URL}/points-eau/`,
-  POINT_EAU_BY_ID: (id: string) => `${API_URL}/points-eau/${id}`,
-  
+  POINT_EAU_BY_NUMERO_PEI: (id: string) => `${API_URL}/points-eau/${id}`,
+  POINT_EAU_UPDATE: (id: number) => `${API_URL}/points-eau/update/${id}`,
+
 
   MISSIONS: `${API_URL}/missions/`,
   MISSION_BY_ID: (id: number) => `${API_URL}/missions/${id}`,

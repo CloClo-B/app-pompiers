@@ -144,6 +144,19 @@ export default function HomeScreen() {
     setModalVisible(true);
   };
 
+// modifier un point d'eau
+
+  const updatePoint = ()=> {
+    if (!token || !selectedPEI) return;
+    setModalVisible(false)
+    router.push({
+      pathname: '/UpdatePointEau',
+      params: { idPoint: selectedPEI.numero_pei.toString() }
+    });
+  };
+
+
+
   // suppression d'un point d'eau
   const handleDeletePoint = async () => {
     if (!token || !selectedPEI) return;
@@ -244,8 +257,15 @@ export default function HomeScreen() {
           <View style={styles.alertBox}>
             <View style={styles.titleContainer}>
 
+
+              {/* boutton poubelle supression point eau */}
               <TouchableOpacity style={styles.refresh} onPress={handleDeletePoint} disabled={enlever} >
                 {enlever ? (<ActivityIndicator size="small" color="#E63946" />) : ( <FontAwesome name="trash" size={20} color="#E63946" /> )}
+              </TouchableOpacity>
+
+              {/* boutton crayon modification point eau */}
+              <TouchableOpacity style={styles.crayonDroite} onPress={updatePoint}>
+                <FontAwesome name="pencil" size={20} color="#251f20" /> 
               </TouchableOpacity>
 
               <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">
@@ -355,6 +375,13 @@ const styles = StyleSheet.create({
   refresh: {
     position: 'absolute',
     left: 0,
+    top: 0,
+    padding: 5,
+    zIndex: 2,
+  },
+  crayonDroite: {
+    position: 'absolute',
+    right: 0,
     top: 0,
     padding: 5,
     zIndex: 2,

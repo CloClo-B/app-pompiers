@@ -151,9 +151,11 @@ def delete_point_eau_by_id(db: Session, point_id: int) -> bool:
 # Met à jour un point d'eau par ID
 def update_point_eau_by_id(db: Session, point_id: int, point_data: Dict[str, Any]):
     db_point = db.query(PointEau).filter(PointEau.id == point_id).first()
-    if not db_point:
-        return None
     
+    # verifier que l'id existe bien
+    if not db_point:
+        raise ValueError("Id point incorrect")
+
     # Mettre à jour les champs 
     for key, value in point_data.items():
         if key in ['id', 'geom', 'date_crea', 'latitude', 'longitude']:
@@ -166,6 +168,14 @@ def update_point_eau_by_id(db: Session, point_id: int, point_data: Dict[str, Any
     
     # Si latitude/longitude sont fournis, recalculer geom
     if 'latitude' in point_data and 'longitude' in point_data:
+        
+        # verifier que les coordonnées sont exact
+        if(point_data['latitude'] > 90 or point_data['latitude'] < -90):
+            raise ValueError("lattitude incorect")
+        
+        if(point_data['longitude'] > 180 or point_data['longitude'] < -180):
+            raise ValueError("longitude incorect")
+
         transformer = Transformer.from_crs("EPSG:4326", "EPSG:2154")
         x, y = transformer.transform(point_data['latitude'], point_data['longitude'])
         wkt = WKTElement(f"POINT({x} {y})", srid=2154)
@@ -174,6 +184,7 @@ def update_point_eau_by_id(db: Session, point_id: int, point_data: Dict[str, Any
     db.commit()
     db.refresh(db_point)
     return db_point
+
 
 # Récupère un point d'eau par numéro PEI
 def get_point_eau_by_numero_pei(db: Session, numero_pei: int):
@@ -184,7 +195,8 @@ def get_point_eau_by_numero_pei(db: Session, numero_pei: int):
     ).filter(PointEau.numero_pei == numero_pei).first()
 
     if not point:
-        return None
+        raise ValueError("Numéro PEI incorrect")
+
 
     p, lat, lon = point
     return {

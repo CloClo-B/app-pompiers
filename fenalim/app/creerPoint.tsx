@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, {useEffect, useState } from 'react';
-import {StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {StyleSheet, Text, TextInput, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import axios from 'axios';
 import { createPointEau } from '@/service/pointEauService';
@@ -114,7 +114,6 @@ export default function CreerPoint() {
 
   
   // communication avec l'api  /points-eau/
-  // valentin : 172.20.10.2 | 192.168.1.184
   const creerPointAPI = async () => {
 
     // Avant l'appel API, pour vérifier les valeurs

@@ -52,9 +52,9 @@ export const getAllPointEau = async () => {
   return reponse.data;
 };
 
-// renvoie les infos d'un point en fonction de son id 
+// renvoie les infos d'un point en fonction de son numero PEI
 export const getPointEauByID = async (token: string, idPoint: string) => {
-    const reponse = await axios.get(API_ENDPOINTS.POINT_EAU_BY_ID(idPoint),
+    const reponse = await axios.get(API_ENDPOINTS.POINT_EAU_BY_NUMERO_PEI(idPoint),
     {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -63,9 +63,21 @@ export const getPointEauByID = async (token: string, idPoint: string) => {
   return reponse.data;
 };
 
-// suppression d'un point d'eau par numéro PEI (string car peut être long)
+
+// modifiecation d'un point d'eau par son id
+export const updatePointEau = async (token: string, id: number, info : any) => {
+  const reponse = await axios.put(API_ENDPOINTS.POINT_EAU_UPDATE(id), info, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return reponse.data;
+};
+
+
+// suppression d'un point d'eau par numéro PEI 
 export const deletePointEau = async (token: string, numeroPEI: string) => {
-  const reponse = await axios.delete(API_ENDPOINTS.POINT_EAU_BY_ID(numeroPEI), {
+  const reponse = await axios.delete(API_ENDPOINTS.POINT_EAU_BY_NUMERO_PEI(numeroPEI), {
     headers: {
       Authorization: `Bearer ${token}`,
     },

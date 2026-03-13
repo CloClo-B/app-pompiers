@@ -68,6 +68,24 @@ class PointEauCreate(BaseModel):
     longitude: float
     date_maj: Optional[datetime] = None
 
+# Schéma utilisé lors de la modification d’un point d’eau
+class PointEauUpdate(BaseModel):
+    numero_pei: int
+    nom: Optional[str] = None
+    statut: Optional[str] = None
+    type_nature: Optional[str] = None
+    insee5: Optional[str] = None
+    press_deb: Optional[float] = None
+    debit_1_bar: Optional[float] = None
+    vol_eau_mi: Optional[float] = None
+    accessibilite: Optional[str] = None
+    disponibilite: Optional[str] = None
+    carto_ref: Optional[int] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
+
+
 # UTILISATEUR
 # Schéma de base pour un utilisateur
 class UtilisateurBase(BaseModel):

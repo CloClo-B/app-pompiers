@@ -5,12 +5,13 @@ from sqlalchemy import func
 from geoalchemy2.elements import WKTElement
 from ..database import SessionLocal
 from ..models import PointEau
-from ..schemas import PointEauBase, PointEauCreate, PointEauOut
+from ..schemas import PointEauBase, PointEauCreate, PointEauOut, PointEauUpdate
 from app.DAO.DAOPointsEau import (
     create_point_eau,
     get_all_points_eau,
     get_point_eau_by_numero_pei,
-    delete_point_eau_by_numero_pei
+    delete_point_eau_by_numero_pei,
+    update_point_eau_by_id
 )
 from ..models import Utilisateur
 from .dependencies import rolesChecker
@@ -33,7 +34,7 @@ def list_points(db: Session = Depends(get_db)):
     return points
 
 # Récupère un point d'eau selon son numéro PEI
-@router.get("/{numero_pei}", response_model=PointEauBase)
+@router.get("/{numero_pei}", response_model=PointEauOut)
 def get_point(numero_pei: int, db: Session = Depends(get_db)):
     point = get_point_eau_by_numero_pei(db, numero_pei)
     
@@ -73,6 +74,17 @@ def create_point(payload: PointEauCreate, db: Session = Depends(get_db), user_ch
         "latitude": point_data["latitude"],
         "longitude": point_data["longitude"],
     }
+
+
+# Modifier un point d'eau en fonction de son ID
+@router.put("/update/{id_point}", response_model=PointEauUpdate)
+def update_point(id_point: int, payload: PointEauUpdate, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
+    try:
+        point = update_point_eau_by_id(db, id_point, payload.model_dump(exclude_unset=True))
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+    return point
 
 
 

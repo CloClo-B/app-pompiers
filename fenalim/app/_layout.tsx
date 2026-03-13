@@ -39,6 +39,7 @@ export default function RootLayout() {
         <Stack.Screen name="infoMissionTerminer" options={{ headerShown: false}} />
         <Stack.Screen name="creerSignalement" options={{ headerShown: false }} />
         <Stack.Screen name="creerMissionCarte" options={{ headerShown: false }} />
+        <Stack.Screen name="UpdatePointEau" options={{ headerShown: false }} />
 
       </Stack>
       <StatusBar style="auto" />
