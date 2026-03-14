@@ -93,7 +93,6 @@ async getUserInfo(): Promise<UserData | null> {
     });
 
     if (!response.ok) {
-      // AJOUTE CES LOGS POUR VOIR LA VÉRITÉ
       console.log("--- DEBUG API ---");
       console.log("Status:", response.status);
       const text = await response.text(); 

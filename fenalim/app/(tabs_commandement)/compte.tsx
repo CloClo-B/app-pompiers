@@ -1,8 +1,9 @@
 import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
-import HautPage from '../hautPage';
+import HautPage from "@/app/hautPage";
 import authService, { UserData } from '@/service/authService';
+import ButtonLog from '@/components/ButtonLog';
 
 // Icon
 const imgMonCompte = require('@/assets/images/mon_compte.png');
@@ -364,25 +365,28 @@ export default function Compte() {
                   />
                 </View>
 
-                <TouchableOpacity 
-                  style={[styles.boutton, styles.validateButton]}
+                <ButtonLog
+                  label={saving ? 'ENREGISTREMENT...' : 'VALIDER'}
                   onPress={handleChangePassword}
+                  type="valider"
+                  width={200}
+                  height={45}
+                  marginTop={20}
                   disabled={saving}
-                >
-                  <Text style={{color:'#ffffff', fontWeight: '600'}}>
-                    {saving ? 'ENREGISTREMENT...' : 'VALIDER'}
-                  </Text>
-                </TouchableOpacity>
+                />
               </>
             )}
 
             {/* Déconnexion */}
-            <TouchableOpacity 
-              style={styles.boutton} 
+            <ButtonLog
+              label="SE DÉCONNECTER"
               onPress={handleLogout}
-            >
-              <Text style={{color:'#ffffff', fontWeight: '600'}}>SE DÉCONNECTER</Text>
-            </TouchableOpacity>
+              type="secondary"
+              width={200}
+              height={45}
+              marginTop={40}
+            />
+
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -427,17 +431,6 @@ const styles = StyleSheet.create({
     color: '#06A77D',
     marginLeft: 8,
     fontWeight: 'bold',
-  },
-  boutton: {
-    marginTop: 40,
-    padding: 20,
-    backgroundColor: '#E63946',
-    borderRadius: 30,
-    alignSelf: 'center',
-  },
-  validateButton: {
-    backgroundColor: '#06A77D',
-    marginTop: 20,
   },
   info: {
     alignItems: 'flex-start',

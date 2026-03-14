@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Platform, Linking, TouchableHighlight } from 'react-native';
 import {useRouter } from 'expo-router';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_ENDPOINTS } from '@/config/api';
+import { getAllMissions, deleteMissionById } from '@/service/MissionService';
+import { getToken } from '@/service/infosStocker';
 
 // Donnée de la Mission
 const info = require('@/assets/images/information.png');
@@ -30,7 +29,7 @@ export default function historiqueMission() {
   }, []);
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem('@token')
+      const value = await getToken();
       if(value !== null) {
         setToken(value);
         fetchMissions(value);
@@ -43,7 +42,7 @@ export default function historiqueMission() {
   // afficher la mission a supprimer
   const appuieLongSupp = (nomMisson : string, id: string) => {
     Alert.alert(
-    "Suprrimer la mission ?",
+    "Supprimer la mission ?",
     "Nom de la mission: "+ nomMisson,
     [
         {
@@ -79,11 +78,12 @@ export default function historiqueMission() {
     const diffHeures = Math.floor(diffMs / (1000 * 60 * 60));
     const jours = Math.floor(diffHeures / 24);
     const heures = diffHeures % 24;
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
     if (jours > 0) {
-      return `${jours} j ${heures} h`;
+      return `${jours} j ${heures} h ${minutes} m`;
     }
-    return `${heures} h`;
+    return `${heures} h ${minutes} m`;
   };
 
 
@@ -116,38 +116,33 @@ export default function historiqueMission() {
       console.log(token);
     }
     try {
-      const responseMission = await axios.get(API_ENDPOINTS.MISSIONS, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-            
+
+    // appel du fichier missionService pour la recuperer les données
+      const responseMission = await getAllMissions(token);
+  
       // affichage des données
-      console.log("Données reçues:", responseMission.data);
+      console.log("Données reçues:", responseMission);
       
-      const MissionsRaw = Array.isArray(responseMission.data) ? responseMission.data : responseMission.data.missions;
+      const MissionsRaw = Array.isArray(responseMission) ? responseMission : responseMission.missions;
       
       if (!MissionsRaw) {
-        console.error("Impossible de récupérer l'historique des mission:", responseMission.data);
+        console.error("Impossible de récupérer l'historique des missions :", responseMission);
         return;
       }
-    
-      const lesMissions: MissionAvecPoint[] = await Promise.all(
-      
-        MissionsRaw.filter((u: any) => u.statut === "TERMINER").map(async (u: any) => {
-          
-          return {
-            id_mission: String(u.id_mission),
-            nom_mission: u.nom_mission,
-            date_creation: u.date_creation,
-            date_fin: u.date_fin,
-          }; 
-      })
-    );
+
+      const lesMissions: MissionAvecPoint[] = MissionsRaw.filter((u: any) => u.statut === "TERMINER").map((u: any) => ({
+          id_mission: String(u.id_mission),
+          nom_mission: u.nom_mission,
+          date_creation: u.date_creation,
+          date_fin: u.date_fin,
+        })
+      );
     
     seetMission(lesMissions);
     
   } catch (error) {
       console.error("Erreur lors du chargement de l'historique des missions :", error);
-      Alert.alert("Erreur", "Impossible de récupérer l'historique des missions.");
+      Alert.alert("Erreur", "Impossible de récupérer l'historique des missions");
     }
   };
 
@@ -156,21 +151,21 @@ export default function historiqueMission() {
     // Avant l'appel API, pour vérifier les valeurs
     console.log("Vérification de l'id à envoyer pour supprimer\n");
     console.log("Id mission: ",id_mission);
-
+    if (!token) {
+      Alert.alert("Erreur", "Supression impossible");
+      return;
+    }
     try {
-    
-      const response = await axios.delete(API_ENDPOINTS.MISSION_DELETE(Number(id_mission)),  {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+    // apelle du fichier missionService pour la supression
+    await deleteMissionById(token, Number(id_mission));
     
     router.push({
         pathname: '/succes',
-        params: { title: 'Mission supprimer avec succès', page:"missions" }
+        params: { title: 'Mission supprimée avec succès', page:"missions" }
         });
     } catch (error) {
         console.error(error);
-        alert('Erreur lors de la suprression de la mission');
+        alert('Erreur lors de la suppression de la mission');
     }
   };
 
@@ -182,10 +177,10 @@ export default function historiqueMission() {
     <View style={styles.container}>
 
     <View style={styles.hautBleu}>
-      <Text style={styles.textTittre}>Nom</Text>
-      <Text style={styles.textTittre}>commencement</Text>
-      <Text style={styles.textTittre}>Durée</Text>
-      <Text style={styles.textTittre}>Infos</Text>
+      <Text style={styles.textTitre}>Nom</Text>
+      <Text style={styles.textTitre}>Début</Text>
+      <Text style={styles.textTitre}>Durée</Text>
+      <Text style={styles.textTitre}>Info</Text>
     </View> 
 
 
@@ -208,7 +203,8 @@ const styles = StyleSheet.create({
     flex: 1, 
     padding: 16,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    marginTop: 3,
   },
   tableContainer: { 
     width: 345, 
@@ -219,13 +215,17 @@ const styles = StyleSheet.create({
   },
   row: { 
     justifyContent: 'center',
+    alignItems: 'center',
     flexDirection: 'row', 
     padding: 15, 
     borderBottomWidth: 1, 
     borderBottomColor: '#eee' 
   },
   cell: { 
-    flex: 1 
+    flex: 1,
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   cellImage: { 
     width: 25, 
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1D3557',
   },
 
-  textTittre:{
+  textTitre:{
     color: '#ffffff',
     fontSize: 17,
   },

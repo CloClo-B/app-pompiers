@@ -1,10 +1,10 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import HautPage from '../hautPage';
 
-import CreerPoint from '../creerPoint';
-import PointSignale from '../pointSignale';
+import CreerPoint from '@/app/creerPoint';
+import PointSignale from '@/app/pointSignale';
 
 // Gestion des points d'eau, affiche les différentes pages
 export default function HomeScreen() {
@@ -28,12 +28,14 @@ export default function HomeScreen() {
     </View>
 
 
-  {/* choix type demande */}
+  {/* onglet entre deux choix */}
   <View style={styles.typeD}>
 
       <TouchableOpacity style={[styles.bouttonG, styles.boutton, choix === "signale" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("signale"); setChoix("signale");}}>
       <Text style={choix === "signale" ? styles.txtActif : styles.txtInactif}>Point d’eau signalé</Text>
       </TouchableOpacity>
+
+      {/* <TextInput value={recherche} onChangeText={setRecherche} style={styles.recherche} placeholder="Rechercher un utilisateur" /> */}
 
       <TouchableOpacity style={[styles.bouttonD, styles.boutton, choix === "creer" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("creer"); setChoix("creer");}}>
       <Text style={choix === "creer" ? styles.txtActif : styles.txtInactif}>Créer un point d’eau</Text>
@@ -53,7 +55,7 @@ export default function HomeScreen() {
 
 
       <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
-      <View>
+      <View style={styles.contenue}>
           {page === "signale" && <PointSignale />}
           {page === "creer" && <CreerPoint />}
       </View>
@@ -68,33 +70,33 @@ export default function HomeScreen() {
 // Style
 const styles = StyleSheet.create({
   contenue: {
-    marginTop: 20,
+    marginTop: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   typeD:{ 
     flexDirection: 'row',
-    marginTop: 20,
+    marginTop: 30,
     alignSelf: 'center',  
   },
   boutton:{
     paddingVertical: 15,
-    paddingHorizontal:25,
+    paddingHorizontal:15,
     alignSelf: 'center',
     borderWidth: 1,
     borderColor: '#1D3557',
   },
 
   bouttonG:{
-    borderTopLeftRadius: 30,
-    borderBottomLeftRadius: 30,
+    borderTopLeftRadius: 26,
+    borderBottomLeftRadius: 27,
   },
 
   bouttonD:{
 
-    borderTopRightRadius: 30,
-    borderBottomRightRadius: 30,
+    borderTopRightRadius: 26,
+    borderBottomRightRadius: 27,
   },
 
 

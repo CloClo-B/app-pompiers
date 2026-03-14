@@ -1,10 +1,11 @@
 import { useRouter } from 'expo-router';
 import React, {useEffect, useState } from 'react';
-import {StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {StyleSheet, Text, TextInput, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_ENDPOINTS } from '@/config/api';
+import { createPointEau } from '@/service/pointEauService';
+import { getToken } from '@/service/infosStocker';
+import ButtonLog from '@/components/ButtonLog';
 
 // Page création de Point d'eau
 export default function CreerPoint() {
@@ -17,7 +18,7 @@ export default function CreerPoint() {
   }, []);
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem('@token')
+      const value = await getToken();
       if(value !== null) {
         setToken(value);
       }
@@ -113,13 +114,12 @@ export default function CreerPoint() {
 
   
   // communication avec l'api  /points-eau/
-  // valentin : 172.20.10.2 | 192.168.1.184
   const creerPointAPI = async () => {
 
     // Avant l'appel API, pour vérifier les valeurs
   console.log("Vérification des valeurs à envoyer\n");
   console.log("numeroPEI:", numeroPEI);
-  console.log("nom:", ""); // a changer par la suite
+  // console.log("nom:", "");
   console.log("statut:", valueStatut);
   console.log("type_nature:", valueType);
   console.log("insee5:", insee5);
@@ -131,17 +131,13 @@ export default function CreerPoint() {
   console.log("vol_eau_mi:", parseFloat(volumeMin));
   console.log("longitude:", parseFloat(longitude));
   console.log("latitude:", parseFloat(latitude));
-  console.log("utilisateur:", "");
+  console.log(token);
   
+  // vérfication des valeurs correct avant envoyer à l'api + affichage message de l'erreur
   if (!token) {
-    alert("Token manquant, impossible de créer le point d'eau");
+    alert("Erreur, impossible de créer le point d'eau");
     return;
   }
-  else{
-    console.log(token);
-  }
-
-  // vérfication des valeurs correct avant envoyer à l'api + affichage message de l'erreur
   if(valueType == null || verifTypePoint(valueType) == false){
     console.log("Erreur le type de point est incorrect");
     alert("Le type de point est incorrect");
@@ -205,28 +201,12 @@ export default function CreerPoint() {
 
     else{
       try {
-        const response = await axios.post(API_ENDPOINTS.POINTS_EAU, {
-          numero_pei: parseInt(numeroPEI),
-          nom: '',
-          statut: valueStatut,
-          type_nature: valueType,
-          insee5: insee5, 
-          accessibilite: valueAcces,
-          disponibilite: valueDispo,
-          carto_ref: parseInt(refCarto)  ? parseInt(refCarto) : null ,
-          press_deb: parseFloat(pression.replace(',', '.')),
-          debit_1_bar: parseFloat(debit.replace(',', '.')),
-          vol_eau_mi: parseFloat(volumeMin.replace(',', '.')),
-          longitude: parseFloat(longitude.replace(',', '.')),
-          latitude: parseFloat(latitude.replace(',', '.')),
-          utilisateur: '', //ne pas oublié par la suite c'est pour savoir qui a ajouter le point 
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+
+        // appel du fichier pointEauService pour la envoyer la requete de creation de point d'eau 
+        await createPointEau(token, numeroPEI , valueStatut, valueType,
+          insee5, valueAcces, valueDispo, refCarto, pression, debit, volumeMin, longitude, latitude
+        );
+
         
         router.push({
             pathname: '/succes',
@@ -236,6 +216,7 @@ export default function CreerPoint() {
       catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           // erreur renvoyée par l’API
+          console.log(JSON.stringify(error.response?.data, null, 2));
           console.log(error.response?.status);
           console.log(error.response?.data);
           alert(error.response?.data?.detail ?? "Erreur lors de la création du point d'eau");
@@ -264,12 +245,13 @@ export default function CreerPoint() {
         setItems={setItemsType}
         onOpen={onOpenType}
         placeholder="Sélectionnez un type de point d'eau"
+        placeholderStyle={{ color: '#9e9c9c' }}
         listMode="SCROLLVIEW"
         style={styles.menuD}
       />
     </View> 
 
-    {/* disponiilite */}
+    {/* disponibilité */}
     <View style={[styles.tout, {zIndex: 300, marginTop:20}]}>
       <Text style={styles.text}>Disponibilité du point d’eau</Text> 
       <DropDownPicker 
@@ -280,15 +262,16 @@ export default function CreerPoint() {
         setValue={setValueDispo} 
         setItems={setItemsDispo}
         onOpen={onOpenDispo}
-        placeholder="Sélectionnez la disponibilité du point d'eau" 
+        placeholder="Sélectionnez la disponibilité du point d'eau"
+        placeholderStyle={{ color: '#9e9c9c' }}
         listMode= "SCROLLVIEW"
         style={styles.menuD}
       /> 
     </View> 
 
-    {/* accessibilite */}
+    {/* accessibilité */}
     <View style={[styles.tout, {zIndex: 200, marginTop:20}]}>
-      <Text style={styles.text}>Acceésibilite du point d’eau</Text> 
+      <Text style={styles.text}>Accessibilité du point d’eau</Text> 
       <DropDownPicker 
         open={openAcces} 
         value={valueAcces} 
@@ -297,7 +280,8 @@ export default function CreerPoint() {
         setValue={setValueAcces} 
         setItems={setItemsAcces}
         onOpen={onOpenAcces}
-        placeholder="Sélectionnez le niveau d'accèes du point d'eau" 
+        placeholder="Sélectionnez le niveau d'accès du point d'eau"
+        placeholderStyle={{ color: '#9e9c9c' }}
         listMode= "SCROLLVIEW"
         style={styles.menuD}
       /> 
@@ -314,7 +298,8 @@ export default function CreerPoint() {
         setValue={setValueStatut} 
         setItems={setItemsStatut}
         onOpen={onOpenStatut}
-        placeholder="Sélectionnez le statut du point d'eau" 
+        placeholder="Sélectionnez le statut du point d'eau"
+        placeholderStyle={{ color: '#9e9c9c' }}
         listMode= "SCROLLVIEW"
         style={styles.menuD}
       /> 
@@ -335,7 +320,7 @@ export default function CreerPoint() {
 
     {/* préssion */}
     <View style={[styles.tout, {marginTop:20}]}>
-      <Text style={styles.text}>préssion</Text> 
+      <Text style={styles.text}>Pression</Text> 
       <TextInput value={pression} onChangeText={setPression} keyboardType='decimal-pad' style={styles.entree} placeholder=""></TextInput>
     </View> 
 
@@ -347,7 +332,7 @@ export default function CreerPoint() {
 
    {/* insee5 */}
     <View style={[styles.tout, {marginTop:20}]}>
-      <Text style={styles.text}>insee5</Text> 
+      <Text style={styles.text}>INSEE5</Text> 
       <TextInput value={insee5} onChangeText={setInsee5} keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
     </View> 
 
@@ -365,15 +350,13 @@ export default function CreerPoint() {
 
     {/* lattitude */}
     <View style={[styles.tout, {marginTop:20}]}>
-      <Text style={styles.text}>Lattitude</Text> 
+      <Text style={styles.text}>Latitude</Text> 
       <TextInput value={latitude} onChangeText={setLatitude} keyboardType='numbers-and-punctuation' style={styles.entree} placeholder=""></TextInput>
     </View> 
 
     {/* creer */}
       <View style={[styles.tout, {marginTop:20}]}>
-        <TouchableOpacity style={[styles.boutton, {marginTop: 15, backgroundColor: '#457B9D', width: 200, height: 45}]} onPress = {creerPointAPI} >
-          <Text style={{color:'#ffffff'}}>CREER</Text>
-        </TouchableOpacity>
+        <ButtonLog label="CREER" onPress={creerPointAPI} type="primary" width={200} height={45} marginTop={15}/>
     </View>
     </>
   );
@@ -407,13 +390,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#1D3557',
   },
-
-  boutton:{
-    justifyContent: 'center',
-    alignItems: 'center',    
-    borderRadius: 30,
-  },
-
 
 });
   

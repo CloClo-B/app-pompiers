@@ -1,10 +1,10 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import HautPage from '../hautPage';
 
-import HistoriqueMission from '../historiqueMission';
-import MissionEnCours from '../missionEnCours';
+import HautPage from "@/app/hautPage";
+import HistoriqueMission from '@/app/historiqueMission';
+import MissionEnCours from "@/app/missionEnCours";
 
 
 // Affichage des missions

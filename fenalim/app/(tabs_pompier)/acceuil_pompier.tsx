@@ -1,13 +1,13 @@
-import axios from "axios";
 import {FontAwesome} from "@expo/vector-icons";
 import * as Location from "expo-location";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState, useMemo} from "react";
 import {ActivityIndicator, StyleSheet, TouchableOpacity, View, Linking, Platform, Modal, Text} from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import { Marker } from "react-native-maps";
+import MapView from "react-native-map-clustering"; 
 import { useRouter } from 'expo-router';
-import HautPage from "../hautPage";
-import proj4 from "proj4";
-import { API_ENDPOINTS } from "../../config/api";
+import HautPage from "@/app/hautPage";
+import { getAllPointEau } from "@/service/pointEauService";
+import ButtonLog from '@/components/ButtonLog';
 
 // Définit toutes les infos qu'un point possède
 type PointEau = {
@@ -23,7 +23,7 @@ type PointEau = {
   longitude: number;
 };
 
-// Page Accueil (Pompier) carte interactive qui localisation / affiche les points d'eau incendie / itinéraire ou signaler un problème sur les points d'eau
+// Page Accueil (Public) carte interactive qui localisation / affiche les points d'eau incendie / itinéraire ou signaler un problème sur les points d'eau
 export default function HomeScreen() {
   const [localisation, setLocalisation] = useState<Location.LocationObject | null>(null);
   const [pointsEau, setPointsEau] = useState<PointEau[]>([]);
@@ -34,34 +34,25 @@ export default function HomeScreen() {
   const router = useRouter();
 
   // Référence pour piloter la carte
-  const referenceCarte = useRef<MapView>(null);
+  const referenceCarte = useRef<any>(null);
 
   // Charge les points d'eau et active le GPS
   useEffect(() => {
     let watchAbonnement: Location.LocationSubscription | null = null;
 
-    const fetchPointsEau = async () => {
-      try {
-        const response = await axios.get(API_ENDPOINTS.POINTS_EAU);
+  // Fonction pour charger les points d'eau
+  const fetchPointsEau = async () => {
+    try {
+      const response = await getAllPointEau();
 
-        // Conversion du format (Lambert93) vers le format GPS (WGS84)
-        const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
-        const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
-
-        const pointsRaw = Array.isArray(response.data) ? response.data : response.data.points_eau;
-
-        const pointsEauWGS84 = pointsRaw.map((p: any) => {
-          const [lon, lat] = proj4(lambert93, wgs84, [p.longitude, p.latitude]);
-          return { ...p, latitude: lat, longitude: lon };
-        });
-
-        setPointsEau(pointsEauWGS84);
-      } catch (error) {
-        console.error(error);
-      } finally {
+      const pointsRaw = Array.isArray(response) ? response : response.points_eau;
+      setPointsEau(pointsRaw);
+    } catch (error) {
+      console.error(error);
+    }finally {
         setLoading(false);
-      }
-    };
+    }
+  };
 
     // Demande l'accès au GPS et suit la position de l'utilisateur
     const getLocation = async () => {
@@ -118,6 +109,20 @@ export default function HomeScreen() {
     setModalVisible(true);
   };
 
+  // Mémoire pour éviter le recalcule des markers
+  const markers = useMemo(() => {
+    return pointsEau.map((point) => (
+      <Marker
+        key={point.id}
+        coordinate={{ latitude: point.latitude, longitude: point.longitude }}
+        title={`Numero PEI : ${point.numero_pei}`}
+        description="Cliquez ici pour avoir plus d'infos"
+        onCalloutPress={() => infoPointEau(point)}
+      />
+    ));
+  }, [pointsEau]);
+
+
   if (loading || !location) {
     return (
       <View style={styles.loader}>
@@ -140,18 +145,18 @@ export default function HomeScreen() {
           latitudeDelta: 0.2,
           longitudeDelta: 0.2,
         }}
-        showsUserLocation // Affiche le point bleu
+        showsUserLocation // Affiche le point bleu Localisation
+
+        // Réglage des bulles de regroupement
+        clusterColor="#007AFF"
+        clusterTextColor="#FFFFFF"
+        radius={50}
+        extent={512}
       >
-        {pointsEau.slice(0, 100).map((point) => (
-          <Marker
-            key={point.id}
-            coordinate={{ latitude: point.latitude, longitude: point.longitude }}
-            title={`Numero PEI : ${point.numero_pei}`}
-            description="Cliquez ici pour avoir plus d'infos"
-            onCalloutPress={() => infoPointEau(point)}
-          />
-        ))}
+        {/* Affichage de la mémoire des markers */}
+        {markers}
       </MapView>
+      
 
       {/* Bouton retour a la Positions */}
       <TouchableOpacity style={styles.boutonLocalisation} onPress={allerPosition}>
@@ -175,37 +180,33 @@ export default function HomeScreen() {
             </Text>
 
             {/* Itinéraire pour aller au point d'eau */}
-            <TouchableOpacity
-              style={styles.primaryButton}
+            <ButtonLog
+              label="Itinéraire"
               onPress={() => {
                 if (!selectedPEI) return;
-                const url =
-                  Platform.OS === "ios"
-                    ? `maps://maps.apple.com/?daddr=${selectedPEI.latitude},${selectedPEI.longitude}`
-                    : `https://www.google.com/maps/dir/?api=1&destination=${selectedPEI.latitude},${selectedPEI.longitude}`;
+                const url = Platform.OS === "ios"
+                  ? `maps://maps.apple.com/?daddr=${selectedPEI.latitude},${selectedPEI.longitude}`
+                  : `https://www.google.com/maps/dir/?api=1&destination=${selectedPEI.latitude},${selectedPEI.longitude}`;
                 Linking.openURL(url);
               }}
-            >
-              <Text style={styles.buttonText}>Itinéraire</Text>
-            </TouchableOpacity>
+              type="itineraire"
+              width={'100%'}
+              height={45}
+            />
 
             {/* Signaler le point d'eau */}
-            <TouchableOpacity
-              style={styles.dangerButton}
+            <ButtonLog
+              label="Signaler"
               onPress={() => {
                 if (selectedPEI) {
-                  
-                  router.push({
-                    pathname: '/signalement',
-                    params: {idPoint: selectedPEI.numero_pei  .toString()},
-                  });
-                  
+                  router.push({ pathname: '/creerSignalement', params: {idPoint: selectedPEI.numero_pei.toString()} });
                 };
-                setModalVisible(false)
+                setModalVisible(false);
               }}
-            >
-              <Text style={styles.buttonText}>Signaler</Text>
-            </TouchableOpacity>
+              type="signalement"
+              width={'100%'}
+              height={45}
+            />
 
 
             <TouchableOpacity onPress={() => setModalVisible(false)}>
@@ -265,23 +266,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginBottom: 20,
     lineHeight: 22,
-  },
-  primaryButton: {
-    backgroundColor: "#007AFF",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  dangerButton: {
-    backgroundColor: "#FF9500",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  buttonText: {
-    color: "white",
-    textAlign: "center",
-    fontWeight: "600",
   },
   cancelText: {
     color: "#007AFF",

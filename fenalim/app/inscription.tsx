@@ -1,15 +1,25 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { KeyboardAvoidingView,Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView,Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
 
-import Button from '@/components/ButtonLog';
 import axios from 'axios';
 import { useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS } from '@/config/api';
+import { setRole, setToken } from '@/service/infosStocker';
+import ButtonLog, { BoutonInscription } from '@/components/ButtonLog';
+
+import TurnstileCaptcha from '@/components/TurnstileCaptcha';
+import { ValidationCaptcha } from '@/service/captchaService';
+
+const Oeil = require('@/assets/images/oeil.png');
+const OeilCache = require('@/assets/images/oeil_cacher.png');
 
 // Gère l'inscription des nouveaux utilisateurs
-export default function Connexion() {
+export default function Inscription() {
+
+  // captcha
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
 
   // variable pour ensuite envoyer à l'api
   // text input
@@ -18,7 +28,10 @@ export default function Connexion() {
   const [email, setEmail] = useState('');
   const [telephone, setTelephone] = useState('');
   const [motDePasse, setMDP] = useState('');
-  const [ConfirmmotDePasse, setConfirmMDP] = useState('');
+  const [confirmmotDePasse, setConfirmMDP] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmePassword, setshowConfirmePassword] = useState(false);
+  const [attenteChargement, setLoading] = useState(false);
 
   const verifEmail = (email: string) => {
     const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -26,6 +39,8 @@ export default function Connexion() {
   }
 
   const creerUtilisateur = async () => {
+    
+    if (attenteChargement) return;
 
     // Avant l'appel API, pour vérifier les valeurs
     console.log("Vérification des valeurs à envoyer\n");
@@ -34,7 +49,7 @@ export default function Connexion() {
     console.log("email: ", email);
     console.log("téléphone: ", telephone);
     console.log("mdp: ", motDePasse);
-    console.log("confirme mdp: ", ConfirmmotDePasse);
+    console.log("confirme mdp: ", confirmmotDePasse);
 
 
     // vérfication des valeurs correct avant envoyer à l'api + affichage message de l'erreur
@@ -63,12 +78,32 @@ export default function Connexion() {
       alert("La longeur du mot de passe est incorect il faut minimum 12 caracères");
       return;
     }
-    else if(motDePasse.trim() != ConfirmmotDePasse.trim() ){
+    else if(motDePasse.trim() != confirmmotDePasse.trim() ){
       console.log("Erreur les mots de passe sont différents");
       alert("Les mots de passe sont différents");
       return;
     }
-    else{
+    
+
+    // verification du captcha
+    if (!captchaToken) {
+      alert("Veuillez valider le captcha");
+      return;
+      }
+      try {
+        const validation = await ValidationCaptcha(captchaToken);
+        if (validation.status !== "success") {
+        alert("Captcha invalide, veuillez réessayer");
+        return;
+        }
+      } catch (err) {
+        alert("Erreur lors de la validation du captcha");
+        return;
+      }
+      
+      
+      // si captcah ok alors créer utilisateur
+      setLoading(true);
       try {
         const response = await axios.post(API_ENDPOINTS.REGISTER, {
           nom: nom,        
@@ -76,22 +111,17 @@ export default function Connexion() {
           telephone : telephone,
           email: email, 
           mot_de_passe: motDePasse,
-          confirm_password: ConfirmmotDePasse, 
+          confirm_password: confirmmotDePasse, 
         });
         // recup token
         console.log("Token du compte", email, ":", response.data.token);
-
-        const role = response.data.role;  //recuperation du role de l'utilisateur
+        const role = response.data.role;  //recuperation du role 
         console.log(role);
-
         
-        try {
-            await AsyncStorage.setItem('@token', response.data.token)
-            await AsyncStorage.setItem('@role', response.data.role)
+        // stockage du token et du role
+        setToken(response.data.token)
+        setRole(response.data.role)
 
-          } catch (e) {
-            console.log("erreur token")
-          }
         // affichage en focntion du role
         if (role === 'public') {
           router.replace('/(tabs_public)/acceuil');
@@ -113,8 +143,10 @@ export default function Connexion() {
           // autre erreur
           alert("Erreur lors de l'inscription");
         }
+        
+      } finally {
+        setLoading(false);
       }
-    };
   }
 
 
@@ -127,7 +159,7 @@ export default function Connexion() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <LinearGradient colors={['#E63946', '#1D3557']} style={styles.container}>
 
                   <View>
@@ -156,21 +188,43 @@ export default function Connexion() {
 
                   <View style={styles.aligne}>
                     <Text style={styles.title_ID_MDP}>Mot de passe</Text>
-                    <TextInput value={motDePasse} secureTextEntry onChangeText={setMDP} style={styles.saisiChamp}/>
+                    <View style={styles.entreeCrayon}>
+                      <TextInput
+                        value={motDePasse}
+                        secureTextEntry={!showPassword} 
+                        onChangeText={setMDP}
+                        placeholder="Minimum 12 caractères"
+                        style={styles.saisiChampMDP}
+                      />
+                      <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                        <Image source={showPassword ? Oeil : OeilCache} style={styles.imageC} />
+                      </TouchableOpacity>
+                    </View>
                   </View>
 
                   <View style={styles.aligne}>
-                      <Text style={styles.title_ID_MDP}>Confirmer le mot de passe</Text>
-                    <TextInput value={ConfirmmotDePasse} secureTextEntry onChangeText={setConfirmMDP} style={styles.saisiChamp}/>
+                    <Text style={styles.title_ID_MDP}>Confirmer le mot de passe</Text>
+                    <View style={styles.entreeCrayon}>
+                      <TextInput
+                        value={confirmmotDePasse}
+                        secureTextEntry={!showConfirmePassword}
+                        onChangeText={setConfirmMDP}
+                        placeholder="Minimum 12 caractères"
+                        style={styles.saisiChampMDP}
+                      />
+                      <TouchableOpacity onPress={() => setshowConfirmePassword(!showConfirmePassword)}>
+                        <Image source={showConfirmePassword ? Oeil : OeilCache} style={styles.imageC} />
+                      </TouchableOpacity>
+                    </View>
                   </View>
 
+                  <TurnstileCaptcha onVerify={setCaptchaToken} />
+                  
                   <View style={{ marginTop: 50}}>
-                      <Button label='Valider' onPress={creerUtilisateur} backColor="#30D936"/>
+                      <ButtonLog label='Valider' onPress={creerUtilisateur} backColor="#30D936" disabled={attenteChargement} loading={attenteChargement}/>
                   </View>
 
-                  <View>
-                      <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Connexion' onPress={() => router.navigate('/connexion')}/>
-                  </View>
+                  <BoutonInscription/>
                   
           </LinearGradient>
       </ScrollView>
@@ -199,7 +253,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   aligne: {
-    width: '80%', 
+    width: '100%', 
     maxWidth: 300, 
     alignSelf: 'center', 
     marginTop: 20,
@@ -211,5 +265,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     paddingHorizontal: 10,
+  },
+  imageC: {
+    width: 30,
+    height: 30,
+    marginLeft: 8,
+  },
+  entreeCrayon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  saisiChampMDP: {
+    flex: 1,
+    height: 40,
+    color: '#000000ff',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 10,
   }
 });
+

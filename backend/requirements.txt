@@ -16,3 +16,5 @@ pytest-cov
 argon2-cffi
 PyJWT
 python-dotenv
+pynacl
+requests

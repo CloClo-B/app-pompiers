@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Button, TouchableOpacity, Alert, Image, ScrollView, Platform, Linking } from "react-native";
-import HautPage from './hautPage';
-import axios from "axios";
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, ScrollView, Platform, Linking } from "react-native";
+import HautPage from '@/app/hautPage';
 import { router, useLocalSearchParams} from 'expo-router';
 import proj4 from "proj4";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getData } from '@/config/recupRole'; 
 import { naviguerPointEau } from '@/config/navigation';
 import { API_ENDPOINTS } from '@//config/api';
+import { getSignalementByIndex } from "@/service/signalementService";
+import { getPointEauByID } from "@/service/pointEauService";
+import { getRole, getToken } from "@/service/infosStocker";
+import ButtonLog from '@/components/ButtonLog';
 
 // Donnée du Signalement
 type Signale = {
@@ -15,7 +16,7 @@ type Signale = {
   id_point: string;
   probleme: string;
   photo: string;
-  id_utilisateur: string;
+  mail_utilisateur: string;
   date_creation: string;
 };
 type lePoint = {
@@ -32,8 +33,8 @@ export default function UserDetails() {
     const chargerRoleEtToken = async () => {
       try {
         // recup role et token
-        const tokenValue = await AsyncStorage.getItem('@token');
-        const roleValue = await getData();
+        const tokenValue = await getToken();
+        const roleValue = await getRole();
         if (tokenValue){
           setToken(tokenValue);
         }
@@ -46,14 +47,13 @@ export default function UserDetails() {
         }
       } 
       catch (e) {
-        console.log("erreur récupération token ou rôle");
+        console.log("erreur de récupération du token ou du rôle");
       }
     };
 
     chargerRoleEtToken();
   }, []);
 
-  const [chargement, setChargement] = useState(true);
   const [signalement, setSignalement] = useState<Signale | null>(null);
   const [pointSignale, setPointSignale] = useState<lePoint | null>(null);
 
@@ -68,37 +68,41 @@ export default function UserDetails() {
     }
     try {
       console.log("iddddd", id_s)
-      const response = await axios.get(API_ENDPOINTS.SIGNALEMENT_BY_ID_SIGNALEMENT(id_s), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      
+      // appel du fichier signalementService pour recuperer le signalement EN FONCTION DE L'INDEX DU TABLEAU
+      const reponse = await getSignalementByIndex(token, id_s);
+
       // affichage des données
-      console.log("Données reçues:", response.data);
+      console.log("Données reçues:", reponse);
       
       setSignalement({
-        id: String(response.data.id),
-        id_point: response.data.id_point,
-        probleme: response.data.probleme,
-        photo: response.data.photo,
-        id_utilisateur: String(response.data.id_utilisateur),
-        date_creation: String(response.data.date_creation),
+        id: String(reponse.id),
+        id_point: reponse.id_point,
+        probleme: reponse.probleme,
+        photo: reponse.photo,
+        mail_utilisateur: String(reponse.mail_utilisateur),
+        date_creation: String(reponse.date_creation),
       });
-      fetchPointsEau(response.data.id_point);
+      fetchPointsEau(reponse.id_point, token);
 
   } catch (error) {
     console.error("Erreur lors du chargement du signalement :", error);
     Alert.alert("Erreur", "Impossible de récupérer le signalement.");
-  } finally {
-      setChargement(false);
-    }
+  }
   };
 
-  const fetchPointsEau = async (id_point: string) => {
+  const fetchPointsEau = async (id_point: string, token: string) => {
+    if (!token) {
+      Alert.alert("Erreur", "Impossible de récupérer le point d'eau.");
+      return;
+    }
     try {
       // affichage des données
-      // console.log("Données reçues:", response.data);
+      // console.log("Données reçues:", reponse);
       
-      const response = await axios.get(API_ENDPOINTS.POINT_EAU_BY_ID(id_point));
-      const point = response.data; 
+      // appel du fichier pointEauService pour la envoyer la requete de recuperation par id Point
+      const point = await getPointEauByID(token, id_point);      
+      
       if (point) {
         const lambert93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs";
         const wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
@@ -114,9 +118,6 @@ export default function UserDetails() {
       console.error("Erreur lors du chargement du points d'eau :", error);
       Alert.alert("Erreur", "Impossible de récupérer le point d'eau.");
     } 
-    finally {
-      setChargement(false);
-    }
   };
 
 
@@ -144,11 +145,11 @@ export default function UserDetails() {
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>ID du point signaler : </Text> {signalement?.id_point}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Date du signalement : </Text> {signalement?.date_creation ? new Date(signalement.date_creation).toLocaleDateString() : ''}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Heure du signalement : </Text> {signalement?.date_creation ? new Date(signalement.date_creation).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</Text>
-              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Signaler par : </Text> {signalement?.id_utilisateur}</Text>
+              <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Signaler par : </Text> {signalement?.mail_utilisateur}</Text>
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Problème : </Text> {signalement?.probleme}</Text>
               {signalement?.photo && (
                 <Image
-                  source={{ uri: API_ENDPOINTS.IMAGE(signalement.photo) }}
+                  source={{ uri: API_ENDPOINTS.GET_IMAGE_SIGNALEMENT(signalement.photo) }}
                   style={{ width: 300, height: 250, borderRadius: 10, marginTop: 10, marginBottom:10 }}
                   resizeMode="cover"
                 />
@@ -158,13 +159,11 @@ export default function UserDetails() {
             
             {/* BOUTONS */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-                <TouchableOpacity
-                  style={[styles.boutton ,{ backgroundColor: '#457B9D', width: 150, height: 45 }]}
-                  onPress={() => {
-                    const latitude = pointSignale?.latitude;
-                    const longitude = pointSignale?.longitude;
-                
-                    let url = "";
+
+                <ButtonLog label="Itinéraire" onPress={() => {
+                  const latitude = pointSignale?.latitude;
+                  const longitude = pointSignale?.longitude;
+                  let url = "";
                     if (Platform.OS === "ios") {
                       // Apple Maps
                       url = `http://maps.apple.com/?daddr=${latitude},${longitude}&dirflg=d`;
@@ -174,16 +173,15 @@ export default function UserDetails() {
                     }
                 
                     Linking.openURL(url).catch((err) =>
-                      console.error("Impossible d'ouvrir l'application de navigation", err)
-                    );
-                  }}
-                >
-                  <Text style={{ color: '#FFF'}}>Itinéraire</Text>
-                </TouchableOpacity>
+                      console.error("Impossible d'ouvrir l'application de navigation", err));
+                    }} type="primary" width={150} height={45}
+                />
 
-              <TouchableOpacity style={[styles.boutton, { backgroundColor: '#457B9D', width: 150, height: 45 }]} onPress={() => router.push({ pathname: '/marquerResolu', params: { id_s: id_s } })}>
-                <Text style={{color:'#ffffff'}}>Marquer resolu</Text>
-              </TouchableOpacity>
+              <ButtonLog
+                label="Marquer résolu"
+                onPress={() => router.push({ pathname: '/marquerResolu', params: { id_s: id_s } })}
+                type="primary" width={150} height={45}/>
+
             </View>
 
 
@@ -221,10 +219,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 15
   },
-  boutton:{
-    justifyContent: 'center',
-    alignItems: 'center',    
-    borderRadius: 30,
-  },
-
 });

@@ -30,8 +30,12 @@ for feature in geojson['features']:
     x, y = feature['geometry']['coordinates']
     
     # Nettoyage des valeurs vides pour la bdd
-    accessibilite = props.get("ACCESSIBIL") or None
-    disponibilite = props.get("DISPO") or None
+    accessibilite = props.get("ACCESSIBIL") or "C"
+    disponibilite = props.get("DISPO") or "DI"
+    press_deb = props.get("PRESS_DEB_") or 0
+    vol_eau_mi = props.get("VOL_EAU_MI") or 0
+    debit_1_ba = props.get("DEBIT_1_BA") or 0
+    utilisateur = 1
 
     #Ajout des données
     records.append((
@@ -43,12 +47,12 @@ for feature in geojson['features']:
         accessibilite,
         disponibilite,
         props.get("CARTO_REF"),
-        props.get("PRESS_DEB_"),
-        props.get("DEBIT_1_BA"),
-        props.get("VOL_EAU_MI"),
+        press_deb,
+        debit_1_ba,
+        vol_eau_mi,
         props.get("DATE_CREA"),
         props.get("DATE_MAJ"),
-        props.get("UTILISATEU"),
+        utilisateur,
         x,
         y
     ))

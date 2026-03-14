@@ -22,10 +22,14 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.test
+      args:
+        - CLE_CHIFFREMENT=fe12d90cb6b8bb4dbc94b6f61fd40f3548aad0b23e31702a87e66a66e5fa8cbf
+        - time_token=8
     container_name: fenalim_api_test
     environment:
       DATABASE_URL: postgresql://fenalim_test:fenalim_test123@db_test:5432/fenalim_db_test
       TESTING: "true"
+      CLE_CHIFFREMENT: fe12d90cb6b8bb4dbc94b6f61fd40f3548aad0b23e31702a87e66a66e5fa8cbf
     depends_on:
       db_test:
         condition: service_healthy

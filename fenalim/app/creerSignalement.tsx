@@ -1,14 +1,15 @@
 import { Camera } from 'expo-camera';
-import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Button, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import HautPage from './hautPage';
-import { getData } from '@/config/recupRole'; 
 import { naviguerAccueil} from '@/config/navigation';
-import { API_ENDPOINTS } from '@/config/api';
 import { useLocalSearchParams } from 'expo-router';
+import { createSignalement } from '@/service/signalementService';
+import { getRole, getToken } from '@/service/infosStocker';
+import ButtonLog from '@/components/ButtonLog';
 
 
 // petit encadrer pour choix photo
@@ -18,33 +19,39 @@ const ajouterPhoto = require('@/assets/images/ajouter_photo.png');
 export default function Signalement() {
   const router = useRouter();
   const { idPoint } = useLocalSearchParams<{ idPoint: string }>();
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (idPoint) {
       setIDPoint(idPoint);
+      getData();
     }
   }, [idPoint]);
 
 
-  useEffect(() => {
-  const chargerRole = async () => {
-    const role = await getData();
-    setUserRole(role);
-  };
-    chargerRole();
-  }, []);
+  const getData = async () => {
+    try {
+      // recup role et token
+      const token = await getToken();
+      const role = await getRole();
+      if(token !== null && role !== null) {
+        setToken(token);
+        setRole(role);
+      }
+    } catch(e) {
+      console.log("erreur créer signalement");
+    }
+  }
 
 
 
   // variable pour ensuite envoyer à l'api
-  
   const [IDPoint, setIDPoint] = useState(''); 
   const [probleme, setProbleme] = useState('');
-  const [photo, setPhoto] = useState('');
 
-//  ouvrir la galerie
-  const [image, setImage] = useState<string | null>(null);
+  //  ouvrir la galerie
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
@@ -103,7 +110,7 @@ const handlePickImage = () => {
     console.log("Vérification des valeurs à envoyer\n");
     console.log("IDPoint:", IDPoint);
     console.log("probleme:", probleme);
-    console.log("photo", photo);
+    console.log("photo", image);
 
 
     if(probleme == null || !probleme.trim() || probleme.trim().length<10 || probleme.trim().length> 100){
@@ -116,6 +123,11 @@ const handlePickImage = () => {
       alert("Image requise");
       return;
     }
+    else if(token == null){
+      console.log("Pas de token");
+      alert("Erreur création mission");
+      return;
+    }
     else{        
       try {
         const formData = new FormData();
@@ -126,11 +138,10 @@ const handlePickImage = () => {
           name: "pointsignaler.jpg",
           type: "image/jpeg",
         } as any);
-        formData.append("id_utilisateur", "1");
         
-        const response = await axios.post(API_ENDPOINTS.SIGNALEMENTS, formData, {
-          headers: { "Content-Type": "multipart/form-data" }
-        });
+        // apelle du fichier signalementService pour la envoyer la requete
+        await createSignalement(token, formData);
+
         router.push({
             pathname: '/succes',
             params: { title: 'Signalement créé avec succès',  page:"acceuil"  }
@@ -154,7 +165,7 @@ const handlePickImage = () => {
   return (
     <>
     <View>
-      <HautPage title="Signalement hydrant" />
+      <HautPage title="Signalement hydrant"/>
     </View>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -171,9 +182,9 @@ const handlePickImage = () => {
 
             {/* message signalement */}
             <View style={styles.total}>
-              <Text style={styles.text}>Descripton du problème</Text>
+              <Text style={styles.text}>Description du problème</Text>
               <View style={styles.entreeCryon}>
-                  <TextInput value={probleme} onChangeText={setProbleme} style={styles.entree} maxLength={100} multiline={true} placeholder="Ecrivez ici"></TextInput>
+                  <TextInput value={probleme} onChangeText={setProbleme} style={styles.entree} maxLength={100} multiline={true} placeholder="Explication du problème"></TextInput>
               </View>
             </View>
 
@@ -186,15 +197,8 @@ const handlePickImage = () => {
 
             {/* choix validation annulation */}
             <View style={styles.validation}>
-
-                <TouchableOpacity style={styles.boutton} onPress={() => {if (userRole) naviguerAccueil(userRole); else alert("Rôle utilisateur introuvable"); }}>
-                <Text style={{color:'#ffffff'}}>ANNULER</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.boutton} onPress={creerSignalement}>
-                <Text style={{color:'#ffffff'}}>CONFIRMER</Text>
-                </TouchableOpacity>
-
+                <ButtonLog label="ANNULER" onPress={() => { if (role) naviguerAccueil(role); else alert("Rôle utilisateur introuvable"); }} type="primary" width={150} height={45} />
+                <ButtonLog label="CONFIRMER" onPress={creerSignalement} type="primary" width={150} height={45}/>
             </View>
 
         </View>
@@ -216,7 +220,6 @@ const styles = StyleSheet.create({
   },
   contenue: {
     marginTop: 40,
-    
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -240,15 +243,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 20,
   },
-
-  boutton:{
-    paddingVertical: 15,
-    paddingHorizontal:25,
-    backgroundColor: '#457B9D',
-    borderRadius: 30,
-    alignSelf: 'center',
-  },
-
+  
   info: {
     alignItems: 'center',
     width: '100%', 
