@@ -21,7 +21,7 @@ class Utilisateur(Base):
     email = Column(String(255), unique=True, nullable=False)
     telephone = Column(String(255), unique=True, nullable=False)
     mot_de_passe = Column(String(255), nullable=False)
-    role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.admin)
+    role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.public)
     date_creation = Column(DateTime, server_default=func.now(), nullable=False)
     derniere_connexion = Column(DateTime)
 

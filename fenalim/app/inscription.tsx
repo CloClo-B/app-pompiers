@@ -8,11 +8,18 @@ import { API_ENDPOINTS } from '@/config/api';
 import { setRole, setToken } from '@/service/infosStocker';
 import ButtonLog, { BoutonInscription } from '@/components/ButtonLog';
 
+import TurnstileCaptcha from '@/components/TurnstileCaptcha';
+import { ValidationCaptcha } from '@/service/captchaService';
+
 const Oeil = require('@/assets/images/oeil.png');
 const OeilCache = require('@/assets/images/oeil_cacher.png');
 
 // Gère l'inscription des nouveaux utilisateurs
 export default function Inscription() {
+
+  // captcha
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
 
   // variable pour ensuite envoyer à l'api
   // text input
@@ -77,8 +84,26 @@ export default function Inscription() {
       return;
     }
     
-    setLoading(true);
 
+    // verification du captcha
+    if (!captchaToken) {
+      alert("Veuillez valider le captcha");
+      return;
+      }
+      try {
+        const validation = await ValidationCaptcha(captchaToken);
+        if (validation.status !== "success") {
+        alert("Captcha invalide, veuillez réessayer");
+        return;
+        }
+      } catch (err) {
+        alert("Erreur lors de la validation du captcha");
+        return;
+      }
+      
+      
+      // si captcah ok alors créer utilisateur
+      setLoading(true);
       try {
         const response = await axios.post(API_ENDPOINTS.REGISTER, {
           nom: nom,        
@@ -193,6 +218,8 @@ export default function Inscription() {
                     </View>
                   </View>
 
+                  <TurnstileCaptcha onVerify={setCaptchaToken} />
+                  
                   <View style={{ marginTop: 50}}>
                       <ButtonLog label='Valider' onPress={creerUtilisateur} backColor="#30D936" disabled={attenteChargement} loading={attenteChargement}/>
                   </View>

@@ -38,7 +38,9 @@ export const API_ENDPOINTS = {
   SIGNALEMENT_SUPPRIMER: (id: string) => `${API_URL}/signaler/suprimmer/${id}`,
   GET_IMAGE_SIGNALEMENT: (id: string) => `${API_URL}/${id}`,
 
-
+  CAPTCHA: `${API_URL}/submit-form`,
+  
+  
   HISTORIQUE: `${API_URL}/historiques/`,
 
 
