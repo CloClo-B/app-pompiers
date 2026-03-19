@@ -38,6 +38,17 @@ export const API_ENDPOINTS = {
   SIGNALEMENT_SUPPRIMER: (id: string) => `${API_URL}/signaler/suprimmer/${id}`,
   GET_IMAGE_SIGNALEMENT: (id: string) => `${API_URL}/${id}`,
 
+
+  PROPOSITIONAJOUT: `${API_URL}/propositionAjout/`,
+  PROPOSITIONAJOUTMIN: `${API_URL}/propositionAjout/getmin`,
+  PROPOSITION_BY_ID: (id: number) => `${API_URL}/propositionAjout/id/${id}`,
+  PROPOSITION_SUPPRIMER: (id: number) => `${API_URL}/propositionAjout/suprimmer/${id}`,
+  GET_IMAGE_PROPOSITION: (id: string) => `${API_URL}/${id}`,
+
+
+
+  
+
   CAPTCHA: `${API_URL}/submit-form`,
   
   

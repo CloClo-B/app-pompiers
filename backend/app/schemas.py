@@ -66,6 +66,8 @@ class PointEauCreate(BaseModel):
     carto_ref: int
     latitude: float
     longitude: float
+    supp: Optional[bool] = None
+    id_supp: Optional[int] = None
     date_maj: Optional[datetime] = None
 
 # Schéma utilisé lors de la modification d’un point d’eau
@@ -247,6 +249,53 @@ class SignalerOut(BaseModel):
     date_creation: datetime
     model_config = ConfigDict(from_attributes=True)
 
+
+
+# PropAjoutPoint
+# Schéma de base pour une proposion d'ajout de point
+class PropAjoutBase(BaseModel):
+    id:int
+    description: str
+    photo: str
+    id_utilisateur: int
+    latitude: float
+    longitude: float
+    date_creation: datetime
+    
+# schéma de sortie pour les propositon d'ajout
+class PropAjoutBaseOutMin(BaseModel):
+    id:int
+    description: str
+    photo: str
+    id_utilisateur: int
+    latitude: float
+    longitude: float
+    date_creation: datetime
+# Schéma de création d'une proposition
+class PropAjoutCreate(BaseModel):
+    description: str
+    photo: str
+    id_utilisateur: int
+    latitude: float   
+    longitude: float   
+    model_config = ConfigDict(from_attributes=True)
+
+# schéma de sortie pour les propositon d'ajout
+class PropAjoutOut(BaseModel):
+    id:int
+    description: str
+    photo: str
+    mail_utilisateur: str
+    date_creation: datetime
+    latitude: float
+    longitude: float
+    model_config = ConfigDict(from_attributes=True)
+
+# schéma de sortie minimal pour les propositon d'ajout
+class PropAjoutBaseOutMin(BaseModel):
+    id:int
+    description: str
+    date_creation: datetime
 
 
 

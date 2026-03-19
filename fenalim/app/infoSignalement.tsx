@@ -63,7 +63,7 @@ export default function UserDetails() {
   
   const infoSignalementSelect = async (token: string) => {
     if (!token) {
-      alert("Token manquant, impossible d'afficher les missions en cours");
+      alert("Impossible d'afficher les signalements en cours");
       return;
     }
     try {

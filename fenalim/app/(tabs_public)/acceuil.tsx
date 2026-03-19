@@ -163,6 +163,18 @@ export default function HomeScreen() {
         <FontAwesome name="location-arrow" size={24} color="#FFF" />
       </TouchableOpacity>
       
+      {/* bouton de crétation d'une proposition d'ajout de point */}
+      <TouchableOpacity 
+        style={styles.boutonAjout} 
+        onPress={() => {
+          if (location) {
+            router.push({ pathname: '/creerPropositionAjout', params: { latitude: location.latitude, longitude: location.longitude}});
+          }
+        }}
+      >
+        <FontAwesome name="plus" size={24} color="#FFF" />
+      </TouchableOpacity>
+      
       {/* Description des points d'eau */}
       <Modal transparent animationType="fade" visible={modalVisible}>
         <View style={styles.overlay}>
@@ -272,5 +284,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "600",
     marginTop: 10,
+  },
+  boutonAjout: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    backgroundColor: "#28a745",
+    borderRadius: 30,
+    width: 60,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
   },
 });

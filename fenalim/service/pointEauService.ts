@@ -20,6 +20,9 @@ export const createPointEau = async (
   volumeMin: string,
   longitude: string,
   latitude: string,
+  supp: boolean,
+  id_supp: number
+
 ) => {
   const reponse = await axios.post(API_ENDPOINTS.POINTS_EAU, {
     numero_pei: parseInt(numeroPEI),
@@ -35,6 +38,8 @@ export const createPointEau = async (
     vol_eau_mi: parseFloat(volumeMin.replace(',', '.')),
     longitude: parseFloat(longitude.replace(',', '.')),
     latitude: parseFloat(latitude.replace(',', '.')),
+    supp: supp,
+    id_supp: id_supp
   },
   {
     headers: {

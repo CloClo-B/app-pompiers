@@ -2,7 +2,7 @@
 DAO pour la gestion des Points d'Eau
 """
 from sqlalchemy.orm import Session
-from sqlalchemy import func, text
+from sqlalchemy import func
 from datetime import datetime
 from typing import Dict, Any, List
 from app.models import PointEau

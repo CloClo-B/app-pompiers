@@ -1,74 +1,73 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import { getAllSignalement } from '@/service/signalementService';
 import { getToken } from '@/service/infosStocker';
+import {getAllPropositionMin } from '@/service/propoAjoutService';
 
 
 const roue = require('@/assets/images/parametres.png');
 
-// Donnée du Signalement
-type Signale = {
-  id_s: string;
+// Donnée de proposition
+type Proposition = {
   id: string;
-  probleme: string;
+  description: string;
   date: string;
 };
 
-// Affichage des Signalement des points d'eau
-export default function PointSignale() {
+// Affichage des proposition d'ajout de point d'eau
+export default function PropositionAjout() {
   
-  const [signaler, setSignale] = useState<Signale[]>([]);
+  const [proposition, setProposition] = useState<Proposition[]>([]);
   const [chargement, setChargement] = useState(true);
   
   // récupérer le token 
   useEffect(() => {
     getData();
   }, []);
+
   const getData = async () => {
     try {
       const value = await getToken();
       if(value !== null) {
-        fetchPointSignale(value);
+        fetchProposition(value);
       }
     } catch(e) {
-      console.log("Erreur token affichage point eau signalé");
+      console.log("Erreur token affichage proposition d'ajout");
     }
   }
 
-  const fetchPointSignale = async (token: string) => {
+  const fetchProposition = async (token: string) => {
     if (!token) {
-      alert("Token manquant, impossible de créer le point d'eau");
+      alert("Impossible de recuperer les information");
       return;
     }
     else{
       console.log(token);
     }
     try {
-      // apelle du fichier signalementService pour recuperer tout les signalement via la requete
-      const reponseSignalement = await getAllSignalement(token);
+      // apelle du fichier propoAjoutService pour recuperer tout les proposition via la requete
+      const reponseProposition = await getAllPropositionMin(token);
 
       // affichage des données
-      console.log("Données reçues:", reponseSignalement);
+      console.log("Données reçues:", reponseProposition);
       
-      const signaleRaw = Array.isArray(reponseSignalement) ? reponseSignalement : reponseSignalement.signalement;
+      const propositionRaw = Array.isArray(reponseProposition) ? reponseProposition : reponseProposition.proposition;
 
-      if (!signaleRaw) {
-        console.error("Impossible de récupérer les points signalés:", reponseSignalement);
+      if (!propositionRaw) {
+        console.error("Impossible de récupérer la proposition:", reponseProposition);
         return;
     }
 
-    const lesSignaler: Signale[] = signaleRaw.map((u: any) => ({
-      id_s: String(u.id),
-      id: String(u.id_point),
-      probleme: u.probleme,
+    const lesProposition: Proposition[] = propositionRaw.map((u: any) => ({
+      id: String(u.id),
+      description: u.description,
       date: String(u.date_creation),
     }));
-    setSignale(lesSignaler);
+    setProposition(lesProposition);
 
     } catch (error) {
-        console.error("Erreur lors du chargement des points signalés :", error);
-        Alert.alert("Erreur", "Impossible de récupérer les points signalés.");
+        console.error("Erreur lors du chargement des proposition d'ajout :", error);
+        Alert.alert("Erreur", "Impossible de récupérer la proposition d'ajout.");
     } finally {
         setChargement(false);
     }
@@ -76,12 +75,13 @@ export default function PointSignale() {
 
 
   // affichage en tableau
-  const renderItem = ({ item }: { item: Signale }) => (
+  const renderItem = ({ item }: { item: Proposition }) => (
     <View style={styles.row}>
       <Text style={styles.cell}>{item.id}</Text>
-      <Text style={styles.cell}> {item.probleme.length > 10 ? item.probleme.slice(0, 10) + ' ...' : item.probleme}</Text>
+      <Text style={styles.cell}> {item.description.length > 10 ? item.description.slice(0, 10) + ' ...' : item.description}</Text>
       <Text style={styles.cell}> {new Date(item.date).toLocaleDateString()}</Text>
-      <TouchableOpacity onPress={() => router.push({ pathname: '/infoSignalement', params: { id_s: item.id_s } })}>
+      
+      <TouchableOpacity onPress={() => router.push({ pathname: '/infoProposition', params: { id: item.id } })}>
         <Image source={roue} style={styles.cellImage} />
       </TouchableOpacity>
     </View>
@@ -92,21 +92,21 @@ export default function PointSignale() {
     <View style={styles.container}>
 
       <View style={styles.hautBleu}>
-        <Text style={styles.textTitre}>ID point</Text>
-        <Text style={styles.textTitre}>Problème</Text>
+        <Text style={styles.textTitre}>ID</Text>
+        <Text style={styles.textTitre}>Description</Text>
         <Text style={styles.textTitre}>Date</Text>
         <Text style={styles.textTitre}>Info</Text>
       </View>
-
-
+    
       <View style={styles.tableContainer}>
-        <FlatList
-          data={signaler}
+          <FlatList
+          data={proposition}
           renderItem={renderItem}
           keyExtractor={(item, index) => `${item.id}-${index}`}
           scrollEnabled={true}
-        />
+          />
       </View>
+      
     </View>
     </>
   );
@@ -114,6 +114,11 @@ export default function PointSignale() {
 
 // Style
 const styles = StyleSheet.create({
+  contenue: {
+    marginTop: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   container: { 
     flex: 1, 
     padding: 16,
@@ -135,7 +140,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eee' 
   },
   cell: { 
-    flex: 1 
+    flex: 0.5 
   },
   cellImage: { 
     width: 25, 

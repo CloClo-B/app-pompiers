@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import HautPage from './hautPage';
 import { naviguerAccueil} from '@/config/navigation';
 import { useLocalSearchParams } from 'expo-router';
-import { createSignalement } from '@/service/signalementService';
+import { createProposition } from '@/service/propoAjoutService';
 import { getRole, getToken } from '@/service/infosStocker';
 import ButtonLog from '@/components/ButtonLog';
 
@@ -15,20 +15,21 @@ import ButtonLog from '@/components/ButtonLog';
 // petit encadrer pour choix photo
 const ajouterPhoto = require('@/assets/images/ajouter_photo.png');
 
-// Page pour signaler un points d'eau
-export default function Signalement() {
+// Page pour créer une proposition d'ajout de points d'eau
+export default function creerPropositionAjout() {
   const router = useRouter();
-  const { idPoint } = useLocalSearchParams<{ idPoint: string }>();
+
+  //recup les infos stocké 
+  const { latitude, longitude } = useLocalSearchParams<{ latitude: string; longitude: string }>();
+  
+  
   const [token, setToken] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (idPoint) {
-      setIDPoint(idPoint);
-      getData();
-    }
-  }, [idPoint]);
+    useEffect(() => {
+    getData();
+    }, []);
 
 
   const getData = async () => {
@@ -41,15 +42,15 @@ export default function Signalement() {
         setRole(role);
       }
     } catch(e) {
-      console.log("erreur créer signalement");
+      console.log("erreur créer proposition ajout");
     }
   }
 
 
 
   // variable pour ensuite envoyer à l'api
-  const [IDPoint, setIDPoint] = useState(''); 
-  const [probleme, setProbleme] = useState('');
+
+  const [description, setDescription] = useState('');
 
   //  ouvrir la galerie
   const pickImage = async () => {
@@ -103,19 +104,26 @@ const handlePickImage = () => {
         );
     };
 
-  // communication avec l'api  /signaler/
-  const creerSignalement = async () => {
+  // communication avec l'api  /propositionAjout/
+  const creerProposition = async () => {
 
     // Avant l'appel API, pour vérifier les valeurs
     console.log("Vérification des valeurs à envoyer\n");
-    console.log("IDPoint:", IDPoint);
-    console.log("probleme:", probleme);
+    console.log("description:", description);
+    console.log("lattitude:", latitude);
+    console.log("longitude:", longitude);
     console.log("photo", image);
 
 
-    if(probleme == null || !probleme.trim() || probleme.trim().length<10 || probleme.trim().length> 100){
+    if (!latitude || !longitude){
+      console.log("Erreur coordonnée");
+      alert("Erreur coordonnée");
+      return;
+    }
+    
+    else if(description == null || !description.trim() || description.trim().length<50 || description.trim().length> 255){
       console.log("Erreur le nom est incorrect");
-      alert("La description du problème est incorrect minimum 10 caractère maximum 100");
+      alert("La description du problème est incorrect minimum 50 caractère maximum 255");
       return;
     }
     else if(image == null){
@@ -125,26 +133,27 @@ const handlePickImage = () => {
     }
     else if(token == null){
       console.log("Pas de token");
-      alert("Erreur création signalement");
+      alert("Erreur création proposition");
       return;
     }
     else{        
       try {
         const formData = new FormData();
-        formData.append("id_point", IDPoint);
-        formData.append("probleme", probleme);
+        formData.append("description", description);
+        formData.append("latitude", latitude);
+        formData.append("longitude", longitude);
         formData.append("photo", {
           uri: image,
-          name: "pointsignaler.jpg",
+          name: "imageProposition.jpg",
           type: "image/jpeg",
         } as any);
         
         // apelle du fichier signalementService pour la envoyer la requete
-        await createSignalement(token, formData);
+        await createProposition(token, formData);
 
         router.push({
             pathname: '/succes',
-            params: { title: 'Signalement créé avec succès',  page:"acceuil"  }
+            params: { title: 'Proposition créé avec succès',  page:"acceuil"  }
           });
       } 
       catch (error: unknown) {
@@ -152,10 +161,10 @@ const handlePickImage = () => {
           // erreur renvoyée par l’API
           console.log(error.response?.status);
           console.log(error.response?.data);
-          alert(error.response?.data?.detail ?? "Erreur lors du signalement");
+          alert(error.response?.data?.detail ?? "Erreur lors du création de proposition");
         } else {
           // autre erreur
-          alert("Erreur lors du signalement");
+          alert("Erreur lors du création de proposition");
         }
       }
     }
@@ -165,7 +174,7 @@ const handlePickImage = () => {
   return (
     <>
     <View>
-      <HautPage title="Signalement hydrant"/>
+      <HautPage title="Proposition point d'eau"/>
     </View>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -176,15 +185,14 @@ const handlePickImage = () => {
       <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
     
         <View style={styles.info}>
+            
+            <Text style={styles.text}>La localisation du point se fait directement à partir de votre position</Text>
 
-            {/* hydrant selectionner */}
-            <Text style={styles.choixhydrant}> Hydrant #{IDPoint}</Text>
-
-            {/* message signalement */}
+            {/* message proposition */}
             <View style={styles.total}>
-              <Text style={styles.text}>Description du problème</Text>
+              <Text style={styles.text}>Décrivez le plus précisément possible les informations du point d'eau</Text>
               <View style={styles.entreeCryon}>
-                  <TextInput value={probleme} onChangeText={setProbleme} style={styles.entree} maxLength={100} multiline={true} placeholder="Explication du problème"></TextInput>
+                  <TextInput value={description} onChangeText={setDescription} style={styles.entree} maxLength={255} multiline={true} placeholder="Explication des informations"></TextInput>
               </View>
             </View>
 
@@ -198,7 +206,7 @@ const handlePickImage = () => {
             {/* choix validation annulation */}
             <View style={styles.validation}>
                 <ButtonLog label="ANNULER" onPress={() => { if (role) naviguerAccueil(role); else alert("Rôle utilisateur introuvable"); }} type="primary" width={150} height={45} />
-                <ButtonLog label="CONFIRMER" onPress={creerSignalement} type="primary" width={150} height={45}/>
+                <ButtonLog label="CONFIRMER" onPress={creerProposition} type="primary" width={150} height={45}/>
             </View>
 
         </View>

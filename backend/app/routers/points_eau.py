@@ -1,4 +1,5 @@
 # Router FastAPI pour la gestion des points d’eau avec gestion des coordonnées géographiques
+from app.DAO.DAOPropAjout import delete_prop_ajout_by_id
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -47,10 +48,16 @@ def get_point(numero_pei: int, db: Session = Depends(get_db)):
 @router.post("/", response_model=PointEauOut)
 def create_point(payload: PointEauCreate, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("admin"))):
     
+
     # recup l'id utilisateur pour l'envoyer au DAO
     point_data = payload.model_dump()
     point_data["utilisateur"] = user_check.id_utilisateur
     
+    # supprime la proposition de point d'eau si le param supp est a true
+    if(point_data["supp"] == True):
+        delete_prop_ajout_by_id(db, point_data["id_supp"])
+
+
     try:
         nouveau_point = create_point_eau(db, point_data)
     except ValueError as e:

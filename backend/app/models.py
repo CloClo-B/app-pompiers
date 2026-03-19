@@ -94,6 +94,17 @@ class Signaler(Base):
     id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
     date_creation = Column(DateTime, server_default=func.now(), nullable=False)
 
+# Proposition ajout d'un nouveau point d'eau en foncion localisation utilisateur
+class PropAjoutPoint(Base):
+    __tablename__ = "prop_ajout_point"
+    id = Column(Integer, primary_key=True, index=True)
+    description = Column(String(255), nullable=False)
+    photo = Column(String(255), nullable=False) 
+    id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
+    geom = Column(Geometry("POINT", srid=2154), nullable=False)
+    date_creation = Column(DateTime, server_default=func.now(), nullable=False)
+
+
 # Historique des actions utilisateurs 
 class Historique(Base):
     __tablename__ = "historiques"

@@ -40,6 +40,10 @@ export default function RootLayout() {
         <Stack.Screen name="creerSignalement" options={{ headerShown: false }} />
         <Stack.Screen name="creerMissionCarte" options={{ headerShown: false }} />
         <Stack.Screen name="UpdatePointEau" options={{ headerShown: false }} />
+        <Stack.Screen name="creerPropositionAjout" options={{ headerShown: false }} />
+        <Stack.Screen name="infoProposition" options={{ headerShown: false }} />
+        <Stack.Screen name="creerPoint" options={{ headerShown: false }} />
+
 
       </Stack>
       <StatusBar style="auto" />
