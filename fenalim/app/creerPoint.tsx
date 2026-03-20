@@ -17,7 +17,6 @@ export default function CreerPoint() {
   // true si le paramètre supp existe
   const supp = params.supp === 'True';
   const id_supp = Number(params.id_supp) || 0;
-  console.log(supp)
 
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
@@ -247,6 +246,7 @@ export default function CreerPoint() {
       <View style={[styles.tout, { zIndex: 400 }]}>
         <Text style={styles.text}>Type de point d’eau</Text> 
         <DropDownPicker
+          dropDownDirection="BOTTOM"
           open={openType}
           value={valueType}
           items={typePoint}
@@ -264,7 +264,8 @@ export default function CreerPoint() {
       {/* disponibilité */}
       <View style={[styles.tout, {zIndex: 300, marginTop:20}]}>
         <Text style={styles.text}>Disponibilité du point d’eau</Text> 
-        <DropDownPicker 
+        <DropDownPicker
+          dropDownDirection="BOTTOM" 
           open={openDispo} 
           value={valueDispo} 
           items={etatDispo} 
@@ -283,6 +284,7 @@ export default function CreerPoint() {
       <View style={[styles.tout, {zIndex: 200, marginTop:20}]}>
         <Text style={styles.text}>Accessibilité du point d’eau</Text> 
         <DropDownPicker 
+          dropDownDirection="BOTTOM"
           open={openAcces} 
           value={valueAcces} 
           items={etatAcces} 
@@ -301,6 +303,7 @@ export default function CreerPoint() {
       <View style={[styles.tout, {zIndex: 100, marginTop:20}]}>
         <Text style={styles.text}>Statut du point d’eau</Text> 
         <DropDownPicker 
+          dropDownDirection="BOTTOM"
           open={openStatut} 
           value={valueStatut} 
           items={etatStatut} 
