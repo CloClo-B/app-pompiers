@@ -23,6 +23,11 @@ export default function Signalement() {
   const [role, setRole] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
 
+
+  const [attenteChargement, setLoading] = useState(false);
+
+
+
   useEffect(() => {
     if (idPoint) {
       setIDPoint(idPoint);
@@ -105,13 +110,15 @@ const handlePickImage = () => {
 
   // communication avec l'api  /signaler/
   const creerSignalement = async () => {
-
+    
+    
     // Avant l'appel API, pour vérifier les valeurs
     console.log("Vérification des valeurs à envoyer\n");
     console.log("IDPoint:", IDPoint);
     console.log("probleme:", probleme);
     console.log("photo", image);
 
+    
 
     if(probleme == null || !probleme.trim() || probleme.trim().length<10 || probleme.trim().length> 100){
       console.log("Erreur le nom est incorrect");
@@ -139,11 +146,16 @@ const handlePickImage = () => {
           type: "image/jpeg",
         } as any);
         
+        // faire mouliner pour eviter de spam
+        if (attenteChargement) return;
+        setLoading(true)
+        
+        
         // apelle du fichier signalementService pour la envoyer la requete
         await createSignalement(token, formData);
-
+        
         router.push({
-            pathname: '/succes',
+          pathname: '/succes',
             params: { title: 'Signalement créé avec succès',  page:"acceuil"  }
           });
       } 
@@ -157,6 +169,9 @@ const handlePickImage = () => {
           // autre erreur
           alert("Erreur lors du signalement");
         }
+      }
+      finally {
+        setLoading(false);
       }
     }
   };
@@ -198,7 +213,7 @@ const handlePickImage = () => {
             {/* choix validation annulation */}
             <View style={styles.validation}>
                 <ButtonLog label="ANNULER" onPress={() => { if (role) naviguerAccueil(role); else alert("Rôle utilisateur introuvable"); }} type="primary" width={150} height={45} />
-                <ButtonLog label="CONFIRMER" onPress={creerSignalement} type="primary" width={150} height={45}/>
+                <ButtonLog label="CONFIRMER" onPress={creerSignalement} type="primary" width={150} height={45} disabled={attenteChargement} loading={attenteChargement}/>
             </View>
 
         </View>

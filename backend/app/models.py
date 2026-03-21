@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, TIMESTAMP, Enum, ForeignKey, func, DateTime
+from sqlalchemy import Column, Integer, String, Float, TIMESTAMP, Enum, ForeignKey, func, DateTime, Index, UniqueConstraint
 from geoalchemy2 import Geometry
 import enum
 from .database import Base
@@ -87,12 +87,36 @@ class Mission(Base):
 # Signalement de problème sur un point d’eau
 class Signaler(Base):
     __tablename__ = "signaler"
+
+    # index qui permet d'aller plus vite pour la recherche quand y a beaucoup d'utilisateur 
+    __table_args__ = (
+        Index('index_user_date', 'id_utilisateur', 'date_creation'),
+    )
+
     id = Column(Integer, primary_key=True, index=True)
     id_point = Column(Integer, ForeignKey("points_eau.numero_pei"), nullable=False)
     probleme = Column(String(100), nullable=False)
     photo = Column(String(255), nullable=False) 
     id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
     date_creation = Column(DateTime, server_default=func.now(), nullable=False)
+
+
+class SignalementQuota(Base):
+    __tablename__ = "signalement_quota"
+    
+    # evite d'avoir deux lignes pour un même utilisateur à la même date
+    __table_args__ = (
+        UniqueConstraint("id_utilisateur", "date_creation", name="uq_user_date"),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
+    date_creation = Column(DateTime, server_default=func.now(), nullable=False)
+    nb_signalements = Column(Integer, default=0, nullable=False)
+
+
+
+
 
 # Proposition ajout d'un nouveau point d'eau en foncion localisation utilisateur
 class PropAjoutPoint(Base):
