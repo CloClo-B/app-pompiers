@@ -32,7 +32,6 @@ export default function RootLayout() {
         <Stack.Screen name="connexion" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="inscription" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="succes" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="mdp_oublie" options={{ headerShown: false, gestureEnabled: false }} />
         
         <Stack.Screen name="infoUtilisateur" options={{ headerShown: false }} />
         <Stack.Screen name="infoSignalement" options={{ headerShown: false}} />

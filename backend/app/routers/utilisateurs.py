@@ -198,7 +198,8 @@ def verif_login(payload: LoginPayload, db: Session = Depends(get_db)):
     # Génération du token pour l'utilisateur   
     data = {"sub": user.id_utilisateur, "role": user.role}
     tokenUser = createToken(data)
-    return AuthResponse(token=tokenUser, role=user.role) 
+    return AuthResponse(token=tokenUser, role=user.role)
+    
 
 
 # ADMINISTRATION
