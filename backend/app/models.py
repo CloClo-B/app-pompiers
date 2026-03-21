@@ -100,10 +100,9 @@ class Signaler(Base):
     id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
     date_creation = Column(DateTime, server_default=func.now(), nullable=False)
 
-
+# table qui centralise le nombre de signalement par jour et par utilisateur pour pouvoir ajouter les limites
 class SignalementQuota(Base):
     __tablename__ = "signalement_quota"
-    
     # evite d'avoir deux lignes pour un même utilisateur à la même date
     __table_args__ = (
         UniqueConstraint("id_utilisateur", "date_creation", name="uq_user_date"),
@@ -126,7 +125,21 @@ class PropAjoutPoint(Base):
     photo = Column(String(255), nullable=False) 
     id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
     geom = Column(Geometry("POINT", srid=2154), nullable=False)
-    date_creation = Column(DateTime, server_default=func.now(), nullable=False)
+    date_creation = Column(DateTime, server_default=func.current_date(), nullable=False)
+
+# table qui centralise le nombre de proposition d'ajout de points par jour et par utilisateur pour pouvoir ajouter les limites
+class PropAjoutQuota(Base):
+    __tablename__ = "proposition_quota"
+    # evite d'avoir deux lignes pour un même utilisateur à la même date
+    __table_args__ = (
+        UniqueConstraint("id_utilisateur", "date_creation", name="uq_user_date_prop"),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
+    date_creation = Column(DateTime, server_default=func.current_date(), nullable=False)
+    nb_proposition = Column(Integer, default=0, nullable=False)
+
 
 
 # Historique des actions utilisateurs 

@@ -23,7 +23,7 @@ export default function Signalement() {
   const [role, setRole] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
 
-
+  // permet de savoir si le bouton charge pour éviter spam
   const [attenteChargement, setLoading] = useState(false);
 
 

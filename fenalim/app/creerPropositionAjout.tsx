@@ -27,6 +27,9 @@ export default function creerPropositionAjout() {
   const [role, setRole] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
 
+  // permet de savoir si le bouton charge pour éviter spam
+  const [attenteChargement, setLoading] = useState(false);
+
     useEffect(() => {
     getData();
     }, []);
@@ -148,7 +151,12 @@ const handlePickImage = () => {
           type: "image/jpeg",
         } as any);
         
-        // apelle du fichier signalementService pour la envoyer la requete
+        // faire mouliner pour eviter de spam
+        if (attenteChargement) return;
+        setLoading(true)
+        
+
+        // apelle du fichier propoAjoutService pour la envoyer la requete
         await createProposition(token, formData);
 
         router.push({
@@ -166,6 +174,9 @@ const handlePickImage = () => {
           // autre erreur
           alert("Erreur lors du création de proposition");
         }
+      }
+      finally {
+        setLoading(false);
       }
     }
   };
@@ -206,7 +217,7 @@ const handlePickImage = () => {
             {/* choix validation annulation */}
             <View style={styles.validation}>
                 <ButtonLog label="ANNULER" onPress={() => { if (role) naviguerAccueil(role); else alert("Rôle utilisateur introuvable"); }} type="primary" width={150} height={45} />
-                <ButtonLog label="CONFIRMER" onPress={creerProposition} type="primary" width={150} height={45}/>
+                <ButtonLog label="CONFIRMER" onPress={creerProposition} type="primary" width={150} height={45} disabled={attenteChargement} loading={attenteChargement}/>
             </View>
 
         </View>

@@ -1,15 +1,23 @@
+"""
+Vérifie si le nombre de signalement journalier n'est pas dépasser pour un utilisateur 
+apelle la table SignalementQuota qui contient les info du nombre de signalement pour 1 utilisateur en fonction de jour 
+- 3 signalements pour les public
+- 10 signalements pour les pompier et commandement
+- illimité pour admin
+"""
+
 from app.models import SignalementQuota
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 
-def verifier_quota(db: Session, id_utilisateur: int, role: str):
+def verifier_quota_signalement(db: Session, id_utilisateur: int, role: str):
 
     # récupère le quota du jour 
     compte = db.query(SignalementQuota).filter(SignalementQuota.id_utilisateur == id_utilisateur, SignalementQuota.date_creation == func.current_date()).first()
-    # la limite selon le rôle
     
 
+    # limite selon le rôle
     if compte:
         # public
         if role == "public":
@@ -24,7 +32,7 @@ def verifier_quota(db: Session, id_utilisateur: int, role: str):
             else: 
                 compte.nb_signalements += 1
     else:
-        compte = SignalementQuota(id_utilisateur=id_utilisateur,date_creation=func.current_date(),nb_signalements=1)
+        compte = SignalementQuota(id_utilisateur=id_utilisateur,nb_signalements=1)
         db.add(compte)
     db.commit()
 

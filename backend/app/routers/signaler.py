@@ -13,7 +13,7 @@ from app.DAO.DAOSignaler import (
     delete_signale_by_id_point
 )
 from app.DAO.DAOUtilisateurs import dechiffrerTelEtMail
-from app.DAO.quotaSignalement import verifier_quota
+from app.DAO.compteur.quotaSignalement import verifier_quota_signalement
 from ..models import Utilisateur
 from .dependencies import rolesChecker
 
@@ -82,7 +82,7 @@ def create_signalement(id_point: int = Form(...), probleme: str = Form(...), pho
     # si public limite signalement à 3 par jour
     # si pompier ou commandement limite à 10
     try:
-        verifier_quota(db, user_check.id_utilisateur, user_check.role)
+        verifier_quota_signalement(db, user_check.id_utilisateur, user_check.role)
     except ValueError as e:
         raise HTTPException(status_code=403, detail=str(e))
 

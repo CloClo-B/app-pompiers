@@ -14,6 +14,7 @@ from app.DAO.DAOPropAjout import (
     get_all_prop_ajout_min
 )
 
+from app.DAO.compteur.quotaPropAjout import verifier_quota_proposition_ajout
 from app.DAO.DAOUtilisateurs import (dechiffrerTelEtMail,)
 from ..models import Utilisateur
 from .dependencies import rolesChecker
@@ -73,11 +74,23 @@ def get_proposition_id(ajout_id: int, db: Session = Depends(get_db), user_check:
 @router.post("/", response_model=PropAjoutCreate)
 def create_proposition(description: str = Form(...), photo: UploadFile = File(...), latitude: str = Form(...), longitude : str = Form(...), db: Session = Depends(get_db),user_check: Utilisateur = Depends(rolesChecker("public", "pompier", "commandement","admin"))):
    
+    # vérifier le nombre de proposition autorisé avec le calculateur de quota par jour
+    # si public limite proposition à 3 par jour
+    # si pompier ou commandement limite à 10
+    try:
+        verifier_quota_proposition_ajout(db, user_check.id_utilisateur, user_check.role)
+    except ValueError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+
+
 
     # création d'un id unique pour la photo
     ext = os.path.splitext(photo.filename)[1] or ".jpg"
     filename = f"{uuid.uuid4()}{ext}"
     file_path = os.path.join("images/propAjoutImg", filename)
+
+
+
 
     # sauvegarder l'image dans le dossier images/propAjoutImg
     with open(file_path, "wb") as f:
