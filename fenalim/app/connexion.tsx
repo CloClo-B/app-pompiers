@@ -7,7 +7,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS } from '@/config/api';
 import { setRole, setToken } from '@/service/infosStocker';
-import ButtonLog, { BoutonConnexion } from '@/components/ButtonLog';
+import ButtonLog, { BoutonInscription, BoutonMdpOublie } from '@/components/ButtonLog';
 
 
 const Oeil = require('@/assets/images/oeil.png');
@@ -131,7 +131,8 @@ export default function Connexion() {
                   </View>
                   
                   {/* Liens vers Mot de passe oublié / Inscription */}
-                  <BoutonConnexion/>
+                  <BoutonInscription/>
+                  <BoutonMdpOublie/>
                   
           </LinearGradient>
       </ScrollView>

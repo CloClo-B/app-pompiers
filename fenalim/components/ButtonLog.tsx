@@ -81,25 +81,35 @@ export default function Button({
 
 import { router, useRouter } from 'expo-router';
 
-// boutons de la page connexion (uniques)
-export function BoutonConnexion() {
+// boutons de la page connexion (unique)
+export function BoutonInscription() {
   const router = useRouter();
 
   return (
     <View>
-      <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Mot de passe oublié' onPress={() => {console.log('en cours')}}/>
       <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Créer un compte' onPress={() => router.navigate('/inscription')}/>
     </View>
   );
 }
 
 // boutons de la page inscription (unique)
-export function BoutonInscription() {
+export function BoutonConnexion() {
   const router = useRouter();
 
   return (
     <View>
       <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Connexion' onPress={() => router.navigate('/connexion')}/>
+    </View>
+  );
+}
+
+// boutons de la page connexion (unique)
+export function BoutonMdpOublie() {
+  const router = useRouter();
+
+  return (
+    <View>
+      <Button color='rgba(255, 255, 255, 0.86)' backColor='rgba(255, 255, 255, 0)' label='Mot de passe oublié' onPress={() => router.navigate('/mdp_oublie')}/>
     </View>
   );
 }

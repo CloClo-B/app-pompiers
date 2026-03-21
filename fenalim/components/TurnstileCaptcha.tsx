@@ -7,6 +7,14 @@ interface Props {
 }
 
 export default function TurnstileCaptcha({ onVerify }: Props) {
+
+  //Bypass pour éviter les problèmes pendant le dev
+  {/*React.useEffect(() => {
+    onVerify("token-dev-bypass");
+  }, []);
+  
+  return <View />;*/}
+
   const webviewRef = useRef<WebView>(null);
 
   const html = `

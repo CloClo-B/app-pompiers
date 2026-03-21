@@ -6,7 +6,7 @@ import axios from 'axios';
 import { useState } from 'react';
 import { API_ENDPOINTS } from '@/config/api';
 import { setRole, setToken } from '@/service/infosStocker';
-import ButtonLog, { BoutonInscription } from '@/components/ButtonLog';
+import ButtonLog, { BoutonConnexion } from '@/components/ButtonLog';
 
 import TurnstileCaptcha from '@/components/TurnstileCaptcha';
 import { ValidationCaptcha } from '@/service/captchaService';
@@ -89,17 +89,17 @@ export default function Inscription() {
     if (!captchaToken) {
       alert("Veuillez valider le captcha");
       return;
+    }
+    try {
+      const validation = await ValidationCaptcha(captchaToken);
+      if (validation.status !== "success") {
+      alert("Captcha invalide, veuillez réessayer");
+      return;
       }
-      try {
-        const validation = await ValidationCaptcha(captchaToken);
-        if (validation.status !== "success") {
-        alert("Captcha invalide, veuillez réessayer");
-        return;
-        }
-      } catch (err) {
-        alert("Erreur lors de la validation du captcha");
-        return;
-      }
+    } catch (err) {
+      alert("Erreur lors de la validation du captcha");
+      return;
+    }
       
       
       // si captcah ok alors créer utilisateur
@@ -224,7 +224,7 @@ export default function Inscription() {
                       <ButtonLog label='Valider' onPress={creerUtilisateur} backColor="#30D936" disabled={attenteChargement} loading={attenteChargement}/>
                   </View>
 
-                  <BoutonInscription/>
+                  <BoutonConnexion/>
                   
           </LinearGradient>
       </ScrollView>
@@ -242,9 +242,9 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#fff',
-    fontSize: 40,
+    fontSize: 35,
     fontWeight: 'bold',
-    marginBottom: 70,
+    marginBottom: 50,
   },
   title_ID_MDP: {
     color: '#fff',
