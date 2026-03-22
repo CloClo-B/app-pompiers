@@ -79,7 +79,7 @@ export default function Button({
   );
 }
 
-import { router, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 
 // boutons de la page connexion (unique)
 export function BoutonInscription() {

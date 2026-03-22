@@ -1,4 +1,5 @@
 # Routes FastAPI pour la gestion des signalement de points d’eau
+from app.DAO.ban.banUtuilisateur import verifier_ban_utilisateur
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 import uuid, os
 from sqlalchemy.orm import Session
@@ -14,7 +15,6 @@ from app.DAO.DAOSignaler import (
 )
 from app.DAO.DAOUtilisateurs import dechiffrerTelEtMail
 from app.DAO.compteur.quotaSignalement import verifier_quota_signalement
-from ..models import Utilisateur
 from .dependencies import rolesChecker
 
 # Définition de la route pour les signalements
@@ -77,6 +77,12 @@ def create_signalement(id_point: int = Form(...), probleme: str = Form(...), pho
     if not point:
         raise HTTPException(status_code=404, detail=f"Le point numéro : {id_point} n'a pas été trouvé")
     
+    # verifier que l'utilisateur n'est pas banni sinon pas le droit de signalement
+    try:
+        verifier_ban_utilisateur(db, user_check.id_utilisateur)
+    except ValueError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+ 
 
     # vérifier le nombre de signalement autorisé avec le calculateur de quota par jour
     # si public limite signalement à 3 par jour
@@ -85,8 +91,6 @@ def create_signalement(id_point: int = Form(...), probleme: str = Form(...), pho
         verifier_quota_signalement(db, user_check.id_utilisateur, user_check.role)
     except ValueError as e:
         raise HTTPException(status_code=403, detail=str(e))
-
-
 
     # création d'un id unique pour la photo
     ext = os.path.splitext(photo.filename)[1] or ".jpg"

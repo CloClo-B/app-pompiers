@@ -1,4 +1,5 @@
 # Routes FastAPI pour la gestion des utilisateurs (authentification, profil, administration)
+from app.DAO.ban.banUtuilisateur import verifier_ban_utilisateur
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -191,6 +192,13 @@ def verif_login(payload: LoginPayload, db: Session = Depends(get_db)):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
+    # verifier que l'utilisateur n'est pas banni sinon pas le droit de connexion
+    try:
+        verifier_ban_utilisateur(db, user.id_utilisateur)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+ 
+
     # Mise à jour de la date de dernière connexion
     user.derniere_connexion = datetime.now()
     db.commit()

@@ -331,3 +331,9 @@ class PasswordChangeRequest(BaseModel):
             raise ValueError("Le nouveau mot de passe et sa confirmation sont différents ")
         if self.old_password == self.new_password:
             raise ValueError("Le nouveau mot de passe doit être différent de l'ancien")
+
+
+# schema pour la creation d'un signalement utilisateur
+class SignalUserBase(BaseModel):
+    mail_utilisateur: str
+    raison : Optional[str] = None

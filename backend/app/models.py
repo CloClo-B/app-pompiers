@@ -25,6 +25,16 @@ class Utilisateur(Base):
     date_creation = Column(DateTime, server_default=func.now(), nullable=False)
     derniere_connexion = Column(DateTime)
 
+# bannit les utilisateur si trop de faux signalement ou fausse proposition
+class BanUtilisateur(Base):
+    __tablename__ = "ban_utilisateur"
+    id = Column(Integer, primary_key=True, index=True)
+    id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
+    date_debut = Column(TIMESTAMP, server_default=func.now() , nullable=False)
+    date_fin = Column(TIMESTAMP, nullable=False)
+    raison = Column(String(100), nullable=True)
+
+
 
 # Table des points d’eau
 class PointEau(Base):
@@ -115,8 +125,6 @@ class SignalementQuota(Base):
 
 
 
-
-
 # Proposition ajout d'un nouveau point d'eau en foncion localisation utilisateur
 class PropAjoutPoint(Base):
     __tablename__ = "prop_ajout_point"
@@ -139,6 +147,7 @@ class PropAjoutQuota(Base):
     id_utilisateur = Column(Integer, ForeignKey("utilisateurs.id_utilisateur"), nullable=False)
     date_creation = Column(DateTime, server_default=func.current_date(), nullable=False)
     nb_proposition = Column(Integer, default=0, nullable=False)
+
 
 
 

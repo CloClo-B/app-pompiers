@@ -10,6 +10,7 @@ from .routers.historique import router as historique_router
 from .routers.signaler import router as signaler_router
 from .routers.propAjout import router as prop_ajout_router
 from .routers.turnstile import router as captcha_router
+from .routers.signalerUtilisateur import router as signaler_utilisateur
 
 # Initialisation
 app = FastAPI(title="API FastAPI - FEN-Alim")
@@ -34,6 +35,7 @@ app.include_router(historique_router)
 app.include_router(signaler_router)
 app.include_router(prop_ajout_router)
 app.include_router(captcha_router)
+app.include_router(signaler_utilisateur)
 
 # accéder au image depuis le front pour pouvoir les affihcer 
 app.mount("/images", StaticFiles(directory="images"), name="images")

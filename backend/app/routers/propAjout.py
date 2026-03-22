@@ -1,4 +1,5 @@
 # Routes FastAPI pour la gestion des proposition d'ajout de points d’eau
+from app.DAO.ban.banUtuilisateur import verifier_ban_utilisateur
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 import uuid, os
 from sqlalchemy.orm import Session
@@ -74,6 +75,12 @@ def get_proposition_id(ajout_id: int, db: Session = Depends(get_db), user_check:
 @router.post("/", response_model=PropAjoutCreate)
 def create_proposition(description: str = Form(...), photo: UploadFile = File(...), latitude: str = Form(...), longitude : str = Form(...), db: Session = Depends(get_db),user_check: Utilisateur = Depends(rolesChecker("public", "pompier", "commandement","admin"))):
    
+    # verifier que l'utilisateur n'est pas banni sinon pas le droit de signalement
+    try:
+        verifier_ban_utilisateur(db, user_check.id_utilisateur)
+    except ValueError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+ 
     # vérifier le nombre de proposition autorisé avec le calculateur de quota par jour
     # si public limite proposition à 3 par jour
     # si pompier ou commandement limite à 10
@@ -82,14 +89,10 @@ def create_proposition(description: str = Form(...), photo: UploadFile = File(..
     except ValueError as e:
         raise HTTPException(status_code=403, detail=str(e))
 
-
-
     # création d'un id unique pour la photo
     ext = os.path.splitext(photo.filename)[1] or ".jpg"
     filename = f"{uuid.uuid4()}{ext}"
     file_path = os.path.join("images/propAjoutImg", filename)
-
-
 
 
     # sauvegarder l'image dans le dossier images/propAjoutImg

@@ -120,6 +120,7 @@ def verifier_connexion(db: Session, email : str, motDePasse: str):
         raise ValueError("Email ou mot de passe incorrect")
     if not verify_password(motDePasse, user.mot_de_passe):
         raise ValueError("Email ou mot de passe incorrect")
+    
     return user
 
 
