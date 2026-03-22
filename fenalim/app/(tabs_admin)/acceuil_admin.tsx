@@ -9,6 +9,7 @@ import HautPage from "@/app/hautPage";
 import { getAllPointEau, deletePointEau } from "@/service/pointEauService";
 import { getToken } from "@/service/infosStocker";
 import ButtonLog from '@/components/ButtonLog';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Définit toutes les infos qu'un point possède
 type PointEau = {
@@ -43,20 +44,30 @@ export default function HomeScreen() {
   // Fonction pour charger les points d'eau
   const fetchPointsEau = async () => {
     try {
+      const raw = await AsyncStorage.getItem('points_eau_cache');
+      if (raw) {
+        setPointsEau(JSON.parse(raw)); // Charge depuis le cache
+        setLoading(false);
+        return;
+      }
+  
       const response = await getAllPointEau();
-
       const pointsRaw = Array.isArray(response) ? response : response.points_eau;
       setPointsEau(pointsRaw);
+
+      await AsyncStorage.setItem('points_eau_cache', JSON.stringify(pointsRaw));
+  
     } catch (error) {
-      console.error(error);
-    }finally {
-        setLoading(false);
+      console.error('Erreur chargement points :', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   // Actualiser les points d'eau depuis le logo SDIS
   const handleRefresh = async () => {
     setIsRefreshing(true);
+    await AsyncStorage.removeItem('points_eau_cache');
     await fetchPointsEau();
     setIsRefreshing(false);
   };
