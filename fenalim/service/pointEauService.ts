@@ -49,13 +49,18 @@ export const createPointEau = async (
 };
 
 
-
-
 // renvoie tout les points d'eau
 export const getAllPointEau = async () => {
     const reponse = await axios.get(API_ENDPOINTS.POINTS_EAU);
   return reponse.data;
 };
+
+// renvoie tout les points d'eau Light (Optimisation)
+export const getAllPointEauLight = async () => {
+  const reponse = await axios.get(API_ENDPOINTS.POINTS_EAU_LIGHT);
+return reponse.data;
+};
+
 
 // renvoie les infos d'un point en fonction de son numero PEI
 export const getPointEauByID = async (token: string, idPoint: string) => {

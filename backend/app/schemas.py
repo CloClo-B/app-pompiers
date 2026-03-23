@@ -50,6 +50,15 @@ class PointEauOut(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
 
+# Schéma de sortie d'un point d'eau Léger (Optimisation)
+class PointEauOutLight(BaseModel):
+    id: int
+    numero_pei: int
+    latitude: float  
+    longitude: float
+    
+    model_config = ConfigDict(from_attributes=True)
+
 
 # Schéma utilisé lors de la création d’un point d’eau
 class PointEauCreate(BaseModel):

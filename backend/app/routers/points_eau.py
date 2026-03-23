@@ -6,7 +6,7 @@ from sqlalchemy import func
 from geoalchemy2.elements import WKTElement
 from ..database import SessionLocal
 from ..models import PointEau
-from ..schemas import PointEauBase, PointEauCreate, PointEauOut, PointEauUpdate
+from ..schemas import PointEauBase, PointEauCreate, PointEauOut, PointEauOutLight, PointEauUpdate
 from app.DAO.DAOPointsEau import (
     create_point_eau,
     get_all_points_eau,
@@ -32,6 +32,12 @@ def get_db():
 @router.get("/", response_model=list[PointEauBase])
 def list_points(db: Session = Depends(get_db)):
     points = get_all_points_eau(db)
+    return points
+
+# récuperer tout les points d'eau Light (Optimisation)
+@router.get("/light", response_model=list[PointEauOutLight])
+def list_points_light(db: Session = Depends(get_db)):
+    points = get_all_points_eau_light(db)
     return points
 
 # Récupère un point d'eau selon son numéro PEI
