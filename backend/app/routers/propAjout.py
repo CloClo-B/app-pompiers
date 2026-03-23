@@ -75,7 +75,7 @@ def get_proposition_id(ajout_id: int, db: Session = Depends(get_db), user_check:
 @router.post("/", response_model=PropAjoutCreate)
 def create_proposition(description: str = Form(...), photo: UploadFile = File(...), latitude: str = Form(...), longitude : str = Form(...), db: Session = Depends(get_db),user_check: Utilisateur = Depends(rolesChecker("public", "pompier", "commandement","admin"))):
    
-    # verifier que l'utilisateur n'est pas banni sinon pas le droit de signalement
+    # verifier que l'utilisateur n'est pas banni sinon pas le droit de proposition ajout
     try:
         verifier_ban_utilisateur(db, user_check.id_utilisateur)
     except ValueError as e:

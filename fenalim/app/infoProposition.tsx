@@ -9,6 +9,7 @@ import { API_ENDPOINTS } from '@//config/api';
 import { getRole, getToken } from "@/service/infosStocker";
 import ButtonLog from '@/components/ButtonLog';
 import { deleteProposition, getPropositionByID } from "@/service/propoAjoutService";
+import { CreatesignalerUtilisateur } from "@/service/SignalerUtilisateur";
 
 // Donnée de la proposition
 type Proposition = {
@@ -135,6 +136,55 @@ export default function InfoProposition() {
     };
 
 
+
+  // alert confirmer signalement utilisateur
+  const confirmeSupp = () => {
+    Alert.alert(
+    "Faux signalement ?",
+    "Confirmer le signalement de l'utilisateur et donc bannissement de 3 jours",
+    [
+        {
+        text: "Non", style: "cancel" },
+        {
+        text: "Oui", onPress: () => {signalerUtilisateur()},
+        },
+    ]
+    );
+  };
+
+  // Signale utilisateur + supp la proposition
+  const signalerUtilisateur = async () => {
+
+    // Avant l'appel API, pour vérifier les valeurs
+    console.log("Vérification des info à envoyer pour supprimer\n");
+    // console.log("ID:", signalement?.id_point);
+
+    if (!token) {
+      Alert.alert("Erreur, impossible de signaler l'utilisateur");
+      return;
+    }
+    if(proposition?.mail_utilisateur == null){
+      Alert.alert("Erreur, impossible de signaler l'utilisateur");
+      return;
+    }
+    try {
+        
+      // apelle du fichier SignalerUtilisateur
+      await CreatesignalerUtilisateur(token, proposition?.mail_utilisateur, "proposition" , Number(proposition?.id));
+
+        
+      router.push({
+          pathname: '/succes',
+          params: { title: 'Utilisateur signalé avec succès', page:"point_eau" }
+          });
+      } catch (error) {
+          console.error(error);
+          Alert.alert("Erreur", "Signalement utilisateur");
+      }
+    };
+
+
+
   return (
 
     <>
@@ -194,6 +244,17 @@ export default function InfoProposition() {
                 height={60}
             />
 
+
+            {/* Signaler utilisateur */}
+          <View style={{ marginVertical: 20 }}>
+            <TouchableOpacity style={styles.signalerUtilisateur} onPress={async () => confirmeSupp()}>
+              <Text style={{ color: '#fff', fontSize: 18, fontWeight: 'bold' }}>
+                Signaler l'utilisateur
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+
             {/* Rejeter et Créer */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 300, gap: 15 }}>
                 
@@ -252,4 +313,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 15
   },
+  signalerUtilisateur: {
+    backgroundColor: '#FF9500',
+    width: '100%',
+    height: 50,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });

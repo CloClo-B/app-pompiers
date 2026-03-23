@@ -94,7 +94,7 @@ def create_prop_ajout(db: Session, ajout_data: Dict[str, Any]):
     return new_ajout
 
 
-# Supprime une proposition d'ajout et son image associée
+# Supprime une proposition d'ajout par son id et son image associée
 def delete_prop_ajout_by_id(db: Session, id: int) -> bool:
     propAjout = db.query(PropAjoutPoint).filter(PropAjoutPoint.id == id).first()
     

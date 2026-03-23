@@ -127,7 +127,7 @@ export default function UserDetails() {
   const confirmeSupp = () => {
     Alert.alert(
     "Faux signalement ?",
-    "Confirmer le signalement de l'utilisateur",
+    "Confirmer le signalement de l'utilisateur et donc bannissement de 3 jours",
     [
         {
         text: "Non", style: "cancel" },
@@ -155,7 +155,7 @@ export default function UserDetails() {
     try {
         
       // apelle du fichier SignalerUtilisateur
-      await CreatesignalerUtilisateur(token, signalement?.mail_utilisateur);
+      await CreatesignalerUtilisateur(token, signalement?.mail_utilisateur, "signalement" , Number(signalement?.id));
 
         
       router.push({

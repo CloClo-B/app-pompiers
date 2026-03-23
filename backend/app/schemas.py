@@ -337,3 +337,5 @@ class PasswordChangeRequest(BaseModel):
 class SignalUserBase(BaseModel):
     mail_utilisateur: str
     raison : Optional[str] = None
+    signalement_ou_propoition: str
+    id_s_ou_p: int

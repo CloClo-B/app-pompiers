@@ -1,6 +1,8 @@
 # Routes FastAPI pour le signalement d'utilisateur 
-from app.DAO.compteur.quotaSignalement import verifier_quota_signalement
 from app.schemas import SignalUserBase
+from app.DAO.DAOPropAjout import delete_prop_ajout_by_id
+from app.DAO.DAOSignaler import delete_signalement_by_id
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import SessionLocal
@@ -30,8 +32,18 @@ def signaler_utilisateur(payload:  SignalUserBase,db: Session = Depends(get_db),
     existe = next((u for u in tous_les_utilisateurs if dechiffrerTelEtMail(u.email) == payload.mail_utilisateur),None    )
     if not existe:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
+    
+    # supprimme le signalement
+    if(payload.signalement_ou_propoition == "signalement"):
+        delete_signalement_by_id(db, payload.id_s_ou_p)
 
-    # Créer le signalement
+    # supprimme le bannissemet
+    if(payload.signalement_ou_propoition == "proposition"):
+        delete_prop_ajout_by_id(db, payload.id_s_ou_p)
+   
+   
+   
+    # Créer le bannissement
     signalement = BanUtilisateur(
         id_utilisateur=existe.id_utilisateur,
         date_fin=datetime.now() + timedelta(days=3),
