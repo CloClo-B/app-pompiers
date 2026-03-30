@@ -57,6 +57,8 @@ def get_utilisateur_by_id(db: Session, id_utilisateur: int):
     user = db.query(models.Utilisateur).filter(
         models.Utilisateur.id_utilisateur == id_utilisateur
     ).first()
+    if not user:
+        return None
     # Déchiffrement mail et téléphone
     user.email = dechiffrerTelEtMail(user.email)
     user.telephone = dechiffrerTelEtMail(user.telephone)

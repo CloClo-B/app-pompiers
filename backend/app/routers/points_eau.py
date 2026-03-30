@@ -10,6 +10,7 @@ from ..schemas import PointEauBase, PointEauCreate, PointEauOut, PointEauOutLigh
 from app.DAO.DAOPointsEau import (
     create_point_eau,
     get_all_points_eau,
+    get_all_points_eau_light,
     get_point_eau_by_numero_pei,
     delete_point_eau_by_numero_pei,
     update_point_eau_by_id

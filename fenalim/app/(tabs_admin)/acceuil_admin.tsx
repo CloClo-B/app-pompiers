@@ -64,7 +64,7 @@ export default function HomeScreen() {
       const pointsRaw = Array.isArray(response) ? response : response.points_eau;
       setPointsEau(pointsRaw);
       await AsyncStorage.setItem('points_eau_cache', JSON.stringify(pointsRaw));
-  
+      
     } catch (error) {
       console.error('Erreur chargement points :', error);
     } finally {
