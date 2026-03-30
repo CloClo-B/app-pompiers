@@ -140,12 +140,13 @@ class TestUpdateUtilisateur:
         user1 = create_utilisateur(db_session, sample_user_data)
         
         user2_data = sample_user_data.copy()
-        user2_data["email"] = "autre@example.com"
+        user2_data["email"] = "autre.user@test.com"
         user2_data["telephone"] = "0699999999"
         user2 = create_utilisateur(db_session, user2_data)
         
         with pytest.raises(ValueError, match="Email déjà utilisé"):
             update_utilisateur_by_id(db_session, user2.id_utilisateur, {"email": user1.email})
+
     
     def test_update_utilisateur_password(self, db_session, sample_user_data):
         user = create_utilisateur(db_session, sample_user_data)
