@@ -11,19 +11,7 @@ class TestHistoriqueDAO:
     @pytest.fixture
     def utilisateur_test(self, db_session):
         """Crée un utilisateur unique pour lier les historiques"""
-        # Utilisation de random pour garantir l'unicité des champs contraints
-        unique_id = random.randint(1000, 9999)
-        user = models.Utilisateur(
-            nom="Testeur",
-            prenom="Historique",
-            email=f"test.hist{unique_id}@example.com",
-            telephone=f"07{random.randint(10000000, 99999999)}",
-            mot_de_passe="password_hash",
-            role="public"
-        )
-        db_session.add(user)
-        db_session.commit()
-        db_session.refresh(user)
+        user = db_session.query(models.Utilisateur).filter_by(id_utilisateur=1).first()
         return user
 
     @pytest.fixture
