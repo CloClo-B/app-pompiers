@@ -1,5 +1,5 @@
 # Routes FastAPI pour la gestion des signalement de points d’eau
-from app.DAO.ban.banUtuilisateur import verifier_ban_utilisateur
+from app.DAO.ban.banUtilisateur import verifier_ban_utilisateur
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 import uuid, os
 from sqlalchemy.orm import Session

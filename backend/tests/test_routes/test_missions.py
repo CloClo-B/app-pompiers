@@ -48,13 +48,21 @@ class TestMissionsRouter:
 
     # ============= FIXTURE POINT EAU =============
     @pytest.fixture
-    def point_eau_test(self, db_session):
+    def point_eau_test(self, db_session, db_admin):
         numero_pei = random.randint(100000, 999999)
         point = models.PointEau(
-            numero_pei=numero_pei, 
-            nom="Borne Test", 
-            statut="PUBLIC",        
-            type_nature="BI100",    
+            numero_pei=numero_pei,
+            nom="Borne Test",
+            statut="PUBLIC",
+            type_nature="BI100",
+            insee5="56001",
+            accessibilite="C",
+            disponibilite="DI",
+            carto_ref=1,
+            press_deb=5.5,
+            debit_1_bar=60.0,
+            vol_eau_mi=120.0,
+            utilisateur=db_admin.id_utilisateur,
             geom=WKTElement('POINT(200000 6800000)', srid=2154)
         )
         db_session.add(point)

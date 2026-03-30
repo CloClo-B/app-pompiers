@@ -206,7 +206,7 @@ class TestCreateSignale:
             "id_utilisateur": 99999
         }
         
-        with pytest.raises(ValueError, match="id_utilisateur est incorrect"):
+        with pytest.raises(ValueError, match="id_utilisateur est introuvable"):
             create_signale(db_session, signale_data)
     
     def test_create_multiple_signale_same_point(self, db_session, point_test, utilisateur_test):

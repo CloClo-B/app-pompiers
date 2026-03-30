@@ -1,5 +1,5 @@
 # Routes FastAPI pour la gestion des utilisateurs (authentification, profil, administration)
-from app.DAO.ban.banUtuilisateur import verifier_ban_utilisateur
+from app.DAO.ban.banUtilisateur import verifier_ban_utilisateur
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime

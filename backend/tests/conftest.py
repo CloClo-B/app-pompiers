@@ -4,6 +4,9 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text 
 from sqlalchemy.orm import sessionmaker
 
+# Set encryption key before importing app
+os.environ["CLE_CHIFFREMENT"] = "0" * 64  # 32 bytes in hex = 64 hex chars
+
 from app.main import app
 from app.database import get_db
 from app.models import Base

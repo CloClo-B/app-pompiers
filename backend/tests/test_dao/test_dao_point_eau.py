@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy.exc import IntegrityError
 from app.DAO.DAOPointsEau import (
     get_all_points_eau,
     get_point_eau_by_id,
@@ -216,8 +217,8 @@ class TestGetPointEauByNumeroPei:
         assert "longitude" in point
     
     def test_get_point_eau_by_numero_pei_not_exists(self, db_session):
-        point = get_point_eau_by_numero_pei(db_session, 99999)
-        assert point is None
+        with pytest.raises(ValueError, match="Numéro PEI incorrect"):
+            get_point_eau_by_numero_pei(db_session, 99999)
 
 
 class TestUpdatePointEau:
@@ -286,9 +287,8 @@ class TestUpdatePointEau:
 
     def test_update_point_eau_not_exists(self, db_session):
         data = {"nom": "Test"}
-        updated = update_point_eau_by_id(db_session, 99999, data)
-        
-        assert updated is None
+        with pytest.raises(ValueError, match="Id point incorrect"):
+            update_point_eau_by_id(db_session, 99999, data)
 
 
 class TestDeletePointEau:
@@ -315,8 +315,8 @@ class TestDeletePointEau:
         
         assert result is True
         
-        deleted = get_point_eau_by_numero_pei(db_session, numero_pei)
-        assert deleted is None
+        with pytest.raises(ValueError, match="Numéro PEI incorrect"):
+            get_point_eau_by_numero_pei(db_session, numero_pei)
     
     def test_delete_point_eau_by_numero_pei_not_exists(self, db_session):
         result = delete_point_eau_by_numero_pei(db_session, 99999)
@@ -397,8 +397,8 @@ class TestIntegration:
         assert deleted is True
         
 
-        not_found = get_point_eau_by_numero_pei(db_session, 77777)
-        assert not_found is None
+        with pytest.raises(ValueError, match="Numéro PEI incorrect"):
+            get_point_eau_by_numero_pei(db_session, 77777)
 
 
 class TestEdgeCases:
@@ -435,8 +435,8 @@ class TestEdgeCases:
             "debit_1_bar": None
         }
         
-        updated = update_point_eau_by_id(db_session, sample_point.id, data)
-        assert updated is not None
+        with pytest.raises(IntegrityError):
+            update_point_eau_by_id(db_session, sample_point.id, data)
     
     def test_multiple_deletes_same_point(self, db_session, sample_point):
         """Test suppression multiple du même point"""

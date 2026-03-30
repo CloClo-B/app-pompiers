@@ -23,7 +23,7 @@ def get_all_mission(db:Session):
 def get_mission_by_id(db: Session, id_mission: int):
     mission = db.query(models.Mission).filter(models.Mission.id_mission == id_mission).first()
     if not mission:
-        raise ValueError("Mission introuvble")
+        raise ValueError("Mission introuvable")
     user = db.query(models.Utilisateur).filter(models.Utilisateur.id_utilisateur == mission.id_utilisateur).first()
     mail_utilisateur = dechiffrerTelEtMail(user.email) 
 

@@ -4,6 +4,7 @@ from app import models
 from app.main import app
 from app.token_jwt import getTokenUser, createToken
 from app.models import RoleEnum
+from app.DAO.DAOUtilisateurs import chiffrerTelEtMail
 
 @pytest.fixture
 def user_payload():
@@ -51,8 +52,8 @@ def db_admin(db_session):
 def db_user(db_session):
     """Crée un utilisateur simple directement en DB"""
     user = models.Utilisateur(
-        nom="User", prenom="Test", email="usr@test.com",
-        telephone="0677777777", mot_de_passe="hash", role=RoleEnum.public
+        nom="User", prenom="Test", email=chiffrerTelEtMail("usr@test.com"),
+        telephone=chiffrerTelEtMail("0677777777"), mot_de_passe="hash", role=RoleEnum.public
     )
     db_session.add(user)
     db_session.commit()
@@ -64,8 +65,8 @@ class TestAuth:
         res = client.post("/utilisateurs/", json=user_payload)
         assert res.status_code == 200
         data = res.json()
-        assert "id_utilisateur" in data
         assert "token" in data
+        assert "role" in data
 
     def test_login_success(self, client, created_user, user_payload):
         login_payload = {
@@ -82,7 +83,8 @@ class TestMyProfile:
         res = client.get("/utilisateurs/me")
         
         assert res.status_code == 200
-        assert res.json()["email"] == db_user.email
+        assert res.json()["email"] == "usr@test.com"
+        assert res.json()["telephone"] == "0677777777"
         app.dependency_overrides.clear()
 
     def test_update_my_profile_success(self, client, db_user):
@@ -92,6 +94,7 @@ class TestMyProfile:
         
         assert res.status_code == 200
         assert res.json()["nom"] == "NouveauNom"
+        assert res.json()["email"] == "usr@test.com"
         app.dependency_overrides.clear()
 
 

@@ -1,8 +1,8 @@
 """
-Vérifie si le nombre de proposition d'ajout de point journaliere n'est pas dépasser pour un utilisateur 
-apelle la table PropAjoutQuota qui contient les info du nombre de proposition d'ajout pour 1 utilisateur en fonction de jour 
-- 3 proposition pour les public
-- 10 proposition pour les pompier et commandement
+Vérifie si le nombre de proposition d'ajout de points journaliers n'est pas dépassé pour un utilisateur 
+appel de la table PropAjoutQuota qui contient les infos du nombre de propositions d'ajout pour 1 utilisateur en fonction de jour 
+- 3 propositions pour les publics
+- 10 propositions pour les pompiers et commandements
 - admin n'a pas cette fonction car il peut déjà créer des points
 """
 from app.models import PropAjoutQuota

@@ -1,8 +1,13 @@
 import pytest
 import uuid
+from geoalchemy2.elements import WKTElement
 from app import models
-from app.schemas import MissionCreate 
-from app.routers import missions as mission_router  
+from app.schemas import MissionCreate
+from app.DAO.DAOMissions import (
+    create_mission,
+    get_all_mission,
+    get_mission_by_id
+)
 from sqlalchemy.exc import IntegrityError
 
 class TestMissionIntegration:
@@ -24,7 +29,7 @@ class TestMissionIntegration:
         return user
 
     @pytest.fixture
-    def point_eau(self, db_session):
+    def point_eau(self, db_session, utilisateur):
         """Crée un point d'eau de test (PEI)."""
         unique_pei = int(str(uuid.uuid4().int)[:8]) 
         point = models.PointEau(
@@ -34,7 +39,13 @@ class TestMissionIntegration:
             type_nature="BI",
             insee5="12345",
             accessibilite="C", 
-            disponibilite="DI"
+            disponibilite="DI",
+            carto_ref=1,
+            press_deb=1.0,
+            debit_1_bar=10.0,
+            vol_eau_mi=5.0,
+            utilisateur=utilisateur.id_utilisateur,
+            geom=WKTElement('POINT(200000 6800000)', srid=2154)
         )
         db_session.add(point)
         db_session.commit()
@@ -50,7 +61,7 @@ class TestMissionIntegration:
             commentaire="Mission de test",
             itineraire=None
         )
-        mission = mission_router.create_mission(db_session, payload.model_dump()) 
+        mission = create_mission(db_session, payload.model_dump())
         return mission
 
     # ======== TESTS DE CRÉATION ========
@@ -63,7 +74,7 @@ class TestMissionIntegration:
             commentaire="RAS",
             itineraire=None
         )
-        mission = mission_router.create_mission(db_session, payload.model_dump())
+        mission = create_mission(db_session, payload.model_dump())
         assert mission.id_mission is not None
 
     def test_mission_point_inexistant_fails(self, db_session, utilisateur):
@@ -76,7 +87,7 @@ class TestMissionIntegration:
             itineraire=None
         )
         with pytest.raises(ValueError) as excinfo:
-            mission_router.create_mission(db_session, payload.model_dump())
+            create_mission(db_session, payload.model_dump())
         
         assert "L'id du point est invalide" in str(excinfo.value)
 
@@ -91,9 +102,9 @@ class TestMissionIntegration:
             commentaire=None,
             itineraire=None
         )
-        mission_router.create_mission(db_session, p.model_dump())
-        missions = mission_router.list_missions(db_session)
+        create_mission(db_session, p.model_dump())
+        missions = get_all_mission(db_session)
         
         assert len(missions) >= 1
-        noms = [m["nom_mission"] for m in missions] 
+        noms = [m["nom_mission"] for m in missions]
         assert "Mission Liste" in noms
