@@ -16,17 +16,7 @@ from geoalchemy2.elements import WKTElement
 @pytest.fixture
 def utilisateur_test(db_session):
     """Crée un utilisateur de test"""
-    user = models.Utilisateur(
-        nom="Dupont",
-        prenom="Jean",
-        email="jean.dupont@test.com",
-        telephone="0612345678",
-        mot_de_passe="hashed_password",
-        role="pompier"
-    )
-    db_session.add(user)
-    db_session.commit()
-    db_session.refresh(user)
+    user = db_session.query(models.Utilisateur).filter_by(id_utilisateur=1).first()
     return user
 
 
@@ -41,7 +31,14 @@ def point_test(db_session):
         numero_pei=12345,
         statut="PUBLIC",
         type_nature="BI",
-        geom=wkt
+        geom=wkt,
+        accessibilite="C",
+        disponibilite="DI",
+        carto_ref=1,
+        press_deb=0.0,
+        debit_1_bar=0.0,
+        vol_eau_mi=0.0,
+        utilisateur=1
     )
     db_session.add(point)
     db_session.commit()
@@ -453,7 +450,14 @@ class TestEdgeCases:
                 numero_pei=20000 + i,
                 statut="PUBLIC",
                 type_nature="BI",
-                geom=wkt
+                geom=wkt,
+                accessibilite="NC",
+                disponibilite="DI",
+                carto_ref=0,
+                press_deb=0.0,
+                debit_1_bar=0.0,
+                vol_eau_mi=0.0,
+                utilisateur=1
             )
             db_session.add(point)
             db_session.commit()
