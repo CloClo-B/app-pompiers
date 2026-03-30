@@ -8,6 +8,7 @@ from app.main import app
 from app.database import get_db
 from app.models import Base
 from app.token_jwt import getTokenUser  # Import pour le bypass
+from app.models import Utilisateur
 
 # 1. Configuration Environnement
 os.environ["TESTING"] = "true"
@@ -52,10 +53,16 @@ def clean_database():
         for table in reversed(Base.metadata.sorted_tables):
             connection.execute(text(f"TRUNCATE TABLE {table.name} RESTART IDENTITY CASCADE;"))
         connection.execute(text("SET session_replication_role = 'origin';"))
+        
+        connection.execute(text("""
+            INSERT INTO utilisateurs (id_utilisateur, nom, prenom, email, telephone, mot_de_passe, role)
+            VALUES (1, 'System', 'Test', 'test@example.com', '0000000000', 'hash_bidon', 'admin')
+        """))
+        
         trans.commit()
 
 @pytest.fixture()
-def client(db_session): 
+def client(): 
     """
     Client de test synchrone avec Overrides.
     """
