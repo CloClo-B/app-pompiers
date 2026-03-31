@@ -68,23 +68,15 @@ export default function HomeScreen() {
   )}
 
   {/* affichage des pages en fonction du choix*/}
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-    >
-
-
-      <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
-      <View style={styles.contenue}>
-          {page === "signale" && sousPage === "signalement" && <PointSignale />}
-          {page === "signale" && sousPage === "proposition" && <PropositionAjout />}
-          {page === "creer" && <CreerPoint />}
-      </View>
-        
-      </ScrollView>
-    </KeyboardAvoidingView>
-
+  <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+  >
+      {page === "signale" && sousPage === "signalement" && <PointSignale />}
+      {page === "signale" && sousPage === "proposition" && <PropositionAjout />}
+      {page === "creer" && <CreerPoint />}
+  </KeyboardAvoidingView>
     </>
   );
 }
