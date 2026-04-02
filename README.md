@@ -82,3 +82,38 @@ fen-alim_a/
 ├─ backend/   # API + Base de données
 ├─ fenalim/   # Application Frontend (React Native)
 ├─ README.md
+```
+
+
+## 🚀 Installation et Lancement
+
+### 1. Cloner le dépôt
+```bash
+git clone https://forgens.univ-ubs.fr/gitlab/but2info/fen-alim_a.git
+cd fen-alim_a
+```
+
+### 2. Lancer le backend (Docker)
+```bash
+docker compose up --build -d
+```
+
+### 3. Installer les dépendances frontend
+```bash
+cd fenalim
+npm install
+```
+
+### 4. Configuration de l'adresse IP
+Avant de lancer l'application, il renseigné l'adresse IP de votre machine dans le fichier de configuration :
+```
+fenalim/config/api.ts    ← modifier l'IP ici
+```
+Remplacé l'IP par défaut par l'adresse IP locale de ta machine (ex: `192.168.1.XX`).
+
+> 💡 Pour connaître votre IP : `ipconfig` (Windows) ou `ip a` (Linux/Mac)
+
+### 5. Lancer l'application
+```bash
+npx expo start
+```
