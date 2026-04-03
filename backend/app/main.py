@@ -37,8 +37,11 @@ app.include_router(prop_ajout_router)
 app.include_router(captcha_router)
 app.include_router(signaler_utilisateur)
 
-# accéder au image depuis le front pour pouvoir les affihcer 
-app.mount("/images", StaticFiles(directory="images"), name="images")
+# accéder aux images depuis le front pour pouvoir les afficher
+images_dir = "images"
+if not os.path.isdir(images_dir):
+    os.makedirs(images_dir, exist_ok=True)
+app.mount("/images", StaticFiles(directory=images_dir), name="images")
 
 
 
