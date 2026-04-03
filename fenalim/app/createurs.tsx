@@ -80,14 +80,9 @@ export default function Createurs() {
 
                 <Text style={styles.cardLabel2}>Contact</Text>
                 <View style={styles.socialRow}>
-                    <TouchableOpacity style={styles.socialButtonLinkedin} onPress={() => openLink('https://www.linkedin.com/in/ton-profil')}>
+                    <TouchableOpacity style={styles.socialButtonLinkedin} onPress={() => openLink('https://www.linkedin.com/in/math%C3%A9o-biet-811bbb30b/')}>
                         <FontAwesome name="linkedin-square" size={28} color="#0A66C2" />
                         <Text style={styles.socialText}>LinkedIn</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.socialButtonGithub} onPress={() => openLink('https://github.com/ton-profil')}>
-                        <FontAwesome name="github" size={28} color="#d3afaf" />
-                        <Text style={styles.socialText}>GitHub</Text>
                     </TouchableOpacity>
                 </View>
 

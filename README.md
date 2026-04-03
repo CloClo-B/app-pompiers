@@ -105,11 +105,11 @@ npm install
 ```
 
 ### 4. Configuration de l'adresse IP
-Avant de lancer l'application, il renseigné l'adresse IP de votre machine dans le fichier de configuration :
+Avant de lancer l'application, il faut renseigné l'adresse IP de votre machine dans le fichier de configuration :
 ```
 fenalim/config/api.ts    ← modifier l'IP ici
 ```
-Remplacé l'IP par défaut par l'adresse IP locale de ta machine (ex: `192.168.1.XX`).
+Remplacé l'IP par défaut par l'adresse IP locale de votre machine (ex: `192.168.1.XX`).
 
 > 💡 Pour connaître votre IP : `ipconfig` (Windows) ou `ip a` (Linux/Mac)
 
