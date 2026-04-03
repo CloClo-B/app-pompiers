@@ -43,7 +43,7 @@ export default function Createurs() {
                 <Text style={styles.cardLabel2} >Mail</Text>
                 <Text style={styles.input}>clovisbrr.pro@protonmail.com</Text>
 
-                <Text style={styles.cardLabel2}>Réseaux sociaux</Text>
+                <Text style={styles.cardLabel2}>Contact</Text>
                 <View style={styles.socialRow}>
                     <TouchableOpacity style={styles.socialButtonLinkedin} onPress={() => openLink('https://www.linkedin.com/in/clovis-bourre/')}>
                         <FontAwesome name="linkedin-square" size={28} color="#0A66C2" />
@@ -63,7 +63,7 @@ export default function Createurs() {
                 <Text style={styles.cardLabel2} >Mail</Text>
                 <Text style={styles.input}>hutavalentin@gmail.com</Text>
 
-                <Text style={styles.cardLabel2}>Réseaux sociaux</Text>
+                <Text style={styles.cardLabel2}>Contact</Text>
                 <View style={styles.socialRow}>
                     <TouchableOpacity style={styles.socialButtonLinkedin} onPress={() => openLink('https://www.linkedin.com/in/valentin-huta-773802354/')}>
                         <FontAwesome name="linkedin-square" size={28} color="#0A66C2" />
@@ -78,7 +78,7 @@ export default function Createurs() {
                 <Text style={styles.cardLabel2} >Mail</Text>
                 <Text style={styles.input}></Text>
 
-                <Text style={styles.cardLabel2}>Réseaux sociaux</Text>
+                <Text style={styles.cardLabel2}>Contact</Text>
                 <View style={styles.socialRow}>
                     <TouchableOpacity style={styles.socialButtonLinkedin} onPress={() => openLink('https://www.linkedin.com/in/ton-profil')}>
                         <FontAwesome name="linkedin-square" size={28} color="#0A66C2" />
@@ -98,7 +98,7 @@ export default function Createurs() {
                 <Text style={styles.cardLabel2} >Mail</Text>
                 <Text style={styles.input}></Text>
 
-                <Text style={styles.cardLabel2}>Réseaux sociaux</Text>
+                <Text style={styles.cardLabel2}>Contact</Text>
                 <View style={styles.socialRow}>
                     <TouchableOpacity style={styles.socialButtonLinkedin} onPress={() => openLink('https://www.linkedin.com/in/ton-profil')}>
                         <FontAwesome name="linkedin-square" size={28} color="#0A66C2" />
@@ -115,29 +115,17 @@ export default function Createurs() {
 
             <View style={styles.card}>
                 <Text style={styles.cardLabel}>Clément HOARAU - développeur</Text>
-                <Text style={styles.cardLabel2} >Mail</Text>
-                <Text style={styles.input}></Text>
+                <Text style={styles.input}>A quitté le projet en cours d’année.</Text>
 
-                <Text style={styles.cardLabel2}>Réseaux sociaux</Text>
                 <View style={styles.socialRow}>
-                    <TouchableOpacity style={styles.socialButtonLinkedin} onPress={() => openLink('https://www.linkedin.com/in/ton-profil')}>
-                        <FontAwesome name="linkedin-square" size={28} color="#0A66C2" />
-                        <Text style={styles.socialText}>LinkedIn</Text>
-                    </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.socialButtonGithub} onPress={() => openLink('https://github.com/ton-profil')}>
-                        <FontAwesome name="github" size={28} color="#d3afaf" />
-                        <Text style={styles.socialText}>GitHub</Text>
-                    </TouchableOpacity>
                 </View>
 
             </View>
 
         </View>
           
-        <Text style={styles.tip}>
-          Astuce : remplace les URLs par celles de tes profils personnels LinkedIn et GitHub.
-        </Text>
+        <Text style={styles.tip}>Application réalisée dans le cadre d’un projet sur l’année 2025-2026 pour les pompiers du SDIS 56.</Text>
         
       </ScrollView>
     </LinearGradient>
