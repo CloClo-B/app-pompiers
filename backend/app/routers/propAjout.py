@@ -75,6 +75,15 @@ def get_proposition_id(ajout_id: int, db: Session = Depends(get_db), user_check:
 @router.post("/", response_model=PropAjoutCreate)
 def create_proposition(description: str = Form(...), photo: UploadFile = File(...), latitude: str = Form(...), longitude : str = Form(...), db: Session = Depends(get_db),user_check: Utilisateur = Depends(rolesChecker("public", "pompier", "commandement","admin"))):
    
+    # vérifier que l'utilisateur éxiste
+    user_exists = db.query(Utilisateur).filter(
+        Utilisateur.id_utilisateur == user_check.id_utilisateur
+    ).first()
+    if not user_exists:
+        raise HTTPException(status_code=400, detail="Utilisateur introuvable")
+
+
+
     # verifier que l'utilisateur n'est pas banni sinon pas le droit de proposition ajout
     try:
         verifier_ban_utilisateur(db, user_check.id_utilisateur)
