@@ -6,6 +6,8 @@ apelle la table SignalementQuota qui contient les info du nombre de signalement 
 - illimité pour admin
 """
 
+from datetime import date
+
 from app.models import SignalementQuota
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -32,7 +34,7 @@ def verifier_quota_signalement(db: Session, id_utilisateur: int, role: str):
             else: 
                 compte.nb_signalements += 1
     else:
-        compte = SignalementQuota(id_utilisateur=id_utilisateur,nb_signalements=1)
+        compte = SignalementQuota(id_utilisateur=id_utilisateur,nb_signalements=1, date_creation=date.today())
         db.add(compte)
     db.commit()
 
