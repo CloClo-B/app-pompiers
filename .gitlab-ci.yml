@@ -27,13 +27,13 @@ test:
   script:
 
     # Installation de docker-compose
-    - apk add --no-cache docker compose
+    - apk add --no-cache docker-cli-compose
  
     # Lancement des tests (docker-compose.test.yml)
     # --abort-on-container-exit  :  tests stoppés si container exited
     # --exit-code-from api_test  :  api_test execute pytest qui lui retourne le résultat => (0 si OK | 1 si problème)
-    - docker compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from api_test
+    - docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from api_test
  
   # Permet de supprimer l'ensemble des containers après les tests
   after_script:
-    - docker compose -f docker-compose.test.yml down -v
+    - docker-compose -f docker-compose.test.yml down -v
