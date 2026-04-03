@@ -4,10 +4,15 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text 
 from sqlalchemy.orm import sessionmaker
 
+# Set encryption key before importing app
+os.environ["CLE_CHIFFREMENT"] = "0" * 64  # 32 bytes in hex = 64 hex chars
+
 from app.main import app
 from app.database import get_db
 from app.models import Base
 from app.token_jwt import getTokenUser  # Import pour le bypass
+from app.models import Utilisateur
+from app.DAO.DAOUtilisateurs import chiffrerTelEtMail, hash_password
 
 # 1. Configuration Environnement
 os.environ["TESTING"] = "true"
@@ -40,7 +45,7 @@ def db_session():
     try:
         yield session
     finally:
-        session.rollback() # Libère les verrous (Locks)
+        # session.rollback()
         session.close()
 
 @pytest.fixture(autouse=True)
@@ -52,10 +57,24 @@ def clean_database():
         for table in reversed(Base.metadata.sorted_tables):
             connection.execute(text(f"TRUNCATE TABLE {table.name} RESTART IDENTITY CASCADE;"))
         connection.execute(text("SET session_replication_role = 'origin';"))
+
+        email_chiffre = chiffrerTelEtMail('test@example.com')
+        tel_chiffre = chiffrerTelEtMail('0000000000')
+        mdp_hash = hash_password('MotDePasse123!')
+
+        connection.execute(text("""
+            INSERT INTO utilisateurs (id_utilisateur, nom, prenom, email, telephone, mot_de_passe, role)
+            VALUES (1, 'System', 'Test', :email, :tel, :mdp, 'admin')
+        """), {"email": email_chiffre, "tel": tel_chiffre, "mdp": mdp_hash})
+        connection.execute(text("""
+            SELECT setval('utilisateurs_id_utilisateur_seq', (SELECT MAX(id_utilisateur) FROM utilisateurs));
+        """))
+        
         trans.commit()
+    yield
 
 @pytest.fixture()
-def client(db_session): 
+def client(): 
     """
     Client de test synchrone avec Overrides.
     """

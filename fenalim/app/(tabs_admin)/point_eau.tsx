@@ -5,18 +5,18 @@ import HautPage from '../hautPage';
 
 import CreerPoint from '@/app/creerPoint';
 import PointSignale from '@/app/pointSignale';
+import PropositionAjout from '@/app/propositionAjout';
 
 // Gestion des points d'eau, affiche les différentes pages
 export default function HomeScreen() {
   const { page: pageR } = useLocalSearchParams<{ page?: string }>();
 
   const [page, setPage] = useState("signale"); 
-  const [choix, setChoix] = useState("signale"); 
+  const [sousPage, setSousPage] = useState("signalement");
 
   useEffect(() => {
     if (pageR) {
       setPage(pageR);
-      setChoix(pageR);
     }
   }, [pageR]);
 
@@ -31,38 +31,52 @@ export default function HomeScreen() {
   {/* onglet entre deux choix */}
   <View style={styles.typeD}>
 
-      <TouchableOpacity style={[styles.bouttonG, styles.boutton, choix === "signale" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("signale"); setChoix("signale");}}>
-      <Text style={choix === "signale" ? styles.txtActif : styles.txtInactif}>Point d’eau signalé</Text>
+      <TouchableOpacity style={[styles.bouttonG, styles.boutton, page === "signale" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("signale"); setPage("signale");}}>
+      <Text style={page === "signale" ? styles.txtActif : styles.txtInactif}>Point d’eau signalé</Text>
       </TouchableOpacity>
 
-      {/* <TextInput value={recherche} onChangeText={setRecherche} style={styles.recherche} placeholder="Rechercher un utilisateur" /> */}
 
-      <TouchableOpacity style={[styles.bouttonD, styles.boutton, choix === "creer" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("creer"); setChoix("creer");}}>
-      <Text style={choix === "creer" ? styles.txtActif : styles.txtInactif}>Créer un point d’eau</Text>
+      <TouchableOpacity style={[styles.bouttonD, styles.boutton, page === "creer" ? styles.bouttonActif : styles.bouttonInactif]} onPress={() => {setPage("creer"); setPage("creer");}}>
+      <Text style={page === "creer" ? styles.txtActif : styles.txtInactif}>Créer un point d’eau</Text>
       </TouchableOpacity>
+  </View>
    
 
 
+  {/* choix entre la pages des points d'eau signaler ou la pages des points d'eau en suggestion d'ajout */}
+  {page === "signale" && (
+    <View style={styles.typeD}>
+      <TouchableOpacity
+        style={[styles.bouttonG, styles.boutton, sousPage === "signalement" ? styles.bouttonActif : styles.bouttonInactif]}
+        onPress={() => setSousPage("signalement")}
+      >
+        <Text style={sousPage === "signalement" ? styles.txtActif : styles.txtInactif}>
+          Point signalé
+        </Text>
+      </TouchableOpacity>
 
+      <TouchableOpacity
+        style={[styles.bouttonD, styles.boutton, sousPage === "proposition" ? styles.bouttonActif : styles.bouttonInactif]}
+        onPress={() => setSousPage("proposition")}
+      >
+        <Text style={sousPage === "proposition" ? styles.txtActif : styles.txtInactif}>
+          Suggestion ajout
+        </Text>
+      </TouchableOpacity>
 
-  {/* affichage */}
-  </View>
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-    >
+    </View>
+  )}
 
-
-      <ScrollView contentContainerStyle={[styles.contenue, { paddingBottom: 80 }]} keyboardShouldPersistTaps="handled">
-      <View style={styles.contenue}>
-          {page === "signale" && <PointSignale />}
-          {page === "creer" && <CreerPoint />}
-      </View>
-        
-      </ScrollView>
-    </KeyboardAvoidingView>
-
+  {/* affichage des pages en fonction du choix*/}
+  <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+  >
+      {page === "signale" && sousPage === "signalement" && <PointSignale />}
+      {page === "signale" && sousPage === "proposition" && <PropositionAjout />}
+      {page === "creer" && <CreerPoint />}
+  </KeyboardAvoidingView>
     </>
   );
 }

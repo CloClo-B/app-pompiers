@@ -6,9 +6,18 @@ import axios from 'axios';
 import { createPointEau } from '@/service/pointEauService';
 import { getToken } from '@/service/infosStocker';
 import ButtonLog from '@/components/ButtonLog';
-
+import { useLocalSearchParams } from 'expo-router';
+import { ScrollView } from 'react-native';
 // Page création de Point d'eau
 export default function CreerPoint() {
+  // recup les valeurs en fonction de info proposition
+  const params = useLocalSearchParams();
+  const initialLatitude = params.latitude ? String(params.latitude) : '';
+  const initialLongitude = params.longitude ? String(params.longitude) : '';
+  // true si le paramètre supp existe
+  const supp = params.supp === 'True';
+  const id_supp = Number(params.id_supp) || 0;
+
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
 
@@ -40,8 +49,8 @@ export default function CreerPoint() {
   const [debit, setDebit] = useState('');
   const [pression, setPression] = useState('');
   const [volumeMin, setVolumeMin] = useState('');
-  const [longitude, setLongitude] = useState('');
-  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState(initialLongitude);
+  const [latitude, setLatitude] = useState(initialLatitude);
   const [insee5, setInsee5] = useState('');
   const [refCarto, setRefCarto] = useState('');
   
@@ -204,7 +213,7 @@ export default function CreerPoint() {
 
         // appel du fichier pointEauService pour la envoyer la requete de creation de point d'eau 
         await createPointEau(token, numeroPEI , valueStatut, valueType,
-          insee5, valueAcces, valueDispo, refCarto, pression, debit, volumeMin, longitude, latitude
+          insee5, valueAcces, valueDispo, refCarto, pression, debit, volumeMin, longitude, latitude, supp, id_supp
         );
 
         
@@ -232,132 +241,137 @@ export default function CreerPoint() {
   
   return (
     <>    
+    <ScrollView>
+      {/* type point eau */}
+      <View style={[styles.tout, { zIndex: 400 }]}>
+        <Text style={styles.text}>Type de point d’eau</Text> 
+        <DropDownPicker
+          dropDownDirection="BOTTOM"
+          open={openType}
+          value={valueType}
+          items={typePoint}
+          setOpen={setOpenType}
+          setValue={setValueType}
+          setItems={setItemsType}
+          onOpen={onOpenType}
+          placeholder="Sélectionnez un type de point d'eau"
+          placeholderStyle={{ color: '#9e9c9c' }}
+          listMode="SCROLLVIEW"
+          style={styles.menuD}
+        />
+      </View> 
 
-    {/* type point eau */}
-    <View style={[styles.tout, { zIndex: 400 }]}>
-      <Text style={styles.text}>Type de point d’eau</Text> 
-      <DropDownPicker
-        open={openType}
-        value={valueType}
-        items={typePoint}
-        setOpen={setOpenType}
-        setValue={setValueType}
-        setItems={setItemsType}
-        onOpen={onOpenType}
-        placeholder="Sélectionnez un type de point d'eau"
-        placeholderStyle={{ color: '#9e9c9c' }}
-        listMode="SCROLLVIEW"
-        style={styles.menuD}
-      />
-    </View> 
+      {/* disponibilité */}
+      <View style={[styles.tout, {zIndex: 300, marginTop:20}]}>
+        <Text style={styles.text}>Disponibilité du point d’eau</Text> 
+        <DropDownPicker
+          dropDownDirection="BOTTOM" 
+          open={openDispo} 
+          value={valueDispo} 
+          items={etatDispo} 
+          setOpen={setOpenDispo} 
+          setValue={setValueDispo} 
+          setItems={setItemsDispo}
+          onOpen={onOpenDispo}
+          placeholder="Sélectionnez la disponibilité du point d'eau"
+          placeholderStyle={{ color: '#9e9c9c' }}
+          listMode= "SCROLLVIEW"
+          style={styles.menuD}
+        /> 
+      </View> 
 
-    {/* disponibilité */}
-    <View style={[styles.tout, {zIndex: 300, marginTop:20}]}>
-      <Text style={styles.text}>Disponibilité du point d’eau</Text> 
-      <DropDownPicker 
-        open={openDispo} 
-        value={valueDispo} 
-        items={etatDispo} 
-        setOpen={setOpenDispo} 
-        setValue={setValueDispo} 
-        setItems={setItemsDispo}
-        onOpen={onOpenDispo}
-        placeholder="Sélectionnez la disponibilité du point d'eau"
-        placeholderStyle={{ color: '#9e9c9c' }}
-        listMode= "SCROLLVIEW"
-        style={styles.menuD}
-      /> 
-    </View> 
+      {/* accessibilité */}
+      <View style={[styles.tout, {zIndex: 200, marginTop:20}]}>
+        <Text style={styles.text}>Accessibilité du point d’eau</Text> 
+        <DropDownPicker 
+          dropDownDirection="BOTTOM"
+          open={openAcces} 
+          value={valueAcces} 
+          items={etatAcces} 
+          setOpen={setOpenAcces} 
+          setValue={setValueAcces} 
+          setItems={setItemsAcces}
+          onOpen={onOpenAcces}
+          placeholder="Sélectionnez le niveau d'accès du point d'eau"
+          placeholderStyle={{ color: '#9e9c9c' }}
+          listMode= "SCROLLVIEW"
+          style={styles.menuD}
+        /> 
+      </View> 
 
-    {/* accessibilité */}
-    <View style={[styles.tout, {zIndex: 200, marginTop:20}]}>
-      <Text style={styles.text}>Accessibilité du point d’eau</Text> 
-      <DropDownPicker 
-        open={openAcces} 
-        value={valueAcces} 
-        items={etatAcces} 
-        setOpen={setOpenAcces} 
-        setValue={setValueAcces} 
-        setItems={setItemsAcces}
-        onOpen={onOpenAcces}
-        placeholder="Sélectionnez le niveau d'accès du point d'eau"
-        placeholderStyle={{ color: '#9e9c9c' }}
-        listMode= "SCROLLVIEW"
-        style={styles.menuD}
-      /> 
-    </View> 
-
-    {/* statut */}
-    <View style={[styles.tout, {zIndex: 100, marginTop:20}]}>
-      <Text style={styles.text}>Statut du point d’eau</Text> 
-      <DropDownPicker 
-        open={openStatut} 
-        value={valueStatut} 
-        items={etatStatut} 
-        setOpen={setOpenStatut} 
-        setValue={setValueStatut} 
-        setItems={setItemsStatut}
-        onOpen={onOpenStatut}
-        placeholder="Sélectionnez le statut du point d'eau"
-        placeholderStyle={{ color: '#9e9c9c' }}
-        listMode= "SCROLLVIEW"
-        style={styles.menuD}
-      /> 
-    </View> 
-  
-    {/* numero PEI */}
-    <View style={[styles.tout, {marginTop:20}]}>
-      <Text style={styles.text}>Numéro PEI</Text> 
-      <TextInput value={numeroPEI} onChangeText={setNumeroPEI} keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
-    </View> 
-  
-    {/* debit */}
-    <View style={[styles.tout, {marginTop:20}]}>
-      <Text style={styles.text}>Débit en L/min</Text> 
-      <TextInput value={debit} onChangeText={setDebit} keyboardType='decimal-pad' style={styles.entree} placeholder=""></TextInput>
-    </View> 
-
-
-    {/* préssion */}
-    <View style={[styles.tout, {marginTop:20}]}>
-      <Text style={styles.text}>Pression</Text> 
-      <TextInput value={pression} onChangeText={setPression} keyboardType='decimal-pad' style={styles.entree} placeholder=""></TextInput>
-    </View> 
-
-    {/* volume eau */}
-    <View style={[styles.tout, {marginTop:20}]}>
-      <Text style={styles.text}>Volume eau minimum en L</Text> 
-      <TextInput value={volumeMin} onChangeText={setVolumeMin} keyboardType='decimal-pad' style={styles.entree} placeholder=""></TextInput>
-    </View> 
-
-   {/* insee5 */}
-    <View style={[styles.tout, {marginTop:20}]}>
-      <Text style={styles.text}>INSEE5</Text> 
-      <TextInput value={insee5} onChangeText={setInsee5} keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
-    </View> 
-
-    {/* ref carto */}
-    <View style={[styles.tout, {marginTop:20}]}>
-      <Text style={styles.text}>Référence carthographique</Text> 
-      <TextInput value={refCarto} onChangeText={setRefCarto} keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
-    </View> 
-
-    {/* longitude */}
-    <View style={[styles.tout, {marginTop:20}]}>
-      <Text style={styles.text}>Longitude</Text> 
-      <TextInput value={longitude} onChangeText={setLongitude} keyboardType='numbers-and-punctuation' style={styles.entree} placeholder=""></TextInput>
-    </View> 
-
-    {/* lattitude */}
-    <View style={[styles.tout, {marginTop:20}]}>
-      <Text style={styles.text}>Latitude</Text> 
-      <TextInput value={latitude} onChangeText={setLatitude} keyboardType='numbers-and-punctuation' style={styles.entree} placeholder=""></TextInput>
-    </View> 
-
-    {/* creer */}
+      {/* statut */}
+      <View style={[styles.tout, {zIndex: 100, marginTop:20}]}>
+        <Text style={styles.text}>Statut du point d’eau</Text> 
+        <DropDownPicker 
+          dropDownDirection="BOTTOM"
+          open={openStatut} 
+          value={valueStatut} 
+          items={etatStatut} 
+          setOpen={setOpenStatut} 
+          setValue={setValueStatut} 
+          setItems={setItemsStatut}
+          onOpen={onOpenStatut}
+          placeholder="Sélectionnez le statut du point d'eau"
+          placeholderStyle={{ color: '#9e9c9c' }}
+          listMode= "SCROLLVIEW"
+          style={styles.menuD}
+        /> 
+      </View> 
+    
+      {/* numero PEI */}
       <View style={[styles.tout, {marginTop:20}]}>
-        <ButtonLog label="CREER" onPress={creerPointAPI} type="primary" width={200} height={45} marginTop={15}/>
-    </View>
+        <Text style={styles.text}>Numéro PEI</Text> 
+        <TextInput value={numeroPEI} onChangeText={setNumeroPEI} keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
+      </View> 
+    
+      {/* debit */}
+      <View style={[styles.tout, {marginTop:20}]}>
+        <Text style={styles.text}>Débit en L/min</Text> 
+        <TextInput value={debit} onChangeText={setDebit} keyboardType='decimal-pad' style={styles.entree} placeholder=""></TextInput>
+      </View> 
+
+
+      {/* préssion */}
+      <View style={[styles.tout, {marginTop:20}]}>
+        <Text style={styles.text}>Pression</Text> 
+        <TextInput value={pression} onChangeText={setPression} keyboardType='decimal-pad' style={styles.entree} placeholder=""></TextInput>
+      </View> 
+
+      {/* volume eau */}
+      <View style={[styles.tout, {marginTop:20}]}>
+        <Text style={styles.text}>Volume eau minimum en L</Text> 
+        <TextInput value={volumeMin} onChangeText={setVolumeMin} keyboardType='decimal-pad' style={styles.entree} placeholder=""></TextInput>
+      </View> 
+
+    {/* insee5 */}
+      <View style={[styles.tout, {marginTop:20}]}>
+        <Text style={styles.text}>INSEE5</Text> 
+        <TextInput value={insee5} onChangeText={setInsee5} keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
+      </View> 
+
+      {/* ref carto */}
+      <View style={[styles.tout, {marginTop:20}]}>
+        <Text style={styles.text}>Référence carthographique</Text> 
+        <TextInput value={refCarto} onChangeText={setRefCarto} keyboardType='number-pad' style={styles.entree} placeholder=""></TextInput>
+      </View> 
+
+      {/* longitude */}
+      <View style={[styles.tout, {marginTop:20}]}>
+        <Text style={styles.text}>Longitude</Text> 
+        <TextInput value={longitude} onChangeText={setLongitude} keyboardType='numbers-and-punctuation' style={styles.entree} placeholder=""></TextInput>
+      </View> 
+
+      {/* lattitude */}
+      <View style={[styles.tout, {marginTop:20}]}>
+        <Text style={styles.text}>Latitude</Text> 
+        <TextInput value={latitude} onChangeText={setLatitude} keyboardType='numbers-and-punctuation' style={styles.entree} placeholder=""></TextInput>
+      </View> 
+
+      {/* creer */}
+        <View style={[styles.tout, {marginTop:20}]}>
+          <ButtonLog label="CREER" onPress={creerPointAPI} type="primary" width={200} height={45} marginTop={15}/>
+      </View>
+    </ScrollView>
     </>
   );
 }

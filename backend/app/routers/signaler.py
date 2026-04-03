@@ -1,7 +1,9 @@
 # Routes FastAPI pour la gestion des signalement de points d’eau
+from app.DAO.ban.banUtilisateur import verifier_ban_utilisateur
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 import uuid, os
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from ..database import SessionLocal
 from ..models import Signaler, PointEau, Utilisateur
 from ..schemas import SignalerBase, SignalerCreate, SignalerOut
@@ -11,8 +13,8 @@ from app.DAO.DAOSignaler import (
     get_signale_by_id_point,
     delete_signale_by_id_point
 )
-from app.DAO.DAOUtilisateurs import (dechiffrerTelEtMail,)
-from ..models import Utilisateur
+from app.DAO.DAOUtilisateurs import dechiffrerTelEtMail
+from app.DAO.compteur.quotaSignalement import verifier_quota_signalement
 from .dependencies import rolesChecker
 
 # Définition de la route pour les signalements
@@ -49,9 +51,12 @@ def get_signalements_by_point(id_point: int, db: Session = Depends(get_db), user
 @router.get("/id_s/{signalement_id}", response_model=SignalerOut)
 def get_user(signalement_id: int, db: Session = Depends(get_db), user_check: Utilisateur = Depends(rolesChecker("pompier", "commandement","admin"))):
     signal = db.query(Signaler).filter(Signaler.id == signalement_id).first()
+    
+    # verifie  que le signalement existe bien
     if not signal:
-        raise HTTPException(status_code=404, detail=f"Le point numéro: {signalement_id} n'a pas été trouvé")
+        raise HTTPException(status_code=404, detail=f"Le signalement numéro: {signalement_id} n'a pas été trouvé")
     user = db.query(Utilisateur).filter(Utilisateur.id_utilisateur == signal.id_utilisateur).first()
+    
     return {
         "id": signal.id,
         "id_point": signal.id_point,
@@ -62,7 +67,7 @@ def get_user(signalement_id: int, db: Session = Depends(get_db), user_check: Uti
     }
 
 
-# Création d’un nouveau signalement avec une photo
+# Création d’un nouveau signalement avec une photo. On limite le nombre de singlament à 3 pour les utilisateur public 10 pour pompier et commandement
 @router.post("/", response_model=SignalerCreate)
 def create_signalement(id_point: int = Form(...), probleme: str = Form(...), photo: UploadFile = File(...), db: Session = Depends(get_db),user_check: Utilisateur = Depends(rolesChecker("public", "pompier", "commandement","admin"))):
    
@@ -72,6 +77,20 @@ def create_signalement(id_point: int = Form(...), probleme: str = Form(...), pho
     if not point:
         raise HTTPException(status_code=404, detail=f"Le point numéro : {id_point} n'a pas été trouvé")
     
+    # verifier que l'utilisateur n'est pas banni sinon pas le droit de signalement
+    try:
+        verifier_ban_utilisateur(db, user_check.id_utilisateur)
+    except ValueError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+ 
+
+    # vérifier le nombre de signalement autorisé avec le calculateur de quota par jour
+    # si public limite signalement à 3 par jour
+    # si pompier ou commandement limite à 10
+    try:
+        verifier_quota_signalement(db, user_check.id_utilisateur, user_check.role)
+    except ValueError as e:
+        raise HTTPException(status_code=403, detail=str(e))
 
     # création d'un id unique pour la photo
     ext = os.path.splitext(photo.filename)[1] or ".jpg"

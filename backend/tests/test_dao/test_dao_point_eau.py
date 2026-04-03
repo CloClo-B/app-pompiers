@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy.exc import IntegrityError
 from app.DAO.DAOPointsEau import (
     get_all_points_eau,
     get_point_eau_by_id,
@@ -27,7 +28,7 @@ def sample_point_data():
         "accessibilite": "C",
         "disponibilite": "DI",
         "carto_ref": 100,
-        "utilisateur": "test_user"
+        "utilisateur": 1
     }
 
 
@@ -57,7 +58,7 @@ class TestCreatePointEau:
             "accessibilite": "C",
             "disponibilite": "DI",
             "carto_ref": 200,
-            "utilisateur": "pompier_test"
+            "utilisateur": 1
         }
         
         point = create_point_eau(db_session, data)
@@ -76,7 +77,14 @@ class TestCreatePointEau:
             "statut": "prive",
             "type_nature": "pena",
             "latitude": 43.6047,
-            "longitude": 1.4442
+            "longitude": 1.4442,
+            "accessibilite": "NC",
+            "disponibilite": "DI",
+            "carto_ref": 0,
+            "press_deb": 0.0,
+            "debit_1_bar": 0.0,
+            "vol_eau_mi": 0.0,
+            "utilisateur": 1
         }
         
         point = create_point_eau(db_session, data)
@@ -92,7 +100,14 @@ class TestCreatePointEau:
             "statut": "public",
             "type_nature": "bi",
             "latitude": 48.0,
-            "longitude": 2.0
+            "longitude": 2.0,
+            "accessibilite": "NC",
+            "disponibilite": "DI",
+            "carto_ref": 0,
+            "press_deb": 0.0,
+            "debit_1_bar": 0.0,
+            "vol_eau_mi": 0.0,
+            "utilisateur": 1
         }
         
         with pytest.raises(ValueError, match="existe déjà"):
@@ -104,7 +119,14 @@ class TestCreatePointEau:
             "statut": "public",
             "type_nature": "bi",
             "latitude": 48.8566,
-            "longitude": 2.3522
+            "longitude": 2.3522,
+            "accessibilite": "NC",
+            "disponibilite": "DI",
+            "carto_ref": 0,
+            "press_deb": 0.0,
+            "debit_1_bar": 0.0,
+            "vol_eau_mi": 0.0,
+            "utilisateur": 1
         }
         
         point = create_point_eau(db_session, data)
@@ -117,7 +139,14 @@ class TestCreatePointEau:
             "statut": "public",
             "type_nature": "bi",
             "latitude": 48.0,
-            "longitude": 2.0
+            "longitude": 2.0,
+            "accessibilite": "C",
+            "disponibilite": "DI",
+            "carto_ref": 1,
+            "press_deb": 5.0,
+            "debit_1_bar": 60.0,
+            "vol_eau_mi": 0.0,
+            "utilisateur": 1
         }
         
         point = create_point_eau(db_session, data)
@@ -144,11 +173,11 @@ class TestGetAllPointsEau:
     def test_get_all_points_eau_multiple(self, db_session):
         points_data = [
             {"numero_pei": 1001, "statut": "public", "type_nature": "bi", 
-             "latitude": 48.8, "longitude": 2.3},
+             "latitude": 48.8, "longitude": 2.3, "accessibilite": "C", "disponibilite": "DI", "carto_ref": 1, "press_deb": 0.0, "debit_1_bar": 0.0, "vol_eau_mi": 0.0, "utilisateur": 1},
             {"numero_pei": 1002, "statut": "prive", "type_nature": "pi100", 
-             "latitude": 48.9, "longitude": 2.4},
+             "latitude": 48.9, "longitude": 2.4, "accessibilite": "C", "disponibilite": "DI", "carto_ref": 1, "press_deb": 0.0, "debit_1_bar": 0.0, "vol_eau_mi": 0.0, "utilisateur": 1},
             {"numero_pei": 1003, "statut": "public", "type_nature": "pena", 
-             "latitude": 48.7, "longitude": 2.2},
+             "latitude": 48.7, "longitude": 2.2, "accessibilite": "C", "disponibilite": "DI", "carto_ref": 1, "press_deb": 0.0, "debit_1_bar": 0.0, "vol_eau_mi": 0.0, "utilisateur": 1},
         ]
         
         for data in points_data:
@@ -188,8 +217,8 @@ class TestGetPointEauByNumeroPei:
         assert "longitude" in point
     
     def test_get_point_eau_by_numero_pei_not_exists(self, db_session):
-        point = get_point_eau_by_numero_pei(db_session, 99999)
-        assert point is None
+        with pytest.raises(ValueError, match="Numéro PEI incorrect"):
+            get_point_eau_by_numero_pei(db_session, 99999)
 
 
 class TestUpdatePointEau:
@@ -258,9 +287,8 @@ class TestUpdatePointEau:
 
     def test_update_point_eau_not_exists(self, db_session):
         data = {"nom": "Test"}
-        updated = update_point_eau_by_id(db_session, 99999, data)
-        
-        assert updated is None
+        with pytest.raises(ValueError, match="Id point incorrect"):
+            update_point_eau_by_id(db_session, 99999, data)
 
 
 class TestDeletePointEau:
@@ -287,8 +315,8 @@ class TestDeletePointEau:
         
         assert result is True
         
-        deleted = get_point_eau_by_numero_pei(db_session, numero_pei)
-        assert deleted is None
+        with pytest.raises(ValueError, match="Numéro PEI incorrect"):
+            get_point_eau_by_numero_pei(db_session, numero_pei)
     
     def test_delete_point_eau_by_numero_pei_not_exists(self, db_session):
         result = delete_point_eau_by_numero_pei(db_session, 99999)
@@ -308,7 +336,12 @@ class TestIntegration:
             "latitude": 43.2965,
             "longitude": 5.3698,
             "press_deb": 5.0,
-            "debit_1_bar": 60.0
+            "debit_1_bar": 60.0,
+            "vol_eau_mi": 0.0,
+            "accessibilite": "C",
+            "disponibilite": "DI",
+            "carto_ref": 1,
+            "utilisateur": 1
         }
         created = create_point_eau(db_session, data)
         assert created.id is not None
@@ -345,7 +378,14 @@ class TestIntegration:
             "statut": "public",
             "type_nature": "bi",
             "latitude": 48.0,
-            "longitude": 2.0
+            "longitude": 2.0,
+            "accessibilite": "C",
+            "disponibilite": "DI",
+            "carto_ref": 1,
+            "press_deb": 5.0,
+            "debit_1_bar": 60.0,
+            "vol_eau_mi": 0.0,
+            "utilisateur": 1
         }
         created = create_point_eau(db_session, data)
         
@@ -357,8 +397,8 @@ class TestIntegration:
         assert deleted is True
         
 
-        not_found = get_point_eau_by_numero_pei(db_session, 77777)
-        assert not_found is None
+        with pytest.raises(ValueError, match="Numéro PEI incorrect"):
+            get_point_eau_by_numero_pei(db_session, 77777)
 
 
 class TestEdgeCases:
@@ -374,14 +414,19 @@ class TestEdgeCases:
             "longitude": 2.0,
             "nom": "",
             "insee5": "",
-            "utilisateur": ""
+            "accessibilite": "NC",
+            "disponibilite": "DI",
+            "carto_ref": 0,
+            "press_deb": 0.0,
+            "debit_1_bar": 0.0,
+            "vol_eau_mi": 0.0,
+            "utilisateur": 1
         }
         
         point = create_point_eau(db_session, data)
         assert point is not None
         assert point.nom is None
         assert point.insee5 is None
-        assert point.utilisateur is None
     
     def test_update_with_none_values(self, db_session, sample_point):
         """Test mise à jour avec valeurs None"""
@@ -390,8 +435,8 @@ class TestEdgeCases:
             "debit_1_bar": None
         }
         
-        updated = update_point_eau_by_id(db_session, sample_point.id, data)
-        assert updated is not None
+        with pytest.raises(IntegrityError):
+            update_point_eau_by_id(db_session, sample_point.id, data)
     
     def test_multiple_deletes_same_point(self, db_session, sample_point):
         """Test suppression multiple du même point"""

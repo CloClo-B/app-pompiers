@@ -1,7 +1,7 @@
 // Fichier de centralisation des URL pour l'application (frontend)
 
 // IP A CHANGER
-export const API_URL = 'http://192.168.1.184:8000';
+export const API_URL = 'http://172.20.10.2:8000';
 
 
 // Liste de tous les points d'accès utilisés par l'application pour accéder a l'API
@@ -21,6 +21,7 @@ export const API_ENDPOINTS = {
   
 
   POINTS_EAU: `${API_URL}/points-eau/`,
+  POINTS_EAU_LIGHT: `${API_URL}/points-eau/light/`,
   POINT_EAU_BY_NUMERO_PEI: (id: string) => `${API_URL}/points-eau/${id}`,
   POINT_EAU_UPDATE: (id: number) => `${API_URL}/points-eau/update/${id}`,
 
@@ -37,6 +38,18 @@ export const API_ENDPOINTS = {
   SIGNALEMENT_BY_ID: (id: string) => `${API_URL}/signaler/${id}`,
   SIGNALEMENT_SUPPRIMER: (id: string) => `${API_URL}/signaler/suprimmer/${id}`,
   GET_IMAGE_SIGNALEMENT: (id: string) => `${API_URL}/${id}`,
+
+
+  PROPOSITIONAJOUT: `${API_URL}/propositionAjout/`,
+  PROPOSITIONAJOUTMIN: `${API_URL}/propositionAjout/getmin`,
+  PROPOSITION_BY_ID: (id: number) => `${API_URL}/propositionAjout/id/${id}`,
+  PROPOSITION_SUPPRIMER: (id: number) => `${API_URL}/propositionAjout/suprimmer/${id}`,
+  GET_IMAGE_PROPOSITION: (id: string) => `${API_URL}/${id}`,
+
+
+  SIGNALERUTILISATEUR: `${API_URL}/signaler_utilisateur/`,
+
+  
 
   CAPTCHA: `${API_URL}/submit-form`,
   

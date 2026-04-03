@@ -9,7 +9,8 @@ from app.DAO.DAOUtilisateurs import (
     get_utilisateur_by_email,
     update_utilisateur_by_id,
     delete_utilisateur_by_id,
-    verify_password
+    verify_password,
+    dechiffrerTelEtMail
 )
 from app import models
 
@@ -44,13 +45,14 @@ class TestIntegrationUtilisateur:
         
         assert user is not None
         assert user.id_utilisateur is not None
-        assert user.email == unique_user_data["email"]
+        # l'utilisateur stocke l'email chiffré dans la BDD, on le déchiffre pour valider
+        assert dechiffrerTelEtMail(user.email) == unique_user_data["email"]
         assert user.mot_de_passe != unique_user_data["mot_de_passe"]
         assert verify_password(unique_user_data["mot_de_passe"], user.mot_de_passe)
 
-    def test_get_utilisateur_by_email(self, db_session: Session, user_in_db: models.Utilisateur):
+    def test_get_utilisateur_by_email(self, db_session: Session, unique_user_data: dict, user_in_db: models.Utilisateur):
         """Vérifie la récupération par email."""
-        fetched = get_utilisateur_by_email(db_session, user_in_db.email)
+        fetched = get_utilisateur_by_email(db_session, unique_user_data["email"])
         assert fetched is not None
         assert fetched.id_utilisateur == user_in_db.id_utilisateur
 
@@ -79,24 +81,23 @@ class TestIntegrationUtilisateur:
 
     # ================= TESTS DE CONTRAINTES =================
 
-    def test_duplicate_email_returns_none(self, db_session: Session, unique_user_data: dict):
+    def test_duplicate_email_raises_error(self, db_session: Session, unique_user_data: dict):
         create_utilisateur(db_session, unique_user_data)
         
         # On tente de créer un autre utilisateur avec le même email
         data2 = unique_user_data.copy()
         data2["telephone"] = "0700000000" 
 
-        result = create_utilisateur(db_session, data2)
-        assert result is None
+        with pytest.raises(ValueError, match="Compte déjà éxistant Email déjà utilisé"):
+            create_utilisateur(db_session, data2)
 
     def test_duplicate_telephone_fails(self, db_session: Session, unique_user_data: dict):
         """Vérifie que le système empêche les doublons de téléphone."""
         create_utilisateur(db_session, unique_user_data)
         data2 = unique_user_data.copy()
         data2["email"] = f"diff{uuid.uuid4().hex[:4]}@test.com"
-        with pytest.raises(IntegrityError):
+        with pytest.raises(ValueError, match="Compte déjà éxistant numéro de téléphone déjà utilisé"):
             create_utilisateur(db_session, data2)
-            db_session.flush() #
 
     def test_get_all_utilisateurs_format(self, db_session: Session, user_in_db: models.Utilisateur):
         users = get_all_utilisateur(db_session)

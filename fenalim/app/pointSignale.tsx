@@ -104,7 +104,7 @@ export default function PointSignale() {
           data={signaler}
           renderItem={renderItem}
           keyExtractor={(item, index) => `${item.id}-${index}`}
-          scrollEnabled={false}
+          scrollEnabled={true}
         />
       </View>
     </View>

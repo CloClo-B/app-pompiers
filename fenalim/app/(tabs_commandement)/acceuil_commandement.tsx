@@ -1,13 +1,15 @@
 import {FontAwesome} from "@expo/vector-icons";
 import * as Location from "expo-location";
-import React, {useEffect, useRef, useState, useMemo} from "react";
-import {ActivityIndicator, StyleSheet, TouchableOpacity, View, Linking, Platform, Modal, Text} from "react-native";
+import React, {useEffect, useRef, useState, useMemo, useCallback} from "react";
+import {ActivityIndicator, StyleSheet, TouchableOpacity, View, Linking, Platform, Modal, Text, Alert} from "react-native";
 import { Marker } from "react-native-maps";
 import MapView from "react-native-map-clustering";
 import { useRouter } from 'expo-router';
 import HautPage from "@/app/hautPage";
-import { getAllPointEau } from "@/service/pointEauService";
+import { getPointEauByID, getAllPointEauLight } from "@/service/pointEauService";
+import { getToken } from "@/service/infosStocker";
 import ButtonLog from '@/components/ButtonLog';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Définit toutes les infos qu'un point possède
 type PointEau = {
@@ -23,36 +25,76 @@ type PointEau = {
   longitude: number;
 };
 
-// Page Accueil (Public) carte interactive qui localisation / affiche les points d'eau incendie / itinéraire ou signaler un problème sur les points d'eau
+// Définit les infos minimum qu'un point possède (Optimisation)
+type PointEauLight = {
+  id: number;
+  numero_pei: string;
+  latitude: number;
+  longitude: number;
+};
+
+// Page Accueil (Commandement) carte interactive qui localisation / affiche les points d'eau incendie / itinéraire ou signaler un problème sur les points d'eau
 export default function HomeScreen() {
   const [localisation, setLocalisation] = useState<Location.LocationObject | null>(null);
-  const [pointsEau, setPointsEau] = useState<PointEau[]>([]);
+  const [pointsEau, setPointsEau] = useState<PointEauLight[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPEI, setSelectedPEI] = useState<PointEau | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const router = useRouter();
 
   // Référence pour piloter la carte
   const referenceCarte = useRef<any>(null);
 
-  // Charge les points d'eau et active le GPS
-  useEffect(() => {
-    let watchAbonnement: Location.LocationSubscription | null = null;
-
   // Fonction pour charger les points d'eau
   const fetchPointsEau = async () => {
     try {
-      const response = await getAllPointEau();
+      const raw = await AsyncStorage.getItem('points_eau_cache');
+      if (raw) {
+        setPointsEau(JSON.parse(raw)); // Charge depuis le cache
+        setLoading(false);
+        return;
+      }
 
+      const response = await getAllPointEauLight();
       const pointsRaw = Array.isArray(response) ? response : response.points_eau;
       setPointsEau(pointsRaw);
+      await AsyncStorage.setItem('points_eau_cache', JSON.stringify(pointsRaw));
+
     } catch (error) {
-      console.error(error);
-    }finally {
-        setLoading(false);
+      console.error('Erreur chargement points :', error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Actualiser les points d'eau depuis le logo SDIS
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await AsyncStorage.removeItem('points_eau_cache');
+    await fetchPointsEau();
+    setIsRefreshing(false);
+  };
+
+  // récupérer le token
+  const getData = async () => {
+    try {
+      const value = await getToken();
+      if(value !== null) {
+        setToken(value);
+      }
+    } catch(e) {
+      console.log("erreur token creation point eau");
+    }
+  }
+
+  // Charge les points d'eau et active le GPS
+  useEffect(() => {
+    let watchAbonnement: Location.LocationSubscription | null = null;
+    getData();
 
     // Demande l'accès au GPS et suit la position de l'utilisateur
     const getLocation = async () => {
@@ -80,7 +122,12 @@ export default function HomeScreen() {
       );
     };
 
-    fetchPointsEau();
+    const initializeApp = async () => {
+      await fetchPointsEau();
+      setLoading(false);
+    };
+
+    initializeApp();
     getLocation();
 
     return () => {
@@ -103,12 +150,23 @@ export default function HomeScreen() {
     }
   };
 
-
   // Description des points d'eaux
-  const infoPointEau = (point: PointEau) => {
-    setSelectedPEI(point);
+  const infoPointEau = useCallback(async (point: PointEauLight) => {
+    setSelectedPEI(null);
     setModalVisible(true);
-  };
+    setLoadingDetails(true);
+
+    try {
+      const details = await getPointEauByID(token ?? '', point.numero_pei);
+      setSelectedPEI(details);
+    } catch (error) {
+      console.error('Erreur chargement détails :', error);
+      Alert.alert("Erreur", "Impossible de charger les détails de ce point.");
+      setModalVisible(false);
+    } finally {
+      setLoadingDetails(false);
+    }
+  }, [token]);
 
   // Mémoire pour éviter le recalcule des markers
   const markers = useMemo(() => {
@@ -121,7 +179,7 @@ export default function HomeScreen() {
         onCalloutPress={() => infoPointEau(point)}
       />
     ));
-  }, [pointsEau]);
+  }, [pointsEau, infoPointEau]);
 
 
   if (loading || !location) {
@@ -134,7 +192,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <HautPage title="Carte des points d’eau" />
+      <HautPage title="Carte des points d'eau" onLogoPress={handleRefresh} isRefreshing={isRefreshing} />
 
       {/* Carte */}
       <MapView
@@ -164,21 +222,38 @@ export default function HomeScreen() {
         <FontAwesome name="location-arrow" size={24} color="#FFF" />
       </TouchableOpacity>
       
+      {/* bouton de crétation d'une proposition d'ajout de point */}
+      <TouchableOpacity 
+        style={styles.boutonAjout} 
+        onPress={() => {
+          if (location) {
+            router.push({ pathname: '/creerPropositionAjout', params: { latitude: location.latitude, longitude: location.longitude}});
+          }
+        }}
+      >
+        <FontAwesome name="plus" size={24} color="#FFF" />
+      </TouchableOpacity>
+
+
       {/* Description des points d'eau */}
       <Modal transparent animationType="fade" visible={modalVisible}>
         <View style={styles.overlay}>
           <View style={styles.alertBox}>
-            <Text style={styles.title}>
+            <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">
               Numero PEI : {selectedPEI?.numero_pei}
             </Text>
 
-            <Text style={styles.message}>
-              Statut : {selectedPEI?.statut}{"\n"}
-              Type : {selectedPEI?.type_nature ?? "N/A"}{"\n"}
-              Pression : {selectedPEI?.press_deb ?? "N/A"} bar{"\n"}
-              Débit : {selectedPEI?.debit_1_bar ?? "N/A"} m3/h{"\n"}
-              Volume d'eau : {selectedPEI?.vol_eau_mil ?? "N/A"}
-            </Text>
+            {loadingDetails ? (
+              <ActivityIndicator size="small" color="#1976D2" style={{ marginBottom: 20 }} />
+            ) : (
+              <Text style={styles.message}>
+                Statut : {selectedPEI?.statut}{"\n"}
+                Type : {selectedPEI?.type_nature ?? "N/A"}{"\n"}
+                Pression : {selectedPEI?.press_deb ?? "N/A"} bar{"\n"}
+                Débit : {selectedPEI?.debit_1_bar ?? "N/A"} m3/h{"\n"}
+                Volume d'eau : {selectedPEI?.vol_eau_mil ?? "N/A"}
+              </Text>
+            )}
 
             {/* Itinéraire pour aller au point d'eau */}
             <ButtonLog
@@ -291,5 +366,16 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 10,
   },
-
+  boutonAjout: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    backgroundColor: "#28a745",
+    borderRadius: 30,
+    width: 60,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+  },
 });

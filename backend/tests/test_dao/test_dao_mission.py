@@ -16,17 +16,7 @@ from geoalchemy2.elements import WKTElement
 @pytest.fixture
 def utilisateur_test(db_session):
     """Crée un utilisateur de test"""
-    user = models.Utilisateur(
-        nom="Dupont",
-        prenom="Jean",
-        email="jean.dupont@test.com",
-        telephone="0612345678",
-        mot_de_passe="hashed_password",
-        role="pompier"
-    )
-    db_session.add(user)
-    db_session.commit()
-    db_session.refresh(user)
+    user = db_session.query(models.Utilisateur).filter_by(id_utilisateur=1).first()
     return user
 
 
@@ -41,7 +31,14 @@ def point_test(db_session):
         numero_pei=12345,
         statut="PUBLIC",
         type_nature="BI",
-        geom=wkt
+        geom=wkt,
+        accessibilite="C",
+        disponibilite="DI",
+        carto_ref=1,
+        press_deb=0.0,
+        debit_1_bar=0.0,
+        vol_eau_mi=0.0,
+        utilisateur=1
     )
     db_session.add(point)
     db_session.commit()
@@ -101,12 +98,12 @@ class TestGetMissionById:
     def test_get_mission_by_id_exists(self, db_session, mission_test):
         m = get_mission_by_id(db_session, mission_test.id_mission)
         assert m is not None
-        assert m.id_mission == mission_test.id_mission
-        assert m.nom_mission == "Mission Test"
+        assert m["id_mission"] == mission_test.id_mission
+        assert m["nom_mission"] == "Mission Test"
     
     def test_get_mission_by_id_not_exists(self, db_session):
-        m = get_mission_by_id(db_session, 99999)
-        assert m is None
+        with pytest.raises(ValueError, match="Mission introuv"):
+            get_mission_by_id(db_session, 99999)
 
 
 class TestGetMissionByDate:
@@ -242,8 +239,8 @@ class TestDeleteMission:
         
         assert result is True
         
-        deleted = get_mission_by_id(db_session, mission_id)
-        assert deleted is None
+        with pytest.raises(ValueError, match="Mission introuv"):
+            get_mission_by_id(db_session, mission_id)
 
     def test_delete_mission_not_exists(self, db_session):
         result = delete_mission_by_id(db_session, 99999)
@@ -353,7 +350,7 @@ class TestIntegration:
         
         # READ by ID
         retrieved_by_id = get_mission_by_id(db_session, created.id_mission)
-        assert retrieved_by_id.nom_mission == "Mission CRUD"
+        assert retrieved_by_id["nom_mission"] == "Mission CRUD"
         
         # READ ALL
         all_missions = get_all_mission(db_session)
@@ -375,8 +372,8 @@ class TestIntegration:
         assert deleted is True
         
         # VERIFY DELETE
-        not_found = get_mission_by_id(db_session, created.id_mission)
-        assert not_found is None
+        with pytest.raises(ValueError, match="Mission introuvable"):
+            get_mission_by_id(db_session, created.id_mission)
 
     def test_integration_multiple_missions_same_day(self, db_session, utilisateur_test, point_test):
         today = date.today()
@@ -418,7 +415,7 @@ class TestIntegration:
         # Passage à TERMINER
         update_mission_by_id(db_session, mission.id_mission, {"statut": "TERMINER"})
         updated = get_mission_by_id(db_session, mission.id_mission)
-        assert updated.statut == "TERMINER"
+        assert updated["statut"] == "TERMINER"
         
         # Suppression
         assert delete_mission_by_id(db_session, mission.id_mission) is True
@@ -453,7 +450,14 @@ class TestEdgeCases:
                 numero_pei=20000 + i,
                 statut="PUBLIC",
                 type_nature="BI",
-                geom=wkt
+                geom=wkt,
+                accessibilite="NC",
+                disponibilite="DI",
+                carto_ref=0,
+                press_deb=0.0,
+                debit_1_bar=0.0,
+                vol_eau_mi=0.0,
+                utilisateur=1
             )
             db_session.add(point)
             db_session.commit()

@@ -1,14 +1,15 @@
 import {FontAwesome} from "@expo/vector-icons";
 import * as Location from "expo-location";
-import React, {useEffect, useRef, useState, useMemo} from "react";
+import React, {useEffect, useRef, useState, useMemo, useCallback} from "react";
 import {ActivityIndicator, StyleSheet, TouchableOpacity, View, Linking, Platform, Modal, Text, Alert} from "react-native";
 import { Marker } from "react-native-maps";
 import MapView from "react-native-map-clustering";
 import { useRouter } from 'expo-router';
 import HautPage from "@/app/hautPage";
-import { getAllPointEau, deletePointEau } from "@/service/pointEauService";
+import { getPointEauByID, getAllPointEauLight, deletePointEau } from "@/service/pointEauService";
 import { getToken } from "@/service/infosStocker";
 import ButtonLog from '@/components/ButtonLog';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Définit toutes les infos qu'un point possède
 type PointEau = {
@@ -24,10 +25,18 @@ type PointEau = {
   longitude: number;
 };
 
+// Définit les infos minimum qu'un point possède (Optimisation)
+type PointEauLight = {
+  id: number;
+  numero_pei: string;
+  latitude: number;
+  longitude: number;
+};
+
 // Page Accueil (Public) carte interactive qui localisation / affiche les points d'eau incendie / itinéraire ou signaler un problème sur les points d'eau
 export default function HomeScreen() {
   const [localisation, setLocalisation] = useState<Location.LocationObject | null>(null);
-  const [pointsEau, setPointsEau] = useState<PointEau[]>([]);
+  const [pointsEau, setPointsEau] = useState<PointEauLight[]>([]);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -35,6 +44,7 @@ export default function HomeScreen() {
   const [selectedPEI, setSelectedPEI] = useState<PointEau | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [enlever, setDeleting] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const router = useRouter();
 
   // Référence pour piloter la carte
@@ -43,20 +53,29 @@ export default function HomeScreen() {
   // Fonction pour charger les points d'eau
   const fetchPointsEau = async () => {
     try {
-      const response = await getAllPointEau();
-
+      const raw = await AsyncStorage.getItem('points_eau_cache');
+      if (raw) {
+        setPointsEau(JSON.parse(raw)); // Charge depuis le cache
+        setLoading(false);
+        return;
+      }
+  
+      const response = await getAllPointEauLight();
       const pointsRaw = Array.isArray(response) ? response : response.points_eau;
       setPointsEau(pointsRaw);
+      await AsyncStorage.setItem('points_eau_cache', JSON.stringify(pointsRaw));
+      
     } catch (error) {
-      console.error(error);
-    }finally {
-        setLoading(false);
+      console.error('Erreur chargement points :', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   // Actualiser les points d'eau depuis le logo SDIS
   const handleRefresh = async () => {
     setIsRefreshing(true);
+    await AsyncStorage.removeItem('points_eau_cache');
     await fetchPointsEau();
     setIsRefreshing(false);
   };
@@ -139,13 +158,25 @@ export default function HomeScreen() {
 
 
   // Description des points d'eaux
-  const infoPointEau = (point: PointEau) => {
-    setSelectedPEI(point);
+  const infoPointEau = useCallback(async (point: PointEauLight) => {
+    setSelectedPEI(null);
     setModalVisible(true);
-  };
+    setLoadingDetails(true);
+  
+    try {
+      const details = await getPointEauByID(token ?? '', point.numero_pei);
+      setSelectedPEI(details);
+    } catch (error) {
+      console.error('Erreur chargement détails :', error);
+      Alert.alert("Erreur", "Impossible de charger les détails de ce point.");
+      setModalVisible(false);
+    } finally {
+      setLoadingDetails(false);
+    }
+  }, [token]);
+
 
 // modifier un point d'eau
-
   const updatePoint = ()=> {
     if (!token || !selectedPEI) return;
     setModalVisible(false)
@@ -208,7 +239,7 @@ export default function HomeScreen() {
         onCalloutPress={() => infoPointEau(point)}
       />
     ));
-  }, [pointsEau]);
+  }, [pointsEau, infoPointEau]);
 
 
   if (loading || !location) {

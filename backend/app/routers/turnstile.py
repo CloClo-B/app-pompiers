@@ -1,11 +1,15 @@
 # fichier pour la validation du captcha cloudflare récuperer durectement depuis la doc officiel
 import requests
 from fastapi import APIRouter, Request, Form
+import os
 
 
-# clé de test UNIQUEMENT a changer pour la production
+# Charger la clé depuis .env
+
+# clé de TEST UNIQUEMENT a changer pour la production
+SECRET_KEY = os.getenv("CLE_CAPTCHA")
+
 router = APIRouter()
-SECRET_KEY = "1x0000000000000000000000000000000AA"
 
 
 def valider_turnstile(token, secret, remoteip=None):

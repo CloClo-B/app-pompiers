@@ -2,7 +2,7 @@
 DAO pour la gestion des Points d'Eau
 """
 from sqlalchemy.orm import Session
-from sqlalchemy import func, text
+from sqlalchemy import func
 from datetime import datetime
 from typing import Dict, Any, List
 from app.models import PointEau
@@ -56,6 +56,26 @@ def get_all_points_eau(db: Session) -> List[Dict[str, Any]]:
         }
         for p in points
     ]
+
+# Récupère tous les points d'eau Light (Optimisation)
+def get_all_points_eau_light(db: Session) -> List[Dict[str, Any]]:
+    points = db.query(
+        PointEau.id,
+        PointEau.numero_pei,
+        func.ST_Y(ST_Transform(PointEau.geom, 4326)).label("latitude"),
+        func.ST_X(ST_Transform(PointEau.geom, 4326)).label("longitude"),
+    ).all()
+    
+    return [
+        {
+            "id": p.id,
+            "numero_pei": p.numero_pei,
+            "latitude": p.latitude,
+            "longitude": p.longitude,
+        }
+        for p in points
+    ]
+
 
 # Récupère un point d'eau par ID
 def get_point_eau_by_id(db: Session, point_id: int) -> Dict[str, Any]:

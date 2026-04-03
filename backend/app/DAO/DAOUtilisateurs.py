@@ -57,6 +57,8 @@ def get_utilisateur_by_id(db: Session, id_utilisateur: int):
     user = db.query(models.Utilisateur).filter(
         models.Utilisateur.id_utilisateur == id_utilisateur
     ).first()
+    if not user:
+        return None
     # Déchiffrement mail et téléphone
     user.email = dechiffrerTelEtMail(user.email)
     user.telephone = dechiffrerTelEtMail(user.telephone)
@@ -120,6 +122,7 @@ def verifier_connexion(db: Session, email : str, motDePasse: str):
         raise ValueError("Email ou mot de passe incorrect")
     if not verify_password(motDePasse, user.mot_de_passe):
         raise ValueError("Email ou mot de passe incorrect")
+    
     return user
 
 

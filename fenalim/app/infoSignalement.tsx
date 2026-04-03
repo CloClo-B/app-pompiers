@@ -9,6 +9,7 @@ import { getSignalementByIndex } from "@/service/signalementService";
 import { getPointEauByID } from "@/service/pointEauService";
 import { getRole, getToken } from "@/service/infosStocker";
 import ButtonLog from '@/components/ButtonLog';
+import { CreatesignalerUtilisateur } from "@/service/SignalerUtilisateur";
 
 // Donnée du Signalement
 type Signale = {
@@ -63,7 +64,7 @@ export default function UserDetails() {
   
   const infoSignalementSelect = async (token: string) => {
     if (!token) {
-      alert("Token manquant, impossible d'afficher les missions en cours");
+      alert("Impossible d'afficher les signalements en cours");
       return;
     }
     try {
@@ -121,6 +122,54 @@ export default function UserDetails() {
   };
 
 
+
+  // alert confirmer signalement utilisateur
+  const confirmeSupp = () => {
+    Alert.alert(
+    "Faux signalement ?",
+    "Confirmer le signalement de l'utilisateur et donc bannissement de 3 jours",
+    [
+        {
+        text: "Non", style: "cancel" },
+        {
+        text: "Oui", onPress: () => {signalerUtilisateur()},
+        },
+    ]
+    );
+  };
+  // Signale utilisateur + supp le signalement
+  const signalerUtilisateur = async () => {
+
+    // Avant l'appel API, pour vérifier les valeurs
+    console.log("Vérification des info à envoyer pour supprimer\n");
+    // console.log("ID:", signalement?.id_point);
+
+    if (!token) {
+      Alert.alert("Erreur, impossible de signaler l'utilisateur");
+      return;
+    }
+    if(signalement?.mail_utilisateur == null){
+      Alert.alert("Erreur, impossible de signaler l'utilisateur");
+      return;
+    }
+    try {
+        
+      // apelle du fichier SignalerUtilisateur
+      await CreatesignalerUtilisateur(token, signalement?.mail_utilisateur, "signalement" , Number(signalement?.id));
+
+        
+      router.push({
+          pathname: '/succes',
+          params: { title: 'Utilisateur signalé avec succès', page:"point_eau" }
+          });
+      } catch (error) {
+          console.error(error);
+          Alert.alert("Erreur", "Signalement utilisateur");
+      }
+    };
+
+
+
   return (
 
     <>
@@ -149,13 +198,22 @@ export default function UserDetails() {
               <Text><Text style={{ fontWeight:'bold', fontSize: 18 }}>Problème : </Text> {signalement?.probleme}</Text>
               {signalement?.photo && (
                 <Image
-                  source={{ uri: API_ENDPOINTS.GET_IMAGE_SIGNALEMENT(signalement.photo) }}
+                source={{ uri: API_ENDPOINTS.GET_IMAGE_SIGNALEMENT(signalement.photo) }}
                   style={{ width: 300, height: 250, borderRadius: 10, marginTop: 10, marginBottom:10 }}
                   resizeMode="cover"
                 />
               )}
             </View>
 
+              {/* Signaler utilisateur */}
+            <View style={{ marginVertical: 20 }}>
+              <TouchableOpacity style={styles.signalerUtilisateur} onPress={async () => confirmeSupp()}>
+                <Text style={{ color: '#fff', fontSize: 18, fontWeight: 'bold' }}>
+                  Signaler l'utilisateur
+                </Text>
+              </TouchableOpacity>
+            </View>
+                
             
             {/* BOUTONS */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
@@ -219,4 +277,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 15
   },
+  signalerUtilisateur: {
+    backgroundColor: '#FF9500',
+    width: '100%',
+    height: 50,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });

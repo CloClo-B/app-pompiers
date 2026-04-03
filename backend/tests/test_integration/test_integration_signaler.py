@@ -14,6 +14,13 @@ def test_create_signalement(db_session):
         numero_pei=7777,
         statut="PUBLIC",
         type_nature="BI",
+        accessibilite="C",
+        disponibilite="DI",
+        carto_ref=1,
+        press_deb=1.0,
+        debit_1_bar=10.0,
+        vol_eau_mi=5.0,
+        utilisateur=1,
         geom=WKTElement("POINT(700000 6600000)", srid=2154)
     )
 

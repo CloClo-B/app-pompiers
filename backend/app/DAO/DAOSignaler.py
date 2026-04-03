@@ -117,3 +117,29 @@ def update_signale(db: Session, id_point: int, signale_data: Dict[str, Any]):
     db.commit()
     db.refresh(db_signale)
     return db_signale
+
+
+# Supprime un signalement par id et son image associée
+def delete_signalement_by_id(db: Session, id: int) -> bool:
+    signalement = db.query(Signaler).filter(Signaler.id == id).first()
+    
+    if signalement:
+        # supression de la ligne + trouver chemin image dans photo
+        photo = signalement.photo
+        db.delete(signalement)
+        db.commit()
+
+        
+        # supression de l'image
+        try:
+            # Supprimer l'image
+            if os.path.exists(photo):
+                os.remove(photo)
+            print("Image supprimé avec succès")
+        except OSError as e:
+            print(f"Erreur lors de la suppression de l'image : {e}")
+
+
+        return True
+    
+    return False

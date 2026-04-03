@@ -20,6 +20,9 @@ export const createPointEau = async (
   volumeMin: string,
   longitude: string,
   latitude: string,
+  supp: boolean,
+  id_supp: number
+
 ) => {
   const reponse = await axios.post(API_ENDPOINTS.POINTS_EAU, {
     numero_pei: parseInt(numeroPEI),
@@ -35,6 +38,8 @@ export const createPointEau = async (
     vol_eau_mi: parseFloat(volumeMin.replace(',', '.')),
     longitude: parseFloat(longitude.replace(',', '.')),
     latitude: parseFloat(latitude.replace(',', '.')),
+    supp: supp,
+    id_supp: id_supp
   },
   {
     headers: {
@@ -44,13 +49,18 @@ export const createPointEau = async (
 };
 
 
-
-
 // renvoie tout les points d'eau
 export const getAllPointEau = async () => {
     const reponse = await axios.get(API_ENDPOINTS.POINTS_EAU);
   return reponse.data;
 };
+
+// renvoie tout les points d'eau Light (Optimisation)
+export const getAllPointEauLight = async () => {
+  const reponse = await axios.get(API_ENDPOINTS.POINTS_EAU_LIGHT);
+return reponse.data;
+};
+
 
 // renvoie les infos d'un point en fonction de son numero PEI
 export const getPointEauByID = async (token: string, idPoint: string) => {

@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 
 import { LinearGradient } from 'expo-linear-gradient';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 
 import Button from '@/components/ButtonLog';
 import ImageLogo from '@/components/LogoSDIS56';
@@ -31,6 +31,10 @@ export default function Accueil() {
                 <View style={{ marginTop: 40}}>
                     <Button label="Se connecter" type="connexion" onPress={() => router.navigate('/connexion')} />
                     <Button label="S'inscrire" type="inscription" onPress={() => router.navigate('/inscription')} />
+
+                    <TouchableOpacity style={styles.infoBadge} onPress={() => router.navigate('/createurs')}>
+                        <Text style={styles.infoBadgeText}>i</Text>
+                    </TouchableOpacity>
                 </View>
                 
         </LinearGradient>
@@ -61,5 +65,26 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  infoBadge: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#000',
+    alignSelf: 'center',
+    marginTop: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+    paddingTop: 20,
+  },
+  infoBadgeText: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: '900',
   },
 });
