@@ -1,0 +1,39 @@
+# .gitlab-ci.yml : fichier qui permet de tester automatiquement le push envoyé
+
+
+stages:
+  - test
+
+# Lancement de docker-compose.test.yml 
+# Pareil que la commande : 
+# docker compose -f docker-compose.test.yml up --build
+
+test:
+  stage: test
+
+  # On utilise une image Docker qui contient Docker (pour pouvoir
+  # lancer docker compose depuis le runner GitLab)
+  image: docker:27
+
+  # 2ème container qui tourne en parallele (lancement commandes)
+  services:
+    - docker:27-dind
+
+  # Variable obligatoire pour que le 2ème container fonctionne (dind)
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+
+  # Liste des commandes qui s'exécutent
+  script:
+
+    # Installation de docker-compose
+    - apk add --no-cache docker-compose
+ 
+    # Lancement des tests (docker-compose.test.yml)
+    # --abort-on-container-exit  :  tests stoppés si container exited
+    # --exit-code-from api_test  :  api_test execute pytest qui lui retourne le résultat => (0 si OK | 1 si problème)
+    - docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from api_test
+ 
+  # Permet de supprimer l'ensemble des containers après les tests
+  after_script:
+    - docker-compose -f docker-compose.test.yml down -v
