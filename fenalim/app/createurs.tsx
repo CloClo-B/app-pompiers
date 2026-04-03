@@ -61,18 +61,13 @@ export default function Createurs() {
             <View style={styles.card}>
                 <Text style={styles.cardLabel}>Valentin HUTA-CEVER - développeur</Text>
                 <Text style={styles.cardLabel2} >Mail</Text>
-                <Text style={styles.input}></Text>
+                <Text style={styles.input}>hutavalentin@gmail.com</Text>
 
                 <Text style={styles.cardLabel2}>Réseaux sociaux</Text>
                 <View style={styles.socialRow}>
-                    <TouchableOpacity style={styles.socialButtonLinkedin} onPress={() => openLink('https://www.linkedin.com/in/ton-profil')}>
+                    <TouchableOpacity style={styles.socialButtonLinkedin} onPress={() => openLink('https://www.linkedin.com/in/valentin-huta-773802354/')}>
                         <FontAwesome name="linkedin-square" size={28} color="#0A66C2" />
                         <Text style={styles.socialText}>LinkedIn</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.socialButtonGithub} onPress={() => openLink('https://github.com/ton-profil')}>
-                        <FontAwesome name="github" size={28} color="#d3afaf" />
-                        <Text style={styles.socialText}>GitHub</Text>
                     </TouchableOpacity>
                 </View>
 
