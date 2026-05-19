@@ -26,7 +26,7 @@ L’application FEN-Alim permet :
 
 - 🗺️ **La visualisation cartographique**
   - Localisation des points d’eau
-  - Description détailler des points d'eau
+  - Description détaillée des points d'eau
   - Calcul de l'itinéraire
 
 - 👥 **Une gestion multi-niveaux des accès**
@@ -55,23 +55,18 @@ Les échanges entre l’application mobile et le serveur sont sécurisés grâce
 
 ## 👋 Équipe du projet
 
-| Nom Prénom | Email | Groupe |
-|-----------|-------|--------|
-| Clovis BOURRE | bourre.e2402184@etud.univ-ubs.fr | Gr2B |
-| Mathéo BIET | biet.e2400505@etud.univ-ubs.fr | Gr2B |
-| Valentin HUTA-CEVAER | huta-cevaer.e2402478@etud.univ-ubs.fr | Gr2B |
-| Tei GARNIER | garnier.e2401205@etud.univ-ubs.fr | Gr2C |
-| Clément HOARAU | hoarau.e2400553@etud.univ-ubs.fr | Gr2C |
+| Nom Prénom |
+|-----------|
+| Clovis BOURRE (SCRUM MASTER) |
+| Mathéo BIET |
+| Valentin HUTA-CEVAER |
+| Tei GARNIER |
+| Clément HOARAU |
 
 
 ## 📒 Documentation Notion
 
-📌 **Lien vers le site Notion du projet** : https://fen-alim-a.notion.site/FEN-Alim-27eaa60e3d6581e6b773e16efbe575c4
-
-
-## 🔗 Dépôt du projet
-
-📌 **Lien GitLab** : https://forgens.univ-ubs.fr/gitlab/but2info/fen-alim_a
+📌 **Lien vers le site Notion du projet** : https://www.notion.so/clovis-bourre/FEN-Alim-BUT2-349c6649422b807a8c2df1cd98d93f67
 
 
 
@@ -89,7 +84,8 @@ fen-alim_a/
 
 ### 1. Cloner le dépôt
 ```bash
-git clone https://forgens.univ-ubs.fr/gitlab/but2info/fen-alim_a.git
+git clone https://github.com/CloClo-B/app-pompiers.git
+
 cd fen-alim_a
 ```
 
