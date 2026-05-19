@@ -73,7 +73,7 @@ Les échanges entre l’application mobile et le serveur sont sécurisés grâce
 ## 📁 Arborescence du projet
 
 ```bash
-fen-alim_a/
+app-pompiers/
 ├─ backend/   # API + Base de données
 ├─ fenalim/   # Application Frontend (React Native)
 ├─ README.md
@@ -86,7 +86,7 @@ fen-alim_a/
 ```bash
 git clone https://github.com/CloClo-B/app-pompiers.git
 
-cd fen-alim_a
+cd app-pompiers
 ```
 
 ### 2. Lancer le backend (Docker)
