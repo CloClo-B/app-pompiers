@@ -11,6 +11,8 @@ Lors d’un incendie en milieu naturel, les pompiers doivent pouvoir localiser r
 
 Le projet **FEN-Alim** vise à répondre à cette problématique en développant une **application mobile Android et iOS**, connectée à un **serveur central**, destinée aux pompiers et aux acteurs concernés.
 
+Images de l'application
+![Screenshot](./fenalim/image_presentation_app-pompiers.png)
 
 ## 🎯 Objectifs de l’application
 
