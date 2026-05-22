@@ -13,7 +13,7 @@ Le projet **FEN-Alim** vise à répondre à cette problématique en développant
 
 Images de l'application
 
-<img src="https://github.com/CloClo-B/app-pompiers/raw/main/image_presentation_app-pompiers.PNG" alt="Image-app" width="400" style="display: block; margin: auto;">
+![Image-app](https://github.com/CloClo-B/app-pompiers/raw/main/image_presentation_app-pompiers.PNG)
 
 ## 🎯 Objectifs de l’application
 
